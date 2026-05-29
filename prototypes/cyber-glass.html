@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Variation 3 — Cyber Glass</title>
+<style>
+  @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, monospace;
+    background:
+      radial-gradient(900px 600px at 15% 0%, #15173a 0%, transparent 55%),
+      radial-gradient(800px 600px at 90% 100%, #07303a 0%, transparent 55%),
+      #05060d;
+    color: #d8e6ff; min-height: 100vh; overflow-x: hidden;
+  }
+  /* moving grid floor */
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .35;
+    background:
+      linear-gradient(transparent 0, transparent 39px, rgba(80,200,255,.08) 40px),
+      linear-gradient(90deg, transparent 0, transparent 39px, rgba(80,200,255,.08) 40px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(120% 80% at 50% 30%, #000 30%, transparent 75%);
+  }
+  /* scanlines */
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 999; opacity: .5;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.0) 0 2px, rgba(0,0,0,.15) 2px 4px);
+    mix-blend-mode: multiply;
+  }
+  header { text-align: center; padding: 56px 20px 6px; position: relative; z-index: 2; }
+  .kicker { font-size: 11px; letter-spacing: .45em; color: #38e8ff; margin: 0 0 12px; }
+  h1 {
+    margin: 0; font-size: clamp(28px,5vw,46px); font-weight: 800; letter-spacing: .04em;
+    color: #eaf6ff; text-shadow: 0 0 18px rgba(56,232,255,.45);
+  }
+  header p { color: #6f86b0; max-width: 540px; margin: 14px auto 0; font-size: 13px; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(250px,1fr));
+    gap: 40px 34px; max-width: 1180px; margin: 52px auto 90px; padding: 0 34px;
+    justify-items: center;
+  }
+
+  .card {
+    --rx: 0deg; --ry: 0deg; --mx: 0; --my: 0; --lift: 0px;
+    width: 250px; aspect-ratio: 5/7; perspective: 1100px; cursor: pointer;
+    animation: float 6s ease-in-out infinite;
+  }
+  .card:nth-child(odd) { animation-delay: -3s; }
+  @keyframes float { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-12px) } }
+
+  .body {
+    position: relative; width: 100%; height: 100%; border-radius: 18px;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--lift));
+    transition: transform .12s ease;
+    background: linear-gradient(160deg, rgba(20,28,52,.85), rgba(8,11,22,.92));
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(120,180,255,.16);
+    box-shadow: 0 24px 50px -20px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.03) inset;
+    overflow: hidden;
+  }
+  /* animated neon prism border */
+  .card::before {
+    content: ""; position: absolute; inset: -2px; border-radius: 20px; z-index: -1;
+    padding: 2px;
+    background: conic-gradient(from var(--angle),
+      color-mix(in srgb, var(--accent) 90%, #fff), #38e8ff, #b46bff,
+      color-mix(in srgb, var(--accent) 90%, #fff));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity: 0; transition: opacity .3s ease;
+    animation: spin 4s linear infinite;
+  }
+  @keyframes spin { to { --angle: 360deg; } }
+  .card:hover::before { opacity: 1; }
+  .card:hover { animation-play-state: paused; }
+
+  /* parallax layers */
+  .layer { position: absolute; transition: transform .12s ease; will-change: transform; }
+  .l-glow {
+    inset: -20%; z-index: 0;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 55%, transparent), transparent 70%);
+    transform: translate(calc(var(--mx)*14px), calc(var(--my)*14px));
+    opacity: .8;
+  }
+  .l-art {
+    inset: 18px 18px auto 18px; height: 44%; z-index: 1; border-radius: 12px; overflow: hidden;
+    background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 35%, #0a0e1c), #070a14);
+    border: 1px solid rgba(120,180,255,.18);
+    transform: translate(calc(var(--mx)*-8px), calc(var(--my)*-8px));
+    display: grid; place-items: center;
+  }
+  .l-art .ring {
+    position: absolute; width: 120px; height: 120px; border-radius: 50%;
+    border: 1px dashed color-mix(in srgb, var(--accent) 70%, #fff); opacity: .4;
+    animation: spin2 9s linear infinite;
+  }
+  @keyframes spin2 { to { transform: rotate(360deg); } }
+  .l-icon {
+    inset: 18px 18px auto 18px; height: 44%; z-index: 2; display: grid; place-items: center;
+    font-size: 60px; filter: drop-shadow(0 0 18px color-mix(in srgb, var(--accent) 80%, transparent));
+    transform: translate(calc(var(--mx)*26px), calc(var(--my)*26px)) translateZ(40px);
+  }
+  .scan { position: absolute; inset: 18px 18px auto 18px; height: 44%; z-index: 3; pointer-events: none; border-radius: 12px;
+    background: linear-gradient(180deg, transparent 0, rgba(56,232,255,.18) 50%, transparent 100%);
+    background-size: 100% 40px; background-repeat: no-repeat; background-position: 0 -40px;
+    transition: background-position .9s ease; }
+  .card:hover .scan { background-position: 0 200%; }
+
+  .content { position: absolute; left: 18px; right: 18px; bottom: 16px; z-index: 4; }
+  .tag { font-size: 9px; letter-spacing: .25em; color: #38e8ff; }
+  .nm {
+    font-size: 22px; font-weight: 800; letter-spacing: .04em; color: #eaf6ff; margin: 2px 0 2px;
+    position: relative;
+  }
+  /* glitch */
+  .card:hover .nm { animation: glitch .5s steps(2) infinite; }
+  .nm::before, .nm::after { content: attr(data-text); position: absolute; left: 0; top: 0; opacity: 0; }
+  .card:hover .nm::before { opacity: .8; color: #ff3b6b; animation: glitch1 .4s steps(2) infinite; }
+  .card:hover .nm::after  { opacity: .8; color: #38e8ff; animation: glitch2 .4s steps(2) infinite; }
+  @keyframes glitch  { 0%,100%{ transform: translate(0) } 50%{ transform: translate(.5px,-.5px) } }
+  @keyframes glitch1 { 0%{ clip-path: inset(0 0 70% 0); transform: translate(-2px,1px) } 100%{ clip-path: inset(60% 0 0 0); transform: translate(2px,-1px) } }
+  @keyframes glitch2 { 0%{ clip-path: inset(50% 0 20% 0); transform: translate(2px,1px) } 100%{ clip-path: inset(10% 0 60% 0); transform: translate(-2px,-1px) } }
+  .tgl { font-size: 11px; color: #8aa1c9; margin: 0 0 12px; }
+
+  .bars { display: grid; gap: 7px; }
+  .bar { font-size: 9px; letter-spacing: .1em; color: #7f96bf; }
+  .bar .track { height: 5px; border-radius: 3px; background: rgba(120,180,255,.12); margin-top: 3px; overflow: hidden; }
+  .bar .fill { height: 100%; width: 0; border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), #38e8ff);
+    transition: width .8s cubic-bezier(.2,.8,.2,1); }
+  .card:hover .fill { width: var(--w); }
+  .corner-tag { position: absolute; top: 14px; right: 16px; z-index: 4; font-size: 10px; color: #5f76a0; letter-spacing: .15em; }
+  .hint { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); font-size: 11px; color:#56688f; z-index:1000; letter-spacing:.1em; }
+</style>
+</head>
+<body>
+  <header>
+    <p class="kicker">VARIATION 3</p>
+    <h1>CYBER&nbsp;GLASS</h1>
+    <p>Holographic unit cards. Tilt reveals depth — the icon floats above the art. Hover for the neon prism edge, scanline sweep, glitch, and stat readout.</p>
+  </header>
+  <main class="grid" id="grid"></main>
+  <div class="hint">tip: move your cursor over a card to tilt &amp; read its stats</div>
+
+  <script src="data.js"></script>
+  <script>
+    const grid = document.getElementById('grid');
+    const ratingPct = r => Math.round((parseFloat(r) / 5) * 100);
+    const usersPct = u => {
+      const n = parseFloat(u);
+      return Math.min(100, Math.round((n / 200) * 100)); // 200K = full bar
+    };
+
+    APPS.forEach((app, idx) => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.style.setProperty('--accent', app.accent);
+      el.innerHTML = `
+        <div class="body">
+          <div class="layer l-glow"></div>
+          <div class="layer l-art"><span class="ring"></span></div>
+          <div class="layer l-icon">${app.icon}</div>
+          <div class="scan"></div>
+          <span class="corner-tag">№ ${String(idx + 1).padStart(2, '0')}</span>
+          <div class="content">
+            <div class="tag">${app.type.toUpperCase()} · ${app.year}</div>
+            <div class="nm" data-text="${app.name}">${app.name}</div>
+            <p class="tgl">${app.tagline}</p>
+            <div class="bars">
+              <div class="bar">REACH<div class="track"><div class="fill" style="--w:${usersPct(app.stats.users)}%"></div></div></div>
+              <div class="bar">RATING<div class="track"><div class="fill" style="--w:${ratingPct(app.stats.rating)}%"></div></div></div>
+            </div>
+          </div>
+        </div>`;
+
+      const body = el.querySelector('.body');
+      el.addEventListener('pointermove', (e) => {
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;   // -0.5..0.5
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        el.style.setProperty('--mx', px.toFixed(3));
+        el.style.setProperty('--my', py.toFixed(3));
+        el.style.setProperty('--ry', `${px * 26}deg`);
+        el.style.setProperty('--rx', `${-py * 26}deg`);
+        el.style.setProperty('--lift', '24px');
+      });
+      el.addEventListener('pointerleave', () => {
+        el.style.setProperty('--mx', 0); el.style.setProperty('--my', 0);
+        el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg');
+        el.style.setProperty('--lift', '0px');
+      });
+      grid.appendChild(el);
+    });
+  </script>
+</body>
+</html>

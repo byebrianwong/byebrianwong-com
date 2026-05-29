@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Retro Arcade — App Booster Packs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  html { background: #4c1d95; }
+  body {
+    font-family: "Fredoka", system-ui, sans-serif; color: #fff; min-height: 100vh; overflow-x: hidden;
+    background:
+      radial-gradient(circle at 50% 120%, #ff5e7e 0%, transparent 58%),
+      conic-gradient(from 0deg at 50% 32%, rgba(255,255,255,.06) 0 10deg, transparent 10deg 20deg),
+      linear-gradient(160deg, #5b21b6 0%, #2563eb 55%, #0ea5e9 100%);
+    background-repeat: no-repeat;
+  }
+  body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .25; z-index: 0;
+    background-image: radial-gradient(rgba(255,255,255,.9) 1.5px, transparent 1.6px); background-size: 14px 14px;
+    mask-image: radial-gradient(130% 100% at 50% 30%, #000 30%, transparent 80%); }
+  .stage { position: relative; z-index: 1; min-height: 100vh; }
+
+  /* ===================== HUD + SOUND TOGGLE ===================== */
+  .hud { position: fixed; top: 16px; left: 18px; z-index: 80; font-family: "Bungee"; font-size: 11px;
+    letter-spacing: .06em; color: #ffd23f; text-shadow: 2px 2px 0 #0b1020; display: none; gap: 16px; }
+  .stage[data-phase="select"] .hud, .stage[data-phase="reveal"] .hud { display: flex; }
+  .hud .v { color: #fff; }
+  .sound { position: fixed; top: 12px; right: 16px; z-index: 80; width: 42px; height: 42px; border-radius: 10px;
+    border: 3px solid #0b1020; background: #ffd23f; color: #0b1020; font-size: 18px; cursor: pointer;
+    box-shadow: 0 4px 0 rgba(0,0,0,.35); transition: transform .1s ease; }
+  .sound:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.35); }
+
+  /* ===================== TITLE (INSERT COIN) ===================== */
+  .title { display: none; min-height: 100vh; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 24px; position: relative; }
+  .stage[data-phase="title"] .title { display: flex; }
+  .stage[data-phase="title"] header { display: none; }
+  .title::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .22;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.0) 0 2px, rgba(0,0,0,.5) 2px 4px); }
+  .title .logo { font-family: "Bungee"; font-size: clamp(34px, 9vw, 96px); line-height: .9; color: #fff;
+    text-shadow: 0 3px 0 #1e3a8a, 0 6px 0 #1e3a8a, 6px 9px 0 rgba(0,0,0,.35), 0 0 30px rgba(56,189,248,.6);
+    animation: hue 8s linear infinite; }
+  @keyframes hue { 50% { filter: hue-rotate(40deg); } }
+  .title .sub { font-family: "Bungee"; font-size: clamp(13px, 2.4vw, 20px); color: #ffd23f; margin-top: 18px;
+    letter-spacing: .2em; text-shadow: 2px 2px 0 #b91c1c; }
+  .title .press { font-family: "Bungee"; font-size: clamp(16px, 3vw, 26px); margin-top: 54px; color: #fff;
+    text-shadow: 0 0 16px #38bdf8; }
+  .blink { animation: blink 1.05s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .title .hint2 { margin-top: 16px; font-size: 13px; font-weight: 600; color: #cbd5ff; opacity: .8; }
+
+  /* ===================== HEADER (pack select / reveal) ===================== */
+  header { text-align: center; padding: 46px 20px 4px; }
+  .kicker { font-family: "Bungee"; font-size: 13px; letter-spacing: .25em; color: #ffd23f; margin: 0 0 14px; text-shadow: 2px 2px 0 #b91c1c; }
+  h1 { margin: 0; font-family: "Bungee"; font-size: clamp(28px, 6vw, 54px); line-height: .98;
+    color: #fff; text-shadow: 0 2px 0 #1e3a8a, 0 4px 0 #1e3a8a, 4px 6px 0 rgba(0,0,0,.35), 0 0 22px rgba(255,210,63,.4); }
+  h1 .pop { color: #ffd23f; }
+  .lede { color: #e7e9ff; max-width: 560px; margin: 16px auto 0; font-size: 15px; font-weight: 500; }
+
+  /* ===================== PACK SELECT ===================== */
+  .select { display: none; flex-direction: column; align-items: center; }
+  .stage[data-phase="select"] .select { display: flex; }
+  .packs { display: flex; gap: 50px; flex-wrap: wrap; justify-content: center; margin: 50px 0 30px; padding: 0 24px; }
+  .pack { --rx:0deg; --ry:0deg; --mx:0; --my:0; width: 260px; aspect-ratio: 3/4; border: none; background: none;
+    padding: 0; cursor: pointer; perspective: 1000px; font-family: inherit; animation: bob 5s ease-in-out infinite; }
+  .pack:nth-child(2){ animation-delay: -2.5s; }
+  @keyframes bob { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-14px) } }
+  .pack .foil { position: relative; width: 100%; height: 100%; border-radius: 20px; overflow: hidden;
+    transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .15s ease;
+    background: repeating-conic-gradient(from 0deg at 50% 38%, rgba(255,255,255,.16) 0 9deg, transparent 9deg 18deg), linear-gradient(155deg, var(--pa), var(--pb));
+    border: 5px solid #0b1020; box-shadow: 0 22px 44px -16px rgba(0,0,0,.6), 0 0 0 3px #ffd23f inset, 0 0 0 7px #0b1020 inset;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 26px 20px; }
+  .pack .foil::after { content: ""; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay;
+    background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.6) 49%, transparent 60%);
+    background-size: 250% 250%; background-position: calc(50% + var(--mx)*60%) calc(50% + var(--my)*60%); }
+  .pack .tape { position: absolute; top: 16px; left: -42px; transform: rotate(-38deg); background: #ffd23f; color: #7a1212;
+    font-family: "Bungee"; font-size: 11px; padding: 5px 50px; letter-spacing: .08em; box-shadow: 0 3px 0 rgba(0,0,0,.3); }
+  .pack .pemoji { font-size: 78px; filter: drop-shadow(0 6px 0 rgba(0,0,0,.35)); transform: translateZ(40px); }
+  .pack .pname { font-family: "Bungee"; font-size: 24px; color: #fff; text-shadow: 2px 2px 0 #0b1020; line-height: 1; }
+  .pack .psub { font-size: 13px; font-weight: 600; color: #0b1020; background: #ffd23f; padding: 3px 12px; border-radius: 4px; }
+  .pack .pcount { font-size: 12px; font-weight: 600; color: #fff; opacity: .9; }
+  .pack .pill { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); font-family: "Bungee"; font-size: 12px;
+    background: #ef4444; color: #fff; padding: 7px 16px; border-radius: 6px; white-space: nowrap; border: 2px solid #0b1020; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
+  .pack:hover .pill { background: #f97316; }
+
+  /* ===================== OPENER (rip) ===================== */
+  .opener { display: none; position: fixed; inset: 0; z-index: 60; place-items: center; pointer-events: none; }
+  .stage[data-phase="opening"] .opener { display: grid; }
+  .opener .flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 45%, #ffd23f, transparent 55%); opacity: 0; }
+  .opener.rip .flash { animation: flash .7s ease forwards; }
+  @keyframes flash { 0%{opacity:0} 22%{opacity:1} 100%{opacity:0} }
+  .pk { position: relative; width: 280px; aspect-ratio: 3/4; }
+  .pk .half { position: absolute; left: 0; right: 0; overflow: hidden; border-radius: 18px; border: 5px solid #0b1020;
+    background: repeating-conic-gradient(from 0deg at 50% 38%, rgba(255,255,255,.16) 0 9deg, transparent 9deg 18deg), linear-gradient(155deg, var(--pa), var(--pb));
+    box-shadow: 0 0 0 3px #ffd23f inset; }
+  .pk .top { top: 0; height: 32%; } .pk .bot { bottom: 0; height: 72%; display: flex; align-items: center; justify-content: center; }
+  .pk .bot .pemoji { font-size: 84px; }
+  .pk.shake { animation: shake .26s ease; }
+  @keyframes shake { 20%{transform:translateX(-6px) rotate(-2deg)} 40%{transform:translateX(7px) rotate(2deg)} 60%{transform:translateX(-6px)} 80%{transform:translateX(4px)} }
+  .opener.rip .top { animation: ripTop .65s cubic-bezier(.3,.7,.3,1) forwards; }
+  .opener.rip .bot { animation: ripBot .65s .04s cubic-bezier(.5,0,.7,1) forwards; }
+  @keyframes ripTop { to { transform: translateY(-300px) rotate(-16deg); opacity: 0; } }
+  @keyframes ripBot { 25%{ transform: translateY(0) scale(1.05); } to { transform: translateY(230px) scale(.85); opacity: 0; } }
+  .particle { position: absolute; top: 50%; left: 50%; width: var(--s); height: var(--s); background: var(--c); pointer-events: none;
+    transform: rotate(var(--r)); clip-path: polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+    animation: fly .9s ease-out forwards; z-index: 70; }
+  @keyframes fly { 0%{ transform: translate(-50%,-50%) scale(0) rotate(var(--r)); opacity:1 } 60%{opacity:1}
+    100%{ transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--r)); opacity:0 } }
+
+  /* ===================== REVEAL ===================== */
+  .reveal { display: none; flex-direction: column; align-items: center; }
+  .stage[data-phase="reveal"] .reveal { display: flex; }
+  .reveal-head { text-align: center; margin: 38px 0 6px; }
+  .reveal-head .pt { font-family: "Bungee"; font-size: clamp(26px,5vw,42px); color: #ffd23f; text-shadow: 2px 2px 0 #0b1020; }
+  .reveal-head .ps { color: #e7e9ff; font-size: 14px; font-weight: 600; }
+  .back { margin: 16px 0 4px; border: 3px solid #0b1020; cursor: pointer; font-family: "Bungee"; font-size: 13px;
+    background: #ffd23f; color: #0b1020; padding: 9px 18px; border-radius: 8px; box-shadow: 0 5px 0 rgba(0,0,0,.35); transition: transform .12s ease, box-shadow .12s ease; }
+  .back:hover { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(0,0,0,.35); }
+  .back:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.35); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 250px)); gap: 40px 32px; justify-content: center; max-width: 1120px; padding: 30px 24px 90px; }
+
+  /* ---- card shell (flip-capable) ---- */
+  .card { --rx:0deg; --ry:0deg; --mx:0; --my:0; --lift:0px; --hx:50%; --hy:50%; --shine:0; --glare:0; --flip:180deg;
+    width: 250px; aspect-ratio: 5/7; perspective: 1100px; cursor: pointer; opacity: 0;
+    animation: dealIn .55s cubic-bezier(.2,.9,.3,1.2) forwards; animation-delay: calc(var(--i)*.08s); }
+  @keyframes dealIn { from { opacity:0; transform: translateY(60px) scale(.6) rotate(-8deg) } to { opacity:1; transform:none } }
+  .float { width: 100%; height: 100%; animation: cbob 5.5s ease-in-out infinite; animation-delay: calc(var(--i)*.3s); }
+  @keyframes cbob { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-9px) } }
+  .card:hover .float { animation-play-state: paused; }
+  .tilt { width:100%; height:100%; transform-style: preserve-3d; transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--lift)); transition: transform .12s ease; }
+  .flipper { position: relative; width:100%; height:100%; transform-style: preserve-3d; transform: rotateY(var(--flip)); transition: transform .55s cubic-bezier(.3,.8,.3,1.05); }
+  .card.revealed { --flip: 0deg; }
+  .card.pop .flipper { animation: cardpop .5s ease; }
+  @keyframes cardpop { 30%{ transform: rotateY(0) scale(1.12); } }
+  .face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 16px; overflow: hidden; }
+
+  /* ---- FRONT ---- */
+  .front { background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 55%, #1b1f3a), #11142a);
+    border: 5px solid #0b1020; box-shadow: 0 0 0 3px #ffd23f inset, 0 16px 30px -14px rgba(0,0,0,.7); }
+  .card:hover .front { box-shadow: 0 0 0 3px #ffd23f inset, 0 0 28px 4px #fb923c, 0 0 60px 10px rgba(249,115,22,.55), 0 16px 30px -14px rgba(0,0,0,.7); }
+  /* rarity border accents */
+  .r-rare .front  { box-shadow: 0 0 0 3px #cbd5e1 inset, 0 16px 30px -14px rgba(0,0,0,.7); }
+  .r-holo .front  { box-shadow: 0 0 0 3px #67e8f9 inset, 0 0 22px -2px rgba(103,232,249,.5), 0 16px 30px -14px rgba(0,0,0,.7); }
+  .r-legendary .front { box-shadow: 0 0 0 3px #fde047 inset, 0 0 26px -2px rgba(253,224,71,.6), 0 16px 30px -14px rgba(0,0,0,.7); }
+  .r-legendary .front::before { content:""; position:absolute; inset:-6px; border-radius:20px; z-index:0; padding:4px;
+    background: conic-gradient(from var(--angle), #fde047, #fff7cc, #f59e0b, #fde047);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: spin 4s linear infinite; opacity:.9; }
+  @keyframes spin { to { --angle: 360deg; } }
+
+  .frametop { position: absolute; top: 0; left: 0; right: 0; z-index: 6; display: flex; justify-content: space-between; align-items: center; padding: 9px 11px 7px; }
+  .nm { font-family: "Bungee"; font-size: 17px; color: #fff; text-shadow: 1.5px 1.5px 0 #0b1020; }
+  .card:hover .nm { color: #ffd23f; }
+  .hp { font-family: "Bungee"; font-size: 15px; color: #ffd23f; text-shadow: 1.5px 1.5px 0 #7a1212; white-space: nowrap; }
+  .hp small { font-size: 8px; color: #fff; }
+  .art { position: absolute; top: 38px; left: 11px; right: 11px; height: 42%; border-radius: 8px; overflow: hidden;
+    background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 80%, #000), #0b0c1c); border: 3px solid #0b1020; }
+  .art .halftone { position: absolute; inset: 0; opacity: .35; mix-blend-mode: screen; background-image: radial-gradient(rgba(255,255,255,.8) 1.3px, transparent 1.4px); background-size: 10px 10px; }
+  .layer { position: absolute; transition: transform .12s ease; will-change: transform; }
+  .l-glow { inset: -20%; background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 70%, #fff 10%), transparent 70%); transform: translate(calc(var(--mx)*12px), calc(var(--my)*12px)); opacity: .8; }
+  .l-icon { inset: 0; display: grid; place-items: center; font-size: 58px; z-index: 3; filter: drop-shadow(0 4px 0 rgba(0,0,0,.4)); transform: translate(calc(var(--mx)*22px), calc(var(--my)*22px)); }
+  .ring { position: absolute; width: 110px; height: 110px; border-radius: 50%; border: 2px dashed color-mix(in srgb, var(--accent) 60%, #fff); opacity: .35; animation: rspin 9s linear infinite; }
+  @keyframes rspin { to { transform: rotate(360deg) } }
+  .shine, .glare { position: absolute; inset: 0; z-index: 4; pointer-events: none; border-radius: 6px; }
+  .shine { --space: 4%;
+    background-image:
+      repeating-linear-gradient(0deg, hsl(2,100%,73%) calc(var(--space)*1), hsl(53,100%,69%) calc(var(--space)*2), hsl(93,100%,69%) calc(var(--space)*3), hsl(176,100%,76%) calc(var(--space)*4), hsl(228,100%,74%) calc(var(--space)*5), hsl(283,100%,73%) calc(var(--space)*6), hsl(2,100%,73%) calc(var(--space)*7)),
+      repeating-linear-gradient(133deg, #0e152e 0%, hsl(180,10%,60%) 3.8%, hsl(180,29%,66%) 4.5%, hsl(180,10%,60%) 5.2%, #0e152e 10%, #0e152e 12%),
+      radial-gradient(farthest-corner circle at var(--hx) var(--hy), rgba(255,255,255,.1) 12%, rgba(0,0,0,.15) 90%);
+    background-blend-mode: screen, hue, normal; background-size: 100% 200%, 200% 700%, 300%;
+    background-position: 0 var(--hy), var(--hx) var(--hy), var(--hx) var(--hy);
+    mix-blend-mode: color-dodge; filter: brightness(.9) contrast(2.1) saturate(1.2); opacity: var(--shine); }
+  .glare { background: radial-gradient(farthest-corner circle at var(--hx) var(--hy), rgba(255,255,255,.8) 8%, rgba(255,255,255,.45) 24%, rgba(10,10,30,.6) 90%); mix-blend-mode: overlay; opacity: var(--glare); }
+  .badges { position: absolute; top: calc(38px + 42% + 8px); left: 11px; right: 11px; z-index: 6; display: flex; justify-content: space-between; align-items: center; }
+  .typebadge { font-family: "Bungee"; font-size: 9px; background: var(--accent); color: #0b1020; padding: 3px 8px; border-radius: 4px; border: 2px solid #0b1020; }
+  .gem { font-family: "Bungee"; font-size: 9px; padding: 3px 8px; border-radius: 4px; border: 2px solid #0b1020; }
+  .r-common .gem { background:#94a3b8; color:#0b1020; } .r-rare .gem { background:#e2e8f0; color:#0b1020; }
+  .r-holo .gem { background: linear-gradient(90deg,#67e8f9,#a78bfa,#f472b6); color:#0b1020; }
+  .r-legendary .gem { background: linear-gradient(90deg,#fde047,#fbbf24); color:#7a1212; }
+  .fire { position: absolute; top: calc(38px + 42% + 8px); left: 50%; transform: translateX(-50%) scale(.6); z-index: 7; font-family:"Bungee"; font-size: 9px; color:#fff; background:#ef4444; padding:3px 8px; border-radius:4px; border:2px solid #0b1020; opacity:0; transition:.2s ease; white-space:nowrap; }
+  .card:hover .fire { opacity:1; transform: translateX(-50%) scale(1) rotate(-4deg); animation: firepulse .5s ease-in-out infinite alternate; }
+  @keyframes firepulse { to { transform: translateX(-50%) scale(1.08) rotate(-4deg); } }
+  .statbox { position: absolute; left: 11px; right: 11px; bottom: 11px; z-index: 6; background: #f5ecd2; color: #2a2350; border: 3px solid #0b1020; border-radius: 8px; padding: 9px 10px; }
+  .tgl { font-size: 11px; font-weight: 600; color: #4b3f6b; margin: 0 0 8px; line-height: 1.15; }
+  .statrow { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+  .statrow .lbl { font-family: "Bungee"; font-size: 7.5px; color: #7a1212; width: 42px; }
+  .segs { display: flex; gap: 2px; flex: 1; }
+  .seg { flex: 1; height: 8px; background: #d8c9a3; border: 1px solid #b6a577; border-radius: 1px; transition: background .25s ease; }
+  .card:hover .seg.on, .card.revealed.seen .seg.on { background: var(--accent); border-color: color-mix(in srgb, var(--accent) 60%, #000); }
+
+  /* ---- BACK (face-down) ---- */
+  .back-face { transform: rotateY(180deg);
+    background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,.07) 0 12deg, transparent 12deg 24deg), linear-gradient(160deg, #3b1d8a, #11142a);
+    border: 5px solid #0b1020; box-shadow: 0 0 0 3px #ffd23f inset; display: grid; place-items: center; }
+  .back-face .bstar { font-family:"Bungee"; font-size: 52px; color:#ffd23f; text-shadow: 3px 3px 0 #0b1020; }
+  .back-face .bwm { position:absolute; bottom: 16px; left:0; right:0; text-align:center; font-family:"Bungee"; font-size: 9px; letter-spacing:.2em; color:#cbd5ff; opacity:.7; }
+  .back-face .bhalf { position:absolute; inset:0; opacity:.25; mix-blend-mode:screen; background-image: radial-gradient(rgba(255,255,255,.8) 1.3px, transparent 1.4px); background-size: 12px 12px; }
+
+  /* rare reveal banner */
+  .banner { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(.5); z-index: 90; pointer-events: none;
+    font-family: "Bungee"; font-size: clamp(30px, 7vw, 64px); opacity: 0; white-space: nowrap; text-align:center; }
+  .banner.show { animation: bannerIn 1.5s cubic-bezier(.2,.9,.3,1.2) forwards; }
+  @keyframes bannerIn { 0%{opacity:0; transform:translate(-50%,-50%) scale(.4) rotate(-6deg)} 18%{opacity:1; transform:translate(-50%,-50%) scale(1.05) rotate(-3deg)} 78%{opacity:1; transform:translate(-50%,-50%) scale(1) rotate(-3deg)} 100%{opacity:0; transform:translate(-50%,-50%) scale(1.1) rotate(-3deg)} }
+  .banner .l1 { color:#fde047; text-shadow: 0 3px 0 #b45309, 4px 6px 0 rgba(0,0,0,.4), 0 0 30px rgba(253,224,71,.7); display:block; }
+  .banner.holo .l1 { color:#67e8f9; text-shadow: 0 3px 0 #0e7490, 4px 6px 0 rgba(0,0,0,.4), 0 0 30px rgba(103,232,249,.7); }
+
+  /* ===================== INSPECT MODAL ===================== */
+  .inspect { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; gap: 40px;
+    background: rgba(7,8,22,0); backdrop-filter: blur(0px); transition: background .3s ease, backdrop-filter .3s ease; padding: 24px; flex-wrap: wrap; }
+  .inspect.on { display: flex; background: rgba(7,8,22,.8); backdrop-filter: blur(6px); }
+  .inspect::after { content:""; position:absolute; inset:0; pointer-events:none; opacity:.18; background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,.5) 2px 4px); }
+  .inspect .big { width: min(320px, 78vw); aspect-ratio: 5/7; position: relative; transform: scale(.85) translateY(16px); opacity: 0; transition: transform .4s cubic-bezier(.2,.9,.3,1.15), opacity .3s ease; }
+  .inspect.on .big { transform: none; opacity: 1; }
+  .inspect .detail { width: 320px; max-width: 86vw; z-index: 2; }
+  .inspect .detail .dh { font-family:"Bungee"; font-size: 30px; color:#fff; text-shadow: 2px 2px 0 #0b1020; }
+  .inspect .detail .drar { display:inline-block; font-family:"Bungee"; font-size:11px; padding:4px 10px; border-radius:5px; border:2px solid #0b1020; margin:8px 0 14px; }
+  .inspect .detail p { color:#dbe3ff; line-height:1.6; font-size:14px; font-weight:500; }
+  .inspect .detail .row { display:flex; justify-content:space-between; padding:9px 0; border-top:1px solid rgba(255,255,255,.15); font-size:13px; }
+  .inspect .detail .row b { font-family:"Bungee"; font-size:11px; }
+  .inspect .launch { display:inline-block; margin-top:18px; font-family:"Bungee"; font-size:14px; color:#0b1020; background:#ffd23f;
+    padding:12px 22px; border-radius:10px; border:3px solid #0b1020; box-shadow:0 5px 0 rgba(0,0,0,.4); text-decoration:none; transition: transform .1s ease, box-shadow .1s ease; }
+  .inspect .launch:hover { transform: translateY(-2px); box-shadow:0 7px 0 rgba(0,0,0,.4); }
+  .inspect .launch:active { transform: translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.4); }
+  .inspect .closex { position:absolute; top:18px; right:22px; font-family:"Bungee"; font-size:13px; color:#ffd23f; opacity:.85; z-index:3; }
+
+  .gyro-btn { display:none; position:fixed; bottom:16px; right:16px; z-index:80; font-family:"Bungee"; font-size:11px; color:#0b1020;
+    background:#ffd23f; border:3px solid #0b1020; border-radius:8px; padding:8px 12px; box-shadow:0 4px 0 rgba(0,0,0,.35); cursor:pointer; }
+  .footer-note { text-align: center; color: #e7e9ff; opacity: .7; font-size: 12px; padding: 0 0 50px; }
+</style>
+</head>
+<body>
+  <button class="sound" id="soundBtn" title="Toggle sound">🔊</button>
+  <div class="hud" id="hud"><span>PACKS <span class="v" id="hudPacks">0</span></span><span>CARDS <span class="v" id="hudCards">0</span>/8</span></div>
+  <button class="gyro-btn" id="gyroBtn">📱 TILT FX</button>
+
+  <div class="stage" data-phase="title">
+    <!-- TITLE -->
+    <section class="title" id="titleScreen">
+      <div class="logo">BYE<br>BRIAN<br>WONG</div>
+      <div class="sub">★ THE APP ARCADE ★</div>
+      <div class="press blink">▸ INSERT COIN ◂</div>
+      <div class="hint2">click anywhere or press any key to start</div>
+    </section>
+
+    <header>
+      <p class="kicker">INSERT COIN</p>
+      <h1>RIP A <span class="pop">BOOSTER</span> PACK</h1>
+      <p class="lede">Pick a pack, tear it open, and watch the cards flip — rarest last. Hover for holo foil &amp; fire; click a card to inspect it.</p>
+    </header>
+
+    <section class="select"><div class="packs" id="packs"></div></section>
+
+    <section class="reveal">
+      <div class="reveal-head"><div class="pt" id="packTitle"></div><div class="ps" id="packSub"></div></div>
+      <button class="back" id="back">◄ OPEN THE OTHER PACK</button>
+      <div class="cards" id="cards"></div>
+      <p class="footer-note">Hover: tilt · holo foil · fire   |   Click a card to inspect &amp; launch</p>
+    </section>
+
+    <div class="opener" id="opener">
+      <div class="flash"></div>
+      <div class="pk" id="pk"><div class="half top"></div><div class="half bot"><span class="pemoji"></span></div></div>
+    </div>
+  </div>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="inspect" id="inspect">
+    <div class="closex">ESC ✕</div>
+    <div class="big" id="inspectBig"></div>
+    <div class="detail" id="inspectDetail"></div>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+  /* ---------------- arcade sound (Web Audio, synthesized) ---------------- */
+  const Sound = (() => {
+    let ctx, on = true;
+    const ac = () => { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); if (ctx.state === 'suspended') ctx.resume(); return ctx; };
+    function tone({ freq = 440, type = 'square', dur = .12, vol = .18, slideTo, delay = 0 }) {
+      if (!on) return; const c = ac(), t = c.currentTime + delay;
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      if (slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(1, slideTo), t + dur);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + .03);
+    }
+    function noise({ dur = .2, vol = .2, delay = 0, hp = 700 }) {
+      if (!on) return; const c = ac(), t = c.currentTime + delay;
+      const buf = c.createBuffer(1, Math.max(1, c.sampleRate * dur), c.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+      const s = c.createBufferSource(); s.buffer = buf;
+      const f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = hp;
+      const g = c.createGain(); g.gain.value = vol;
+      s.connect(f).connect(g).connect(c.destination); s.start(t);
+    }
+    return {
+      coin() { tone({ freq: 988, dur: .07, vol: .2 }); tone({ freq: 1319, dur: .13, vol: .2, delay: .07 }); },
+      rip() { noise({ dur: .28, vol: .28, hp: 500 }); tone({ freq: 300, slideTo: 90, type: 'sawtooth', dur: .25, vol: .12 }); },
+      whoosh() { tone({ freq: 180, slideTo: 620, type: 'sawtooth', dur: .16, vol: .12 }); },
+      blip() { tone({ freq: 600, dur: .05, vol: .12 }); },
+      flip() { tone({ freq: 320, slideTo: 520, dur: .07, vol: .12 }); },
+      fire() { tone({ freq: 140, slideTo: 40, type: 'sawtooth', dur: .3, vol: .16 }); noise({ dur: .3, vol: .08, hp: 1200 }); },
+      rare() { [523, 659, 784, 1046, 1318].forEach((f, i) => tone({ freq: f, dur: .14, vol: .2, delay: i * .1 })); },
+      select() { tone({ freq: 440, dur: .06, vol: .15 }); tone({ freq: 660, dur: .1, vol: .15, delay: .05 }); },
+      toggle() { on = !on; if (on) this.blip(); return on; },
+      get on() { return on; }
+    };
+  })();
+
+  const stage = document.querySelector('.stage');
+  const packsWrap = document.getElementById('packs');
+  const cardsWrap = document.getElementById('cards');
+  const opener = document.getElementById('opener');
+  const pk = document.getElementById('pk');
+  const banner = document.getElementById('banner');
+  const inspect = document.getElementById('inspect');
+  const seen = new Set();
+  let packsOpened = 0;
+
+  /* ---------------- title -> select ---------------- */
+  function start() {
+    if (stage.dataset.phase !== 'title') return;
+    Sound.coin();
+    stage.dataset.phase = 'select';
+  }
+  document.getElementById('titleScreen').addEventListener('click', start);
+  window.addEventListener('keydown', (e) => {
+    if (stage.dataset.phase === 'title') { start(); return; }
+    if (e.key === 'Escape') closeInspect();
+  });
+
+  /* ---------------- sound toggle ---------------- */
+  document.getElementById('soundBtn').addEventListener('click', function () {
+    this.textContent = Sound.toggle() ? '🔊' : '🔇';
+  });
+
+  /* ---------------- helpers ---------------- */
+  const usersPct = u => Math.min(100, Math.round((parseFloat(u) / 320) * 100));
+  const ratingPct = r => Math.round((parseFloat(r) / 5) * 100);
+  function segs(pct) { const N = 12, lit = Math.round((pct / 100) * N); let h = '';
+    for (let k = 0; k < N; k++) h += `<span class="seg ${k < lit ? 'on' : ''}"></span>`; return h; }
+
+  function frontHTML(app) {
+    const r = RARITY[app.rarity];
+    return `
+      <div class="frametop"><span class="nm">${app.name}</span><span class="hp"><small>HP</small> ${app.hp}</span></div>
+      <div class="art">
+        <div class="layer l-glow"></div><span class="ring"></span>
+        <div class="layer l-icon">${app.icon}</div><div class="halftone"></div>
+        <div class="shine"></div><div class="glare"></div>
+      </div>
+      <div class="badges"><span class="typebadge">${app.type.toUpperCase()}</span><span class="gem">${r.gem} ${r.label}</span></div>
+      <span class="fire">🔥 ON FIRE</span>
+      <div class="statbox">
+        <p class="tgl">${app.tagline}</p>
+        <div class="statrow"><span class="lbl">REACH</span><span class="segs">${segs(usersPct(app.stats.users))}</span></div>
+        <div class="statrow"><span class="lbl">★ ${app.stats.rating}</span><span class="segs">${segs(ratingPct(app.stats.rating))}</span></div>
+      </div>`;
+  }
+
+  function wireTilt(card) {
+    const baseShine = RARITY[card.dataset.rarity].baseShine;
+    card._baseShine = baseShine;
+    card.style.setProperty('--shine', baseShine);
+    card.addEventListener('pointermove', e => {
+      if (!card.classList.contains('revealed')) return;
+      const r = card.getBoundingClientRect();
+      const fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+      const px = fx - .5, py = fy - .5;
+      card.style.setProperty('--mx', px.toFixed(3)); card.style.setProperty('--my', py.toFixed(3));
+      card.style.setProperty('--ry', `${px * 22}deg`); card.style.setProperty('--rx', `${-py * 22}deg`);
+      card.style.setProperty('--lift', '22px');
+      card.style.setProperty('--hx', `${(fx * 100).toFixed(1)}%`); card.style.setProperty('--hy', `${(fy * 100).toFixed(1)}%`);
+    });
+    let fired = false;
+    card.addEventListener('pointerenter', () => {
+      if (!card.classList.contains('revealed')) return;
+      card.style.setProperty('--shine', .9); card.style.setProperty('--glare', .75);
+      if (!fired) { Sound.fire(); fired = true; setTimeout(() => fired = false, 600); }
+    });
+    card.addEventListener('pointerleave', () => {
+      card.style.setProperty('--rx', '0deg'); card.style.setProperty('--ry', '0deg'); card.style.setProperty('--lift', '0px');
+      card.style.setProperty('--shine', baseShine); card.style.setProperty('--glare', 0);
+    });
+  }
+
+  function makeCard(app, i) {
+    const card = document.createElement('div');
+    card.className = 'card r-' + app.rarity;
+    card.dataset.rarity = app.rarity; card.dataset.app = app.id;
+    card.style.setProperty('--accent', app.accent); card.style.setProperty('--i', i);
+    card.innerHTML = `<div class="float"><div class="tilt"><div class="flipper">
+      <div class="face front">${frontHTML(app)}</div>
+      <div class="face back-face"><span class="bhalf"></span><span class="bstar">★</span><span class="bwm">BYEBRIANWONG · ARCADE</span></div>
+    </div></div></div>`;
+    wireTilt(card);
+    card.addEventListener('click', () => { if (card.classList.contains('revealed')) openInspect(app); });
+    return card;
+  }
+
+  /* ---------------- packs ---------------- */
+  PACKS.forEach(pack => {
+    const count = APPS.filter(a => a.pack === pack.id).length;
+    const label = pack.id === 'toolkit' ? 'SERIOUS BUSINESS' : 'FUN ZONE';
+    const b = document.createElement('button');
+    b.className = 'pack'; b.style.setProperty('--pa', pack.a); b.style.setProperty('--pb', pack.b);
+    b.innerHTML = `<div class="foil"><div class="tape">FOIL PACK</div><span class="pemoji">${pack.icon}</span>
+      <div class="pname">${pack.name}</div><div class="psub">${label}</div><div class="pcount">${count} cards inside</div>
+      <div class="pill">TEAR OPEN ►</div></div>`;
+    const foil = b.querySelector('.foil');
+    b.addEventListener('pointermove', e => {
+      const r = b.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5;
+      foil.style.setProperty('--mx', px.toFixed(3)); foil.style.setProperty('--my', py.toFixed(3));
+      foil.style.setProperty('--ry', `${px * 14}deg`); foil.style.setProperty('--rx', `${-py * 14}deg`);
+    });
+    b.addEventListener('pointerleave', () => { foil.style.setProperty('--rx', '0deg'); foil.style.setProperty('--ry', '0deg'); });
+    b.addEventListener('mouseenter', () => Sound.blip());
+    b.addEventListener('click', () => openPack(pack));
+    packsWrap.appendChild(b);
+  });
+
+  /* ---------------- open + reveal sequence ---------------- */
+  function openPack(pack) {
+    Sound.select();
+    stage.dataset.phase = 'opening';
+    opener.style.setProperty('--pa', pack.a); opener.style.setProperty('--pb', pack.b);
+    pk.querySelector('.pemoji').textContent = pack.icon;
+    opener.classList.remove('rip'); void pk.offsetWidth;
+    pk.classList.add('shake');
+    setTimeout(() => {
+      pk.classList.remove('shake'); opener.classList.add('rip');
+      Sound.rip(); burst(opener, ['#ffd23f', pack.a, pack.b, '#fff', '#ef4444'], 26);
+    }, 260);
+    setTimeout(() => revealPack(pack), 980);
+  }
+
+  function revealPack(pack) {
+    // rarest last
+    const apps = APPS.filter(a => a.pack === pack.id).sort((x, y) => RARITY[x.rarity].rank - RARITY[y.rarity].rank);
+    document.getElementById('packTitle').textContent = pack.name.toUpperCase();
+    document.getElementById('packSub').textContent = (pack.id === 'toolkit' ? 'SERIOUS BUSINESS' : 'FUN ZONE') + ' · ' + apps.length + ' CARDS';
+    cardsWrap.innerHTML = '';
+    const cards = apps.map((app, i) => { const c = makeCard(app, i); cardsWrap.appendChild(c); return { c, app }; });
+    opener.classList.remove('rip');
+    stage.dataset.phase = 'reveal';
+    packsOpened++; document.getElementById('hudPacks').textContent = packsOpened;
+
+    // deal-in finishes, then flip one-by-one (rarest last gets fanfare)
+    cards.forEach(({ c, app }, idx) => {
+      const last = idx === cards.length - 1;
+      setTimeout(() => {
+        c.classList.add('revealed');
+        Sound.flip();
+        seen.add(app.id); document.getElementById('hudCards').textContent = seen.size;
+        setTimeout(() => c.classList.add('seen'), 250); // lock stat bars lit after reveal
+        if (last && RARITY[app.rarity].rank >= 2) fanfare(c, app);
+      }, 700 + idx * 340);
+    });
+  }
+
+  function fanfare(card, app) {
+    const isLeg = app.rarity === 'legendary';
+    card.classList.add('pop');
+    const rect = card.getBoundingClientRect();
+    const fx = document.createElement('div');
+    fx.style.cssText = `position:fixed;left:${rect.left + rect.width / 2}px;top:${rect.top + rect.height / 2}px;z-index:95;pointer-events:none;`;
+    document.body.appendChild(fx);
+    burst(fx, isLeg ? ['#fde047', '#fbbf24', '#fff', '#f59e0b'] : ['#67e8f9', '#a78bfa', '#f472b6', '#fff'], 34);
+    setTimeout(() => fx.remove(), 1300);
+    banner.className = 'banner show' + (isLeg ? '' : ' holo');
+    banner.innerHTML = `<span class="l1">${isLeg ? '★ LEGENDARY! ★' : '✦ HOLO ✦'}</span>`;
+    Sound.rare();
+    banner.addEventListener('animationend', () => banner.classList.remove('show'), { once: true });
+  }
+
+  document.getElementById('back').addEventListener('click', () => { Sound.blip(); stage.dataset.phase = 'select'; cardsWrap.innerHTML = ''; });
+
+  /* ---------------- inspect ---------------- */
+  function openInspect(app) {
+    Sound.select();
+    const r = RARITY[app.rarity];
+    const big = document.getElementById('inspectBig');
+    big.innerHTML = `<div class="card r-${app.rarity} revealed" style="--accent:${app.accent};--shine:${r.baseShine}">
+      <div class="float" style="animation:none"><div class="tilt"><div class="flipper" style="transform:rotateY(0)">
+      <div class="face front">${frontHTML(app)}</div></div></div></div></div>`;
+    const bigCard = big.querySelector('.card');
+    // live foil on the inspected card
+    big.onpointermove = e => { const b = bigCard.getBoundingClientRect();
+      const fx = (e.clientX - b.left) / b.width, fy = (e.clientY - b.top) / b.height;
+      bigCard.style.setProperty('--ry', `${(fx - .5) * 18}deg`); bigCard.style.setProperty('--rx', `${-(fy - .5) * 18}deg`);
+      bigCard.style.setProperty('--hx', `${fx * 100}%`); bigCard.style.setProperty('--hy', `${fy * 100}%`);
+      bigCard.style.setProperty('--shine', .9); bigCard.style.setProperty('--glare', .7); bigCard.style.setProperty('--lift', '14px'); };
+    big.onpointerleave = () => { bigCard.style.setProperty('--rx', '0deg'); bigCard.style.setProperty('--ry', '0deg'); bigCard.style.setProperty('--shine', r.baseShine); bigCard.style.setProperty('--glare', 0); bigCard.style.setProperty('--lift', '0px'); };
+
+    const rarColor = { common: '#94a3b8', rare: '#e2e8f0', holo: '#67e8f9', legendary: '#fde047' }[app.rarity];
+    document.getElementById('inspectDetail').innerHTML = `
+      <div class="dh">${app.name}</div>
+      <span class="drar" style="background:${rarColor};color:#0b1020">${r.gem} ${r.label}</span>
+      <p>${app.blurb}</p>
+      <div class="row"><span>Type</span><b>${app.type.toUpperCase()}</b></div>
+      <div class="row"><span>Reach</span><b>${app.stats.users} USERS</b></div>
+      <div class="row"><span>Rating</span><b>★ ${app.stats.rating}</b></div>
+      <div class="row"><span>Platform</span><b>${app.stats.platform.toUpperCase()}</b></div>
+      <div class="row"><span>Launched</span><b>${app.year}</b></div>
+      <a class="launch" href="${app.link}" onclick="event.preventDefault()">▶ LAUNCH ${app.name.toUpperCase()}</a>`;
+    inspect.classList.add('on');
+  }
+  function closeInspect() { if (inspect.classList.contains('on')) { Sound.blip(); inspect.classList.remove('on'); } }
+  inspect.addEventListener('click', e => { if (e.target === inspect || e.target.classList.contains('closex')) closeInspect(); });
+
+  /* ---------------- mobile gyro (best-effort) ---------------- */
+  const gyroBtn = document.getElementById('gyroBtn');
+  function handleOrient(e) {
+    if (e.gamma == null) return;
+    const gx = Math.max(-1, Math.min(1, e.gamma / 28));
+    const gy = Math.max(-1, Math.min(1, (e.beta - 40) / 28));
+    document.querySelectorAll('.cards .card.revealed').forEach(card => {
+      card.style.setProperty('--ry', `${gx * 16}deg`); card.style.setProperty('--rx', `${-gy * 16}deg`);
+      card.style.setProperty('--mx', gx.toFixed(2)); card.style.setProperty('--my', gy.toFixed(2));
+      card.style.setProperty('--hx', `${50 + gx * 45}%`); card.style.setProperty('--hy', `${50 + gy * 45}%`);
+      card.style.setProperty('--shine', Math.max(card._baseShine || 0, .55));
+    });
+  }
+  if (window.DeviceOrientationEvent && 'ontouchstart' in window) {
+    gyroBtn.style.display = 'block';
+    gyroBtn.addEventListener('click', async () => {
+      try {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          const p = await DeviceOrientationEvent.requestPermission();
+          if (p !== 'granted') return;
+        }
+        window.addEventListener('deviceorientation', handleOrient);
+        gyroBtn.textContent = '📱 TILT ON'; Sound.blip();
+      } catch (_) {}
+    });
+  }
+  </script>
+</body>
+</html>

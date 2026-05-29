@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "next",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "prototypes",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4179", "--bind", "127.0.0.1"],
+      "port": 4179
+    }
+  ]
+}

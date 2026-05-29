@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trading Card Portfolio — Variations</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    background: #07080f; color: #e8ebff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; padding: 64px 24px;
+  }
+  .kicker { font-size: 12px; letter-spacing: .35em; text-transform: uppercase; color: #7c83b4; margin: 0 0 12px; }
+  h1 { margin: 0; font-size: clamp(28px, 5vw, 44px); font-weight: 800; text-align: center;
+       background: linear-gradient(90deg,#fff,#b9c0ff,#8ce8ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: #888fbd; max-width: 580px; text-align: center; margin: 14px 0 0; line-height: 1.6; }
+  .section-label { align-self: flex-start; max-width: 1000px; width: 100%; margin: 52px auto 0; font-size: 12px;
+    letter-spacing: .2em; text-transform: uppercase; color: #6f76a0; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; max-width: 1000px; width: 100%; margin-top: 18px; }
+  a.tile {
+    display: block; text-decoration: none; color: inherit; border-radius: 18px; padding: 26px;
+    border: 1px solid rgba(255,255,255,.09); background: linear-gradient(160deg, rgba(255,255,255,.045), rgba(255,255,255,.01));
+    transition: transform .25s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .25s; position: relative; overflow: hidden;
+  }
+  a.tile:hover { transform: translateY(-6px); border-color: var(--c); box-shadow: 0 20px 50px -22px var(--c); }
+  a.tile .num { font-size: 12px; letter-spacing: .2em; color: var(--c); }
+  a.tile h2 { margin: 8px 0 6px; font-size: 22px; }
+  a.tile p { color: #9aa0c7; font-size: 13.5px; line-height: 1.55; margin: 0 0 14px; }
+  a.tile .feat { font-size: 11.5px; color: #6f76a0; }
+  a.tile .swatch { position: absolute; right: -30px; top: -30px; width: 110px; height: 110px; border-radius: 50%;
+    background: radial-gradient(closest-side, var(--c), transparent); opacity: .5; }
+  a.tile .go { margin-top: 14px; font-weight: 700; font-size: 13px; color: var(--c); }
+  a.tile .badge { position: absolute; top: 16px; right: 18px; font-size: 10px; font-weight: 700; letter-spacing: .1em;
+    background: var(--c); color: #07080f; padding: 3px 9px; border-radius: 999px; }
+  .small { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .small a.tile { padding: 20px; }
+  .small a.tile h2 { font-size: 18px; }
+  footer { margin-top: 50px; color: #555b86; font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+  <p class="kicker">byebrianwong.com</p>
+  <h1>Trading Card Portfolio</h1>
+  <p class="sub">Holographic-card concepts for showcasing 8 apps. The two refined directions open with a <b>booster-pack</b> flow — pick a pack, rip it open, reveal its cards.</p>
+
+  <div class="section-label">★ Refined directions — with booster packs</div>
+  <div class="cards">
+    <a class="tile" href="prototypes/bright-cards.html" style="--c:#ff7eb3">
+      <span class="swatch"></span><span class="badge">NEW</span>
+      <div class="num">DIRECTION A</div>
+      <h2>Bright Pop</h2>
+      <p>The reactive card style, made happy &amp; bright. Light candy background, colorful soft shadows, rounded type — every effect kept: parallax tilt, prism edge, gloss sweep, stat bars, float.</p>
+      <div class="feat">light · cheerful · glossy</div>
+      <div class="go">Open prototype →</div>
+    </a>
+    <a class="tile" href="prototypes/retro-cards.html" style="--c:#ffd23f">
+      <span class="swatch"></span><span class="badge">EXPANDED</span>
+      <div class="num">DIRECTION B</div>
+      <h2>Retro Arcade</h2>
+      <p>NBA Jam × classic Pokémon — now a full cabinet: insert-coin start, rip-open with one-by-one <b>flip reveal</b>, <b>rarity tiers</b> (Common→Legendary) with a fanfare, synth <b>arcade sound</b>, holo foil, "ON FIRE" hover, and click-to-<b>inspect</b> + launch.</p>
+      <div class="feat">bold · 90s arcade · holo · sound · gacha</div>
+      <div class="go">Open prototype →</div>
+    </a>
+  </div>
+
+  <div class="section-label">Earlier explorations</div>
+  <div class="cards small">
+    <a class="tile" href="prototypes/cyber-glass.html" style="--c:#38e8ff">
+      <div class="num">V3</div><h2>Cyber Glass</h2>
+      <p>The original dark/glassy version that started this direction.</p>
+      <div class="go">Open →</div>
+    </a>
+    <a class="tile" href="prototypes/classic-holo.html" style="--c:#a78bfa">
+      <div class="num">V1</div><h2>Classic Holo</h2>
+      <p>Pokémon-TCG foil + glare, flip-to-reveal stats.</p>
+      <div class="go">Open →</div>
+    </a>
+    <a class="tile" href="prototypes/fanned-deck.html" style="--c:#d8b873">
+      <div class="num">V2</div><h2>The Hand</h2>
+      <p>A fanned hand on a felt table; draw a card to center.</p>
+      <div class="go">Open →</div>
+    </a>
+  </div>
+
+  <footer>Placeholder data in <code>prototypes/data.js</code> — two packs (Toolkit / Arcade), 4 apps each. Swap in the real apps anytime.</footer>
+</body>
+</html>

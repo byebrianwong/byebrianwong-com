@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Variation 1 — Classic Holo</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+    background:
+      radial-gradient(1200px 800px at 20% -10%, #2a2350 0%, transparent 55%),
+      radial-gradient(1000px 700px at 100% 10%, #103047 0%, transparent 50%),
+      #0b0b14;
+    color: #eef0ff;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  header {
+    text-align: center;
+    padding: 56px 20px 8px;
+  }
+  header .kicker {
+    font-size: 12px; letter-spacing: .35em; text-transform: uppercase;
+    color: #9aa0c7; margin: 0 0 10px;
+  }
+  header h1 {
+    margin: 0; font-size: clamp(28px, 5vw, 44px); font-weight: 800;
+    background: linear-gradient(90deg, #fff, #b9c0ff 60%, #8ce8ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  header p { color: #8b90b8; margin: 12px auto 0; max-width: 540px; font-size: 15px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 46px 40px;
+    max-width: 1180px;
+    margin: 48px auto 90px;
+    padding: 0 32px;
+    justify-items: center;
+  }
+
+  /* ---- card scaffold ---- */
+  .card {
+    --rx: 0deg; --ry: 0deg;
+    --mx: 50%; --my: 50%;
+    --posx: 50%; --posy: 50%;
+    --shine: 0; --glare: 0;
+    width: 240px; aspect-ratio: 5 / 7;
+    perspective: 1000px;
+    cursor: pointer;
+  }
+  .rotator {
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transform: rotateY(var(--ry)) rotateX(var(--rx));
+    transition: transform .2s ease;
+  }
+  .inner {
+    position: relative; width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transition: transform .6s cubic-bezier(.2,.7,.2,1);
+    border-radius: 18px;
+  }
+  .card.flipped .inner { transform: rotateY(180deg); }
+  .card:hover .rotator { transition: transform .05s ease; }
+
+  .face {
+    position: absolute; inset: 0;
+    border-radius: 18px;
+    overflow: hidden;
+    backface-visibility: hidden;
+    box-shadow:
+      0 1px 0 1px rgba(255,255,255,.06) inset,
+      0 0 0 2px rgba(255,255,255,.05),
+      0 18px 40px -12px rgba(0,0,0,.7);
+  }
+
+  /* ---- front ---- */
+  .front {
+    padding: 12px;
+    background:
+      linear-gradient(160deg, color-mix(in srgb, var(--accent) 55%, #1a1830), #0d0c18 80%),
+      var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, #fff 6%);
+  }
+  .art {
+    position: relative;
+    height: 56%;
+    border-radius: 12px;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 30% 10%, color-mix(in srgb, var(--accent) 80%, #fff 10%), transparent 60%),
+      conic-gradient(from 200deg at 70% 120%, color-mix(in srgb, var(--accent) 70%, #000), #0b0a16 70%),
+      #0b0a16;
+    display: grid; place-items: center;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12) inset;
+  }
+  .art .icon { font-size: 64px; filter: drop-shadow(0 6px 14px rgba(0,0,0,.5)); transform: translateZ(20px); }
+  .art .sheen {
+    position: absolute; inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.5) 46%, transparent 60%);
+    background-size: 250% 250%;
+    background-position: calc(var(--mx)) calc(var(--my));
+    mix-blend-mode: overlay; opacity: .5;
+  }
+  .topbar {
+    position: absolute; top: 18px; left: 18px; right: 18px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 800; font-size: 13px;
+  }
+  .topbar .name { letter-spacing: .02em; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
+  .topbar .hp { color: #ffd76a; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
+  .topbar .hp small { font-size: 9px; opacity: .8; }
+
+  .meta { padding: 12px 6px 4px; }
+  .meta .tagline { font-size: 15px; font-weight: 700; margin: 0 0 2px; }
+  .meta .sub { font-size: 11px; color: #c9ccea; opacity: .8; margin: 0; }
+  .badges { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .badge {
+    font-size: 10px; padding: 3px 8px; border-radius: 999px; font-weight: 700;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18);
+  }
+  .stars { position: absolute; bottom: 12px; right: 14px; font-size: 12px; letter-spacing: 2px; color: #ffd76a; }
+
+  /* holographic overlays */
+  .shine, .glare { position: absolute; inset: 0; border-radius: 12px; pointer-events: none; }
+  .shine {
+    --space: 4%;
+    background-image:
+      repeating-linear-gradient(0deg,
+        hsl(2,100%,73%) calc(var(--space)*1), hsl(53,100%,69%) calc(var(--space)*2),
+        hsl(93,100%,69%) calc(var(--space)*3), hsl(176,100%,76%) calc(var(--space)*4),
+        hsl(228,100%,74%) calc(var(--space)*5), hsl(283,100%,73%) calc(var(--space)*6),
+        hsl(2,100%,73%) calc(var(--space)*7)),
+      repeating-linear-gradient(133deg,
+        #0e152e 0%, hsl(180,10%,60%) 3.8%, hsl(180,29%,66%) 4.5%,
+        hsl(180,10%,60%) 5.2%, #0e152e 10%, #0e152e 12%),
+      radial-gradient(farthest-corner circle at var(--mx) var(--my),
+        rgba(255,255,255,.1) 12%, rgba(0,0,0,.15) 90%);
+    background-blend-mode: screen, hue, normal;
+    background-size: 100% 200%, 200% 700%, 300%;
+    background-position: 0 var(--posy), var(--posx) var(--posy), var(--mx) var(--my);
+    mix-blend-mode: color-dodge;
+    filter: brightness(.85) contrast(2.2) saturate(1.1);
+    opacity: var(--shine);
+    inset: 12px; height: calc(56% - 0px); /* sit over the art window */
+    top: 12px; bottom: auto; height: calc(56%);
+  }
+  .glare {
+    inset: 12px; top: 12px; height: 56%;
+    background: radial-gradient(farthest-corner circle at var(--mx) var(--my),
+      rgba(255,255,255,.8) 8%, rgba(255,255,255,.5) 22%, rgba(10,10,30,.6) 90%);
+    mix-blend-mode: overlay;
+    opacity: var(--glare);
+  }
+
+  /* ---- back ---- */
+  .back {
+    transform: rotateY(180deg);
+    background:
+      radial-gradient(120% 120% at 50% 0%, color-mix(in srgb, var(--accent) 35%, #14132a), #0b0a16 75%);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, #fff 6%);
+    padding: 22px 20px;
+    display: flex; flex-direction: column;
+  }
+  .back h3 { margin: 0 0 2px; font-size: 20px; }
+  .back .b-tag { margin: 0 0 14px; font-size: 12px; color: var(--accent); font-weight: 700; letter-spacing: .04em; }
+  .back .blurb { font-size: 12.5px; line-height: 1.5; color: #c9ccea; margin: 0 0 16px; }
+  .statrow { display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,.1); padding: 9px 0; font-size: 12px; }
+  .statrow span:first-child { color: #8b90b8; }
+  .statrow span:last-child { font-weight: 700; }
+  .launch {
+    margin-top: auto; text-align: center; padding: 11px; border-radius: 10px;
+    font-weight: 800; font-size: 13px; text-decoration: none; color: #0b0a16;
+    background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 50%, #fff));
+    box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  .hint { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #6d7299; }
+</style>
+</head>
+<body>
+  <header>
+    <p class="kicker">Variation 1</p>
+    <h1>Classic Holo</h1>
+    <p>Pokémon-TCG energy. Move your cursor over a card for the rainbow foil + glare. Click to flip and read the stats.</p>
+  </header>
+  <main class="grid" id="grid"></main>
+  <div class="hint">tip: hover for the holo shimmer · click to flip</div>
+
+  <script src="data.js"></script>
+  <script>
+    const rarity = hp => hp >= 130 ? '★★★' : hp >= 95 ? '★★' : '★';
+    const grid = document.getElementById('grid');
+
+    APPS.forEach(app => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.style.setProperty('--accent', app.accent);
+      el.innerHTML = `
+        <div class="rotator">
+          <div class="inner">
+            <div class="face front">
+              <div class="topbar">
+                <span class="name">${app.name}</span>
+                <span class="hp"><small>HP</small> ${app.hp}</span>
+              </div>
+              <div class="art">
+                <span class="icon">${app.icon}</span>
+                <div class="sheen"></div>
+                <div class="shine"></div>
+                <div class="glare"></div>
+              </div>
+              <div class="meta">
+                <p class="tagline">${app.tagline}</p>
+                <p class="sub">${app.stats.platform} · since ${app.year}</p>
+                <div class="badges">
+                  <span class="badge">${app.type}</span>
+                  <span class="badge">★ ${app.stats.rating}</span>
+                  <span class="badge">${app.stats.users}</span>
+                </div>
+              </div>
+              <div class="stars">${rarity(app.hp)}</div>
+            </div>
+            <div class="face back">
+              <h3>${app.name}</h3>
+              <p class="b-tag">${app.tagline.toUpperCase()}</p>
+              <p class="blurb">${app.blurb}</p>
+              <div class="statrow"><span>Users</span><span>${app.stats.users}</span></div>
+              <div class="statrow"><span>Rating</span><span>★ ${app.stats.rating}</span></div>
+              <div class="statrow"><span>Platform</span><span>${app.stats.platform}</span></div>
+              <div class="statrow"><span>Launched</span><span>${app.year}</span></div>
+              <a class="launch" href="#" onclick="event.preventDefault()">Open ${app.name} →</a>
+            </div>
+          </div>
+        </div>`;
+
+      const rotator = el.querySelector('.rotator');
+      const setVars = (e) => {
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top) / r.height;
+        el.style.setProperty('--mx', `${px * 100}%`);
+        el.style.setProperty('--my', `${py * 100}%`);
+        el.style.setProperty('--posx', `${40 + px * 20}%`);
+        el.style.setProperty('--posy', `${30 + py * 40}%`);
+        el.style.setProperty('--rx', `${(0.5 - py) * 22}deg`);
+        el.style.setProperty('--ry', `${(px - 0.5) * 26}deg`);
+      };
+      el.addEventListener('pointermove', setVars);
+      el.addEventListener('pointerenter', () => { el.style.setProperty('--shine', .9); el.style.setProperty('--glare', .8); });
+      el.addEventListener('pointerleave', () => {
+        el.style.setProperty('--shine', 0); el.style.setProperty('--glare', 0);
+        el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg');
+        el.style.setProperty('--mx', '50%'); el.style.setProperty('--my', '50%');
+      });
+      // flip only on real clicks (not while we were tilting)
+      el.addEventListener('click', () => el.classList.toggle('flipped'));
+
+      grid.appendChild(el);
+    });
+  </script>
+</body>
+</html>

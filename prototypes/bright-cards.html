@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bright Pop — Booster Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  html { background: #fbfcff; }
+  body {
+    font-family: "Fredoka", ui-rounded, system-ui, sans-serif;
+    color: #2a2350; min-height: 100vh; overflow-x: hidden;
+    background:
+      radial-gradient(60% 50% at 18% 12%, #ffe1ec 0%, transparent 60%),
+      radial-gradient(55% 45% at 85% 6%, #d8efff 0%, transparent 55%),
+      radial-gradient(60% 55% at 50% 110%, #e3ffe9 0%, transparent 60%),
+      radial-gradient(45% 40% at 92% 92%, #fff3cf 0%, transparent 55%),
+      #fbfcff;
+  }
+  body::before { /* soft dot grid */
+    content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .5;
+    background-image: radial-gradient(rgba(120,110,180,.10) 1.4px, transparent 1.4px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(120% 90% at 50% 40%, #000 40%, transparent 85%);
+  }
+
+  .stage { position: relative; z-index: 1; min-height: 100vh; }
+  header { text-align: center; padding: 52px 20px 4px; }
+  .kicker { font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: #8b86c8; margin: 0 0 10px; font-weight: 600; }
+  h1 { margin: 0; font-size: clamp(30px, 6vw, 52px); font-weight: 700; letter-spacing: -.01em;
+       background: linear-gradient(90deg,#ff7eb3,#7c5cff 45%,#19c6e6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { color: #6f6aa0; max-width: 540px; margin: 14px auto 0; font-size: 15px; font-weight: 400; }
+
+  /* ============ PACK SELECT ============ */
+  .select { display: flex; flex-direction: column; align-items: center; }
+  .packs { display: flex; gap: 48px; flex-wrap: wrap; justify-content: center; margin: 56px 0 30px; padding: 0 24px; }
+  .pack {
+    --rx: 0deg; --ry: 0deg; --mx: 0; --my: 0;
+    width: 260px; aspect-ratio: 3 / 4; border: none; background: none; padding: 0;
+    cursor: pointer; perspective: 1000px; font-family: inherit;
+    animation: bob 5s ease-in-out infinite;
+  }
+  .pack:nth-child(2) { animation-delay: -2.5s; }
+  @keyframes bob { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-14px) } }
+  .pack .foil {
+    position: relative; width: 100%; height: 100%; border-radius: 26px; overflow: hidden;
+    transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .15s ease, box-shadow .3s ease;
+    background: linear-gradient(150deg, var(--pa), var(--pb));
+    box-shadow: 0 26px 50px -18px color-mix(in srgb, var(--pb) 60%, transparent), 0 0 0 1px rgba(255,255,255,.4) inset;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    color: #fff; text-align: center; padding: 24px;
+  }
+  .pack:hover .foil { box-shadow: 0 36px 70px -16px color-mix(in srgb, var(--pb) 70%, transparent), 0 0 0 1px rgba(255,255,255,.5) inset; }
+  .pack .foil::after { /* glossy holo sweep */
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.55) 48%, rgba(255,255,255,.0) 60%);
+    background-size: 250% 250%;
+    background-position: calc(50% + var(--mx) * 60%) calc(50% + var(--my) * 60%);
+    mix-blend-mode: overlay; pointer-events: none;
+  }
+  .pack .tear { position: absolute; top: 0; left: 0; right: 0; height: 30px;
+    background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 8px, rgba(255,255,255,.2) 8px 16px);
+    -webkit-mask: radial-gradient(7px at 7px 100%, transparent 98%, #000) repeat-x 0 0 / 14px 100%;
+            mask: radial-gradient(7px at 7px 100%, transparent 98%, #000) repeat-x 0 0 / 14px 100%; }
+  .pack .pemoji { font-size: 76px; filter: drop-shadow(0 8px 14px rgba(0,0,0,.25)); transform: translateZ(40px); }
+  .pack .pname { font-size: 26px; font-weight: 700; text-shadow: 0 2px 8px rgba(0,0,0,.22); }
+  .pack .psub { font-size: 13px; font-weight: 500; opacity: .92; letter-spacing: .04em; }
+  .pack .pcount { margin-top: 6px; font-size: 12px; background: rgba(255,255,255,.25); padding: 5px 12px; border-radius: 999px; font-weight: 600; }
+  .pack .pill { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    font-size: 13px; font-weight: 700; background: #fff; color: #5b21b6; padding: 8px 18px; border-radius: 999px;
+    box-shadow: 0 6px 14px rgba(0,0,0,.18); white-space: nowrap; }
+
+  /* ============ OPENER (rip animation) ============ */
+  .opener { display: none; position: fixed; inset: 0; z-index: 60; place-items: center; pointer-events: none; }
+  .stage[data-phase="opening"] .opener { display: grid; }
+  .opener .flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 45%, #fff, transparent 60%); opacity: 0; }
+  .opener.rip .flash { animation: flash .7s ease forwards; }
+  @keyframes flash { 0%{opacity:0} 22%{opacity:.95} 100%{opacity:0} }
+  .pk { position: relative; width: 280px; aspect-ratio: 3/4; }
+  .pk .half { position: absolute; left: 0; right: 0; overflow: hidden; border-radius: 26px;
+    background: linear-gradient(150deg, var(--pa), var(--pb)); box-shadow: 0 20px 50px -18px color-mix(in srgb,var(--pb) 60%, transparent); }
+  .pk .top { top: 0; height: 34%; }
+  .pk .bot { bottom: 0; height: 70%; display:flex; align-items:center; justify-content:center; }
+  .pk .bot .pemoji { font-size: 84px; }
+  .pk.shake { animation: shake .26s ease; }
+  @keyframes shake { 20%{transform:translateX(-6px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(4px)} }
+  .opener.rip .top { animation: ripTop .65s cubic-bezier(.3,.7,.3,1) forwards; }
+  .opener.rip .bot { animation: ripBot .65s .04s cubic-bezier(.5,0,.7,1) forwards; }
+  @keyframes ripTop { to { transform: translateY(-280px) rotate(-14deg); opacity: 0; } }
+  @keyframes ripBot { 25%{ transform: translateY(0) scale(1.05); } to { transform: translateY(220px) scale(.85); opacity: 0; } }
+
+  .particle { position: absolute; top: 50%; left: 50%; width: var(--s); height: var(--s);
+    background: var(--c); border-radius: 2px; transform: rotate(var(--r)); pointer-events: none;
+    animation: fly .9s ease-out forwards; }
+  @keyframes fly { 0%{ transform: translate(-50%,-50%) scale(0) rotate(var(--r)); opacity:1; }
+    60%{ opacity:1; } 100%{ transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--r)); opacity:0; } }
+
+  /* ============ REVEAL ============ */
+  .reveal { display: none; flex-direction: column; align-items: center; }
+  .stage[data-phase="reveal"] .reveal { display: flex; }
+  .stage[data-phase="select"] .select { display: flex; }
+  .stage[data-phase="opening"] .select, .stage[data-phase="reveal"] .select { display: none; }
+  .reveal-head { text-align: center; margin: 40px 0 8px; }
+  .reveal-head .pt { font-size: clamp(26px,5vw,40px); font-weight: 700; }
+  .reveal-head .ps { color: #7a75ac; font-size: 14px; font-weight: 500; }
+  .back { margin: 18px 0 6px; border: none; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 14px;
+    background: #fff; color: #5b21b6; padding: 10px 20px; border-radius: 999px; box-shadow: 0 8px 20px rgba(120,80,220,.2);
+    transition: transform .2s ease, box-shadow .2s ease; }
+  .back:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(120,80,220,.3); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 250px)); gap: 36px 30px;
+    justify-content: center; max-width: 1120px; padding: 30px 24px 90px; }
+
+  /* ---- bright card ---- */
+  .card {
+    --rx: 0deg; --ry: 0deg; --mx: 0; --my: 0; --lift: 0px;
+    width: 250px; aspect-ratio: 5/7; perspective: 1100px; cursor: pointer; opacity: 0;
+    animation: cardIn .6s cubic-bezier(.2,.9,.3,1.25) forwards; animation-delay: calc(var(--i) * .09s);
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(56px) scale(.7) rotate(-7deg); } to { opacity: 1; transform: none; } }
+  .float { width: 100%; height: 100%; animation: cbob 5.5s ease-in-out infinite; animation-delay: calc(var(--i) * .3s); }
+  @keyframes cbob { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-9px) } }
+
+  .body {
+    position: relative; width: 100%; height: 100%; border-radius: 22px; overflow: hidden;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--lift));
+    transition: transform .14s ease, box-shadow .3s ease;
+    background: #ffffff;
+    box-shadow: 0 18px 34px -16px color-mix(in srgb, var(--accent) 55%, transparent), 0 2px 0 rgba(0,0,0,.03);
+  }
+  .card:hover .body { box-shadow: 0 30px 60px -18px color-mix(in srgb, var(--accent) 70%, transparent); }
+  .card:hover .float { animation-play-state: paused; }
+  .body::before { /* pastel prism edge */
+    content: ""; position: absolute; inset: -2px; border-radius: 24px; z-index: 5; padding: 2px;
+    background: conic-gradient(from var(--angle), #ff9ec4, #ffe08a, #9af5d0, #9ec9ff, #d6a8ff, #ff9ec4);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity: 0; transition: opacity .3s ease; animation: spin 5s linear infinite; }
+  @keyframes spin { to { --angle: 360deg; } }
+  .card:hover .body::before { opacity: 1; }
+
+  .layer { position: absolute; transition: transform .14s ease; will-change: transform; }
+  .l-glow { inset: -10%; height: 64%; z-index: 0;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 60%, #fff), transparent 72%);
+    transform: translate(calc(var(--mx)*14px), calc(var(--my)*14px)); opacity: .85; }
+  .l-art { inset: 0 0 auto 0; height: 56%; z-index: 1; overflow: hidden;
+    background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 78%, #fff 6%), color-mix(in srgb, var(--accent) 40%, #fff 30%));
+    transform: translate(calc(var(--mx)*-7px), calc(var(--my)*-7px)) scale(1.06); }
+  .l-art .blob { position: absolute; width: 130%; height: 130%; left: -15%; top: -20%; opacity: .5;
+    background: radial-gradient(40% 40% at 70% 30%, #fff, transparent 60%), radial-gradient(35% 35% at 25% 75%, rgba(255,255,255,.7), transparent 60%); }
+  .l-icon { inset: 0 0 auto 0; height: 56%; z-index: 3; display: grid; place-items: center; font-size: 64px;
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,.18));
+    transform: translate(calc(var(--mx)*24px), calc(var(--my)*24px)) translateZ(45px); transition: transform .14s ease; }
+  .card:hover .l-icon { animation: pop 2.2s ease-in-out infinite; }
+  @keyframes pop { 0%,100%{ filter: drop-shadow(0 8px 12px rgba(0,0,0,.18)); } 50%{ filter: drop-shadow(0 12px 20px rgba(0,0,0,.22)) brightness(1.06); } }
+  .gloss { position: absolute; inset: 0 0 auto 0; height: 56%; z-index: 4; pointer-events: none;
+    background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.65) 50%, transparent 62%);
+    transform: translateX(-130%) skewX(-12deg); }
+  .card:hover .gloss { transform: translateX(130%) skewX(-12deg); transition: transform .85s ease; }
+
+  .content { position: absolute; left: 0; right: 0; bottom: 0; top: 56%; z-index: 6; padding: 14px 16px; display: flex; flex-direction: column; }
+  .tag { align-self: flex-start; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: #fff; background: var(--accent); padding: 3px 9px; border-radius: 999px; }
+  .nm { font-size: 22px; font-weight: 700; margin: 8px 0 1px; color: #2a2350; }
+  .tgl { font-size: 12px; color: #7d79a8; font-weight: 500; margin: 0 0 10px; }
+  .bars { display: grid; gap: 7px; margin-top: auto; }
+  .bar { font-size: 9px; font-weight: 600; letter-spacing: .08em; color: #9692bd; }
+  .bar .track { height: 6px; border-radius: 4px; background: #eef0fa; margin-top: 3px; overflow: hidden; }
+  .bar .fill { height: 100%; width: 0; border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 40%, #fff)); transition: width .8s cubic-bezier(.2,.8,.2,1); }
+  .card:hover .fill { width: var(--w); }
+  .hp { position: absolute; top: 12px; right: 14px; z-index: 6; font-weight: 700; font-size: 14px; color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,.3); } .hp small { font-size: 9px; opacity: .85; }
+
+  .footer-note { text-align: center; color: #9692bd; font-size: 12px; padding: 0 0 50px; }
+</style>
+</head>
+<body>
+  <div class="stage" data-phase="select">
+    <header>
+      <p class="kicker">Bright Pop · reactive cards</p>
+      <h1>Open a Booster Pack</h1>
+      <p class="lede">Two packs to choose from. Tap one to rip it open and reveal its apps. Then move your cursor over the cards — they tilt, glow, and come alive.</p>
+    </header>
+
+    <!-- SELECT -->
+    <section class="select">
+      <div class="packs" id="packs"></div>
+    </section>
+
+    <!-- REVEAL -->
+    <section class="reveal">
+      <div class="reveal-head">
+        <div class="pt" id="packTitle"></div>
+        <div class="ps" id="packSub"></div>
+      </div>
+      <button class="back" id="back">← Open the other pack</button>
+      <div class="cards" id="cards"></div>
+      <p class="footer-note">Hover a card for tilt · parallax · prism edge · gloss sweep</p>
+    </section>
+
+    <!-- OPENER -->
+    <div class="opener" id="opener">
+      <div class="flash"></div>
+      <div class="pk" id="pk">
+        <div class="half top"></div>
+        <div class="half bot"><span class="pemoji"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    const stage = document.querySelector('.stage');
+    const packsWrap = document.getElementById('packs');
+    const cardsWrap = document.getElementById('cards');
+    const opener = document.getElementById('opener');
+    const pk = document.getElementById('pk');
+
+    // pointer-tilt helper (shared by packs + cards)
+    function wireTilt(el, target, opts = {}) {
+      const max = opts.max || 22, depth = opts.depth || 1;
+      el.addEventListener('pointermove', (e) => {
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - .5;
+        const py = (e.clientY - r.top) / r.height - .5;
+        target.style.setProperty('--mx', (px * depth).toFixed(3));
+        target.style.setProperty('--my', (py * depth).toFixed(3));
+        target.style.setProperty('--ry', `${px * max}deg`);
+        target.style.setProperty('--rx', `${-py * max}deg`);
+        if (opts.lift) target.style.setProperty('--lift', opts.lift);
+      });
+      el.addEventListener('pointerleave', () => {
+        target.style.setProperty('--mx', 0); target.style.setProperty('--my', 0);
+        target.style.setProperty('--rx', '0deg'); target.style.setProperty('--ry', '0deg');
+        if (opts.lift) target.style.setProperty('--lift', '0px');
+      });
+    }
+
+    // ---- render packs ----
+    PACKS.forEach(pack => {
+      const count = APPS.filter(a => a.pack === pack.id).length;
+      const b = document.createElement('button');
+      b.className = 'pack';
+      b.style.setProperty('--pa', pack.a);
+      b.style.setProperty('--pb', pack.b);
+      b.innerHTML = `
+        <div class="foil">
+          <div class="tear"></div>
+          <span class="pemoji">${pack.icon}</span>
+          <div class="pname">${pack.name}</div>
+          <div class="psub">${pack.tagline}</div>
+          <div class="pcount">${count} apps inside</div>
+          <div class="pill">Tap to open ✦</div>
+        </div>`;
+      wireTilt(b, b.querySelector('.foil'), { max: 16, depth: 1 });
+      b.addEventListener('click', () => openPack(pack));
+      packsWrap.appendChild(b);
+    });
+
+    // ---- open animation ----
+    function openPack(pack) {
+      stage.dataset.phase = 'opening';
+      opener.style.setProperty('--pa', pack.a);
+      opener.style.setProperty('--pb', pack.b);
+      pk.querySelector('.pemoji').textContent = pack.icon;
+      opener.classList.remove('rip'); void pk.offsetWidth; // reset
+      pk.classList.add('shake');
+      setTimeout(() => {
+        pk.classList.remove('shake');
+        opener.classList.add('rip');
+        burst(opener, [pack.a, pack.b, '#fff', '#ffe08a']);
+      }, 260);
+      setTimeout(() => revealPack(pack), 980);
+    }
+
+    function revealPack(pack) {
+      const apps = APPS.filter(a => a.pack === pack.id);
+      document.getElementById('packTitle').textContent = pack.name;
+      document.getElementById('packSub').textContent = pack.tagline + ' · ' + apps.length + ' apps';
+      cardsWrap.innerHTML = '';
+      apps.forEach((app, i) => cardsWrap.appendChild(makeCard(app, i)));
+      opener.classList.remove('rip');
+      stage.dataset.phase = 'reveal';
+    }
+
+    function makeCard(app, i) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.setProperty('--accent', app.accent);
+      card.style.setProperty('--i', i);
+      const usersPct = Math.min(100, Math.round((parseFloat(app.stats.users) / 320) * 100));
+      const ratingPct = Math.round((parseFloat(app.stats.rating) / 5) * 100);
+      card.innerHTML = `
+        <div class="float">
+          <div class="body">
+            <div class="layer l-glow"></div>
+            <div class="layer l-art"><span class="blob"></span></div>
+            <div class="layer l-icon">${app.icon}</div>
+            <div class="gloss"></div>
+            <span class="hp"><small>HP</small> ${app.hp}</span>
+            <div class="content">
+              <span class="tag">${app.type}</span>
+              <div class="nm">${app.name}</div>
+              <div class="tgl">${app.tagline}</div>
+              <div class="bars">
+                <div class="bar">REACH<div class="track"><div class="fill" style="--w:${usersPct}%"></div></div></div>
+                <div class="bar">RATING ★ ${app.stats.rating}<div class="track"><div class="fill" style="--w:${ratingPct}%"></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      wireTilt(card, card.querySelector('.body'), { max: 20, depth: 1, lift: '22px' });
+      return card;
+    }
+
+    document.getElementById('back').addEventListener('click', () => {
+      stage.dataset.phase = 'select';
+      cardsWrap.innerHTML = '';
+    });
+  </script>
+</body>
+</html>
