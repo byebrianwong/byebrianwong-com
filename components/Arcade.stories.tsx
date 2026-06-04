@@ -13,7 +13,15 @@ import { Sound } from '@/lib/sound';
 const meta = {
   component: Arcade,
   tags: ['ai-generated'],
-  parameters: { layout: 'fullscreen' },
+  parameters: {
+    layout: 'fullscreen',
+    // These are interaction tests: each story clicks through the phase machine
+    // and ends in an animated / non-deterministic state (particle bursts, the
+    // sound singleton, etc.). They run as vitest browser tests, but they make
+    // poor visual baselines, so keep the whole file out of Chromatic — the
+    // deterministic Card stories are what we track for visual history.
+    chromatic: { disableSnapshot: true },
+  },
 } satisfies Meta<typeof Arcade>;
 
 export default meta;
@@ -54,9 +62,6 @@ export const PackSelect: Story = {
  * wait for the first (common) card to gain the `revealed` class.
  */
 export const OpenToolkitPack: Story = {
-  // Ends mid-animation (deal-in, particle burst) — a great interaction test but
-  // a flaky visual baseline, so keep it out of Chromatic snapshots.
-  parameters: { chromatic: { disableSnapshot: true } },
   play: async ({ canvas, canvasElement, userEvent }) => {
     await userEvent.click(canvas.getByText('★ THE APP ARCADE ★'));
     await userEvent.click(
@@ -85,8 +90,6 @@ export const OpenToolkitPack: Story = {
  * interaction, including that the click is ignored until the card has flipped.
  */
 export const InspectCard: Story = {
-  // Same as OpenToolkitPack: timing-driven + fanfare particles, so test-only.
-  parameters: { chromatic: { disableSnapshot: true } },
   play: async ({ canvas, canvasElement, userEvent }) => {
     await userEvent.click(canvas.getByText('★ THE APP ARCADE ★'));
     await userEvent.click(
