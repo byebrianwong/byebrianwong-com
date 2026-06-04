@@ -3,7 +3,10 @@ import { expect } from 'storybook/test';
 import { APPS, type AppCard } from '@/lib/apps';
 import { Card } from './Card';
 
-const byId = (id: string) => APPS.find((a) => a.id === id)!;
+// Pick a representative app per rarity, so these stories survive app-data
+// churn: the specific apps (ids/names) change often, but the four rarities are
+// fixed by the `Rarity` type and always present in the set.
+const sample = (rarity: AppCard['rarity']) => APPS.find((a) => a.rarity === rarity)!;
 
 /**
  * A single holographic trading card, rendered in isolation. Unlike the `Arcade`
@@ -15,7 +18,7 @@ const meta = {
   tags: ['ai-generated'],
   parameters: { layout: 'centered' },
   // A default app so every story has a card; per-rarity stories override it.
-  args: { app: byId('forge'), revealed: true, seen: true },
+  args: { app: sample('legendary'), revealed: true, seen: true },
   // The `.card` starts at opacity:0 and only settles to opacity:1 via the
   // `dealIn` entrance animation (meant for the arcade's deal-in). In isolation
   // we want the settled, static card — deterministic for Chromatic snapshots and
@@ -38,22 +41,22 @@ type Story = StoryObj<typeof meta>;
 
 /* ---- one story per rarity (the stable visual baselines) ---- */
 
-export const Common: Story = { args: { app: byId('echo') } };
-export const Rare: Story = { args: { app: byId('atlas') } };
-export const Holo: Story = { args: { app: byId('tempo') } };
+export const Common: Story = { args: { app: sample('common') } };
+export const Rare: Story = { args: { app: sample('rare') } };
+export const Holo: Story = { args: { app: sample('holo') } };
 
 export const Legendary: Story = {
-  args: { app: byId('forge') },
-  play: async ({ canvas }) => {
+  args: { app: sample('legendary') },
+  play: async ({ canvas, args }) => {
     // Identity + rarity treatment are driven entirely by the `app` prop.
-    await expect(canvas.getByText('Forge')).toBeVisible();
+    await expect(canvas.getByText(args.app.name)).toBeVisible();
     await expect(canvas.getByText(/LEGENDARY/)).toBeVisible();
   },
 };
 
 /** The foil back shown before a card is flipped face-up. */
 export const FaceDown: Story = {
-  args: { app: byId('forge'), revealed: false },
+  args: { app: sample('legendary'), revealed: false },
   play: async ({ canvasElement }) => {
     // `revealed={false}` must drop the class that flips the card face-up.
     const card = canvasElement.querySelector<HTMLElement>('.card')!;
@@ -103,15 +106,15 @@ interface PlaygroundArgs {
  */
 export const Playground: StoryObj<PlaygroundArgs> = {
   args: {
-    name: 'Forge',
+    name: 'Regibee',
     rarity: 'legendary',
-    type: 'Dev',
-    icon: '⚙️',
+    type: 'Registry',
+    icon: '🐝',
     hp: 150,
-    tagline: 'Snippet manager',
-    accent: '#34d399',
+    tagline: 'Universal gift registry',
+    accent: '#f59e0b',
     rating: '4.9',
-    users: '200K',
+    users: '120K',
     revealed: true,
   },
   argTypes: {

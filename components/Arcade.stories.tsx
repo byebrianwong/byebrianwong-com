@@ -62,9 +62,9 @@ export const PackSelect: Story = {
 };
 
 /**
- * Tearing open the Toolkit pack: after the rip animation the reveal stage shows
- * the pack title and deals the cards in, flipping them face-up rarest-last. We
- * wait for the first (common) card to gain the `revealed` class.
+ * Tearing open the Utility Belt pack: after the rip animation the reveal stage
+ * shows the pack title and deals the cards in, flipping them face-up. Kept
+ * data-agnostic (wait for *any* card to flip) so it survives app-data changes.
  */
 export const OpenToolkitPack: Story = {
   play: async ({ canvas, canvasElement, userEvent }) => {
@@ -83,12 +83,12 @@ export const OpenToolkitPack: Story = {
       { timeout: 6000 },
     );
 
-    // Cards flip one at a time; the common card ("echo") flips first.
+    // Cards deal in and flip face-up one at a time — wait for at least one.
     await waitFor(
       () =>
         expect(
-          canvasElement.querySelector('.card[data-app="echo"]'),
-        ).toHaveClass('revealed'),
+          canvasElement.querySelector('.cards .card.revealed'),
+        ).not.toBeNull(),
       { timeout: 8000 },
     );
   },
@@ -110,25 +110,22 @@ export const InspectCard: Story = {
       ),
     );
 
-    // Wait for the first card to flip face-up, then click it.
-    const echo = await waitFor(
+    // Wait for any card to flip face-up, then click it (data-agnostic).
+    const card = await waitFor(
       () => {
         const el = canvasElement.querySelector<HTMLElement>(
-          '.card[data-app="echo"]',
+          '.cards .card.revealed',
         );
-        expect(el).toHaveClass('revealed');
+        expect(el).not.toBeNull();
         return el!;
       },
       { timeout: 8000 },
     );
-    await userEvent.click(echo);
+    await userEvent.click(card);
 
-    // The inspector shows the app blurb and a launch link.
+    // The inspector opens with the app's launch CTA, whatever the card is.
     await expect(
-      await canvas.findByText(/whisper-fast transcription/i),
-    ).toBeVisible();
-    await expect(
-      canvas.getByRole('link', { name: /LAUNCH ECHO/i }),
+      await canvas.findByRole('link', { name: /LAUNCH/i }),
     ).toBeVisible();
   },
 };
