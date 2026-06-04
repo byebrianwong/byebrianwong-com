@@ -24,7 +24,7 @@ export function CardFace({ app }: { app: AppCard }) {
   return (
     <>
       <div className="frametop">
-        <span className="nm">{app.name}</span>
+        <span className={"nm" + (app.name.length > 11 ? " long" : "")}>{app.name}</span>
         <span className="hp">
           <small>HP</small> {app.hp}
         </span>

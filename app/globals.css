@@ -169,6 +169,7 @@ h1 .pop { color: #ffd23f; }
 
 .frametop { position: absolute; top: 0; left: 0; right: 0; z-index: 6; display: flex; justify-content: space-between; align-items: center; padding: 9px 11px 7px; }
 .nm { font-family: "Bungee"; font-size: 17px; color: #fff; text-shadow: 1.5px 1.5px 0 #0b1020; }
+.nm.long { font-size: 12px; letter-spacing: -.02em; }
 .card:hover .nm { color: #ffd23f; }
 .hp { font-family: "Bungee"; font-size: 15px; color: #ffd23f; text-shadow: 1.5px 1.5px 0 #7a1212; white-space: nowrap; }
 .hp small { font-size: 8px; color: #fff; }
@@ -232,7 +233,8 @@ h1 .pop { color: #ffd23f; }
 .inspect.on .big { transform: none; opacity: 1; }
 .inspect .big .card { opacity: 1; animation: none; }
 .inspect .detail { width: 320px; max-width: 86vw; z-index: 2; }
-.inspect .detail .dh { font-family:"Bungee"; font-size: 30px; color:#fff; text-shadow: 2px 2px 0 #0b1020; }
+.inspect .detail .dh { font-family:"Bungee"; font-size: 30px; color:#fff; text-shadow: 2px 2px 0 #0b1020; line-height: 1.05; overflow-wrap: anywhere; }
+.inspect .detail .dh.long { font-size: 22px; }
 .inspect .detail .drar { display:inline-block; font-family:"Bungee"; font-size:11px; padding:4px 10px; border-radius:5px; border:2px solid #0b1020; margin:8px 0 14px; }
 .inspect .detail p { color:#dbe3ff; line-height:1.6; font-size:14px; font-weight:500; }
 .inspect .detail .row { display:flex; justify-content:space-between; padding:9px 0; border-top:1px solid rgba(255,255,255,.15); font-size:13px; }
@@ -241,6 +243,9 @@ h1 .pop { color: #ffd23f; }
   padding:12px 22px; border-radius:10px; border:3px solid #0b1020; box-shadow:0 5px 0 rgba(0,0,0,.4); text-decoration:none; transition: transform .1s ease, box-shadow .1s ease; }
 .inspect .launch:hover { transform: translateY(-2px); box-shadow:0 7px 0 rgba(0,0,0,.4); }
 .inspect .launch:active { transform: translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.4); }
+.inspect .launch.soon { background:#5b6079; color:#dbe3ff; cursor:default; box-shadow:0 5px 0 rgba(0,0,0,.4); }
+.inspect .launch.soon:hover { transform:none; box-shadow:0 5px 0 rgba(0,0,0,.4); }
+.inspect .launch.soon:active { transform:none; box-shadow:0 5px 0 rgba(0,0,0,.4); }
 .inspect .closex { position:absolute; top:18px; right:22px; font-family:"Bungee"; font-size:13px; color:#ffd23f; opacity:.85; z-index:3; cursor: pointer; }
 
 .gyro-btn { display:none; position:fixed; bottom:16px; right:16px; z-index:80; font-family:"Bungee"; font-size:11px; color:#0b1020;

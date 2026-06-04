@@ -143,25 +143,25 @@ export default function Arcade() {
     timeouts.current.push(window.setTimeout(() => revealStart(p), 980));
   };
 
-  /* ---- reveal sequence (deal-in, then flip rarest-last) ---- */
+  /* ---- reveal sequence (deal-in, then flip left-to-right in source order) ---- */
   const revealStart = (p: Pack) => {
-    const apps = APPS.filter((a) => a.pack === p.id).sort(
-      (x, y) => RARITY[x.rarity].rank - RARITY[y.rarity].rank
-    );
+    const apps = APPS.filter((a) => a.pack === p.id);
     setRevealApps(apps);
     setRevealed(new Set());
     setPhase("reveal");
     setPacksOpened((n) => n + 1);
     openerRef.current?.classList.remove("rip");
 
+    // celebrate the rarest card in the pack (holo+) whenever it flips
+    const rarest = apps.reduce((a, b) => (RARITY[b.rarity].rank > RARITY[a.rarity].rank ? b : a), apps[0]);
+
     apps.forEach((app, idx) => {
-      const last = idx === apps.length - 1;
       timeouts.current.push(
         window.setTimeout(() => {
           setRevealed((prev) => new Set(prev).add(app.id));
           Sound.flip();
           setSeen((prev) => new Set(prev).add(app.id));
-          if (last && RARITY[app.rarity].rank >= 2) fanfare(app);
+          if (app.id === rarest.id && RARITY[app.rarity].rank >= 2) fanfare(app);
         }, 700 + idx * 340)
       );
     });
@@ -504,7 +504,7 @@ export default function Arcade() {
               </div>
             </div>
             <div className="detail">
-              <div className="dh">{inspectApp.name}</div>
+              <div className={"dh" + (inspectApp.name.length > 11 ? " long" : "")}>{inspectApp.name}</div>
               <span
                 className="drar"
                 style={{ background: RAR_COLOR[inspectApp.rarity], color: "#0b1020" }}
@@ -533,13 +533,17 @@ export default function Arcade() {
                 <b>{inspectApp.year}</b>
               </div>
               <a
-                className="launch"
+                className={"launch" + (inspectApp.link === "#" ? " soon" : "")}
                 href={inspectApp.link}
+                target={inspectApp.link === "#" ? undefined : "_blank"}
+                rel={inspectApp.link === "#" ? undefined : "noopener noreferrer"}
                 onClick={(e) => {
                   if (inspectApp.link === "#") e.preventDefault();
                 }}
               >
-                ▶ LAUNCH {inspectApp.name.toUpperCase()}
+                {inspectApp.link === "#"
+                  ? "🔒 COMING SOON"
+                  : `▶ LAUNCH ${inspectApp.name.toUpperCase()}`}
               </a>
             </div>
           </>
