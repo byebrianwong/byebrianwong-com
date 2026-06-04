@@ -13,6 +13,13 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "4179", "--bind", "127.0.0.1"],
       "port": 4179
+    },
+    {
+      "name": "storybook",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "storybook"],
+      "port": 6006,
+      "autoPort": false
     }
   ]
 }

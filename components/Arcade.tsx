@@ -5,68 +5,13 @@ import {
   APPS,
   PACKS,
   RARITY,
-  ratingPct,
-  usersPct,
   type AppCard,
   type Pack,
 } from "@/lib/apps";
 import { Sound } from "@/lib/sound";
+import { CardFace } from "./Card";
 
 type Phase = "title" | "select" | "opening" | "reveal";
-
-/* ---------------- small presentational helpers ---------------- */
-
-function Segs({ pct }: { pct: number }) {
-  const N = 12;
-  const lit = Math.round((pct / 100) * N);
-  return (
-    <span className="segs">
-      {Array.from({ length: N }, (_, k) => (
-        <span key={k} className={"seg" + (k < lit ? " on" : "")} />
-      ))}
-    </span>
-  );
-}
-
-function CardFace({ app }: { app: AppCard }) {
-  const r = RARITY[app.rarity];
-  return (
-    <>
-      <div className="frametop">
-        <span className="nm">{app.name}</span>
-        <span className="hp">
-          <small>HP</small> {app.hp}
-        </span>
-      </div>
-      <div className="art">
-        <div className="layer l-glow" />
-        <span className="ring" />
-        <div className="layer l-icon">{app.icon}</div>
-        <div className="halftone" />
-        <div className="shine" />
-        <div className="glare" />
-      </div>
-      <div className="badges">
-        <span className="typebadge">{app.type.toUpperCase()}</span>
-        <span className="gem">
-          {r.gem} {r.label}
-        </span>
-      </div>
-      <span className="fire">🔥 ON FIRE</span>
-      <div className="statbox">
-        <p className="tgl">{app.tagline}</p>
-        <div className="statrow">
-          <span className="lbl">REACH</span>
-          <Segs pct={usersPct(app.stats.users)} />
-        </div>
-        <div className="statrow">
-          <span className="lbl">★ {app.stats.rating}</span>
-          <Segs pct={ratingPct(app.stats.rating)} />
-        </div>
-      </div>
-    </>
-  );
-}
 
 const cssVars = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 
@@ -99,6 +44,7 @@ function burst(host: HTMLElement, colors: string[], n = 22) {
 
 export default function Arcade() {
   const [phase, setPhase] = useState<Phase>("title");
+  const [coin, setCoin] = useState(false);
   const [pack, setPack] = useState<Pack | null>(null);
   const [revealApps, setRevealApps] = useState<AppCard[]>([]);
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
@@ -122,12 +68,21 @@ export default function Arcade() {
 
   useEffect(() => () => clearTimers(), [clearTimers]);
 
-  /* title -> select */
+  /* title -> (coin insert) -> select */
   const start = useCallback(() => {
-    setPhase((p) => {
-      if (p !== "title") return p;
+    setCoin((already) => {
+      if (already) return true; // animation already running
       Sound.coin();
-      return "select";
+      const reduce =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      timeouts.current.push(
+        window.setTimeout(() => {
+          setPhase("select");
+          setCoin(false);
+        }, reduce ? 140 : 900)
+      );
+      return true;
     });
   }, []);
 
@@ -188,25 +143,25 @@ export default function Arcade() {
     timeouts.current.push(window.setTimeout(() => revealStart(p), 980));
   };
 
-  /* ---- reveal sequence (deal-in, then flip rarest-last) ---- */
+  /* ---- reveal sequence (deal-in, then flip left-to-right in source order) ---- */
   const revealStart = (p: Pack) => {
-    const apps = APPS.filter((a) => a.pack === p.id).sort(
-      (x, y) => RARITY[x.rarity].rank - RARITY[y.rarity].rank
-    );
+    const apps = APPS.filter((a) => a.pack === p.id);
     setRevealApps(apps);
     setRevealed(new Set());
     setPhase("reveal");
     setPacksOpened((n) => n + 1);
     openerRef.current?.classList.remove("rip");
 
+    // celebrate the rarest card in the pack (holo+) whenever it flips
+    const rarest = apps.reduce((a, b) => (RARITY[b.rarity].rank > RARITY[a.rarity].rank ? b : a), apps[0]);
+
     apps.forEach((app, idx) => {
-      const last = idx === apps.length - 1;
       timeouts.current.push(
         window.setTimeout(() => {
           setRevealed((prev) => new Set(prev).add(app.id));
           Sound.flip();
           setSeen((prev) => new Set(prev).add(app.id));
-          if (last && RARITY[app.rarity].rank >= 2) fanfare(app);
+          if (app.id === rarest.id && RARITY[app.rarity].rank >= 2) fanfare(app);
         }, 700 + idx * 340)
       );
     });
@@ -364,7 +319,7 @@ export default function Arcade() {
     }
   };
 
-  const subLabel = (id: Pack["id"]) => (id === "toolkit" ? "SERIOUS BUSINESS" : "FUN ZONE");
+  const subLabel = (id: Pack["id"]) => (id === "toolkit" ? "TOOL TIME" : "GAME TIME");
 
   return (
     <>
@@ -389,15 +344,19 @@ export default function Arcade() {
         {/* TITLE */}
         <section className="title" onClick={start}>
           <div className="logo">
-            BYE
-            <br />
             BRIAN
             <br />
-            WONG
+            WONG&apos;S
           </div>
-          <div className="sub">★ THE APP ARCADE ★</div>
-          <div className="press blink">▸ INSERT COIN ◂</div>
-          <div className="hint2">click anywhere or press any key to start</div>
+          <div className="sub">★ ARCADE EMPORIUM ★</div>
+          <div className={"press" + (coin ? "" : " blink")}>▸ INSERT COIN ◂</div>
+          {coin && (
+            <div className="coinfx">
+              <span className="coin">B</span>
+              <span className="slot" />
+              <div className="coinflash" />
+            </div>
+          )}
         </section>
 
         <header>
@@ -405,10 +364,6 @@ export default function Arcade() {
           <h1>
             RIP A <span className="pop">BOOSTER</span> PACK
           </h1>
-          <p className="lede">
-            Pick a pack, tear it open, and watch the cards flip — rarest last. Hover for holo foil
-            &amp; fire; click a card to inspect it.
-          </p>
         </header>
 
         {/* PACK SELECT */}
@@ -549,7 +504,7 @@ export default function Arcade() {
               </div>
             </div>
             <div className="detail">
-              <div className="dh">{inspectApp.name}</div>
+              <div className={"dh" + (inspectApp.name.length > 11 ? " long" : "")}>{inspectApp.name}</div>
               <span
                 className="drar"
                 style={{ background: RAR_COLOR[inspectApp.rarity], color: "#0b1020" }}
@@ -578,13 +533,17 @@ export default function Arcade() {
                 <b>{inspectApp.year}</b>
               </div>
               <a
-                className="launch"
+                className={"launch" + (inspectApp.link === "#" ? " soon" : "")}
                 href={inspectApp.link}
+                target={inspectApp.link === "#" ? undefined : "_blank"}
+                rel={inspectApp.link === "#" ? undefined : "noopener noreferrer"}
                 onClick={(e) => {
                   if (inspectApp.link === "#") e.preventDefault();
                 }}
               >
-                ▶ LAUNCH {inspectApp.name.toUpperCase()}
+                {inspectApp.link === "#"
+                  ? "🔒 COMING SOON"
+                  : `▶ LAUNCH ${inspectApp.name.toUpperCase()}`}
               </a>
             </div>
           </>
