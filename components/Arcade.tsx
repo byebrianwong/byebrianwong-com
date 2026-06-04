@@ -99,6 +99,7 @@ function burst(host: HTMLElement, colors: string[], n = 22) {
 
 export default function Arcade() {
   const [phase, setPhase] = useState<Phase>("title");
+  const [coin, setCoin] = useState(false);
   const [pack, setPack] = useState<Pack | null>(null);
   const [revealApps, setRevealApps] = useState<AppCard[]>([]);
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
@@ -122,12 +123,21 @@ export default function Arcade() {
 
   useEffect(() => () => clearTimers(), [clearTimers]);
 
-  /* title -> select */
+  /* title -> (coin insert) -> select */
   const start = useCallback(() => {
-    setPhase((p) => {
-      if (p !== "title") return p;
+    setCoin((already) => {
+      if (already) return true; // animation already running
       Sound.coin();
-      return "select";
+      const reduce =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      timeouts.current.push(
+        window.setTimeout(() => {
+          setPhase("select");
+          setCoin(false);
+        }, reduce ? 140 : 900)
+      );
+      return true;
     });
   }, []);
 
@@ -389,15 +399,19 @@ export default function Arcade() {
         {/* TITLE */}
         <section className="title" onClick={start}>
           <div className="logo">
-            BYE
-            <br />
             BRIAN
             <br />
-            WONG
+            WONG&apos;S
           </div>
-          <div className="sub">★ THE APP ARCADE ★</div>
-          <div className="press blink">▸ INSERT COIN ◂</div>
-          <div className="hint2">click anywhere or press any key to start</div>
+          <div className="sub">★ ARCADE EMPORIUM ★</div>
+          <div className={"press" + (coin ? "" : " blink")}>▸ INSERT COIN ◂</div>
+          {coin && (
+            <div className="coinfx">
+              <span className="coin">B</span>
+              <span className="slot" />
+              <div className="coinflash" />
+            </div>
+          )}
         </section>
 
         <header>
