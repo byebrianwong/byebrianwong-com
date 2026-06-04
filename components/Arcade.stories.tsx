@@ -34,9 +34,9 @@ type Story = StoryObj<typeof meta>;
  */
 export const Title: Story = {
   play: async ({ canvas }) => {
-    await expect(canvas.getByText('★ THE APP ARCADE ★')).toBeVisible();
+    await expect(canvas.getByText('★ ARCADE EMPORIUM ★')).toBeVisible();
     // Phase-gating proof: no pack button is reachable while on the title screen.
-    expect(canvas.queryByRole('button', { name: /The Toolkit/i })).toBeNull();
+    expect(canvas.queryByRole('button', { name: /The Utility Belt/i })).toBeNull();
   },
 };
 
@@ -46,9 +46,14 @@ export const Title: Story = {
  */
 export const PackSelect: Story = {
   play: async ({ canvas, userEvent }) => {
-    await userEvent.click(canvas.getByText('★ THE APP ARCADE ★'));
+    await userEvent.click(canvas.getByText('★ ARCADE EMPORIUM ★'));
+    // start() runs a ~900ms coin-insert animation before the select phase.
     await expect(
-      await canvas.findByRole('button', { name: /The Toolkit/i }),
+      await canvas.findByRole(
+        'button',
+        { name: /The Utility Belt/i },
+        { timeout: 5000 },
+      ),
     ).toBeVisible();
     await expect(
       canvas.getByRole('button', { name: /The Arcade/i }),
@@ -63,15 +68,20 @@ export const PackSelect: Story = {
  */
 export const OpenToolkitPack: Story = {
   play: async ({ canvas, canvasElement, userEvent }) => {
-    await userEvent.click(canvas.getByText('★ THE APP ARCADE ★'));
+    await userEvent.click(canvas.getByText('★ ARCADE EMPORIUM ★'));
     await userEvent.click(
-      await canvas.findByRole('button', { name: /The Toolkit/i }),
+      await canvas.findByRole(
+        'button',
+        { name: /The Utility Belt/i },
+        { timeout: 5000 },
+      ),
     );
 
     // The opener animation runs (~1s) before the reveal stage becomes visible.
-    await waitFor(() => expect(canvas.getByText('THE TOOLKIT')).toBeVisible(), {
-      timeout: 6000,
-    });
+    await waitFor(
+      () => expect(canvas.getByText('THE UTILITY BELT')).toBeVisible(),
+      { timeout: 6000 },
+    );
 
     // Cards flip one at a time; the common card ("echo") flips first.
     await waitFor(
@@ -91,9 +101,13 @@ export const OpenToolkitPack: Story = {
  */
 export const InspectCard: Story = {
   play: async ({ canvas, canvasElement, userEvent }) => {
-    await userEvent.click(canvas.getByText('★ THE APP ARCADE ★'));
+    await userEvent.click(canvas.getByText('★ ARCADE EMPORIUM ★'));
     await userEvent.click(
-      await canvas.findByRole('button', { name: /The Toolkit/i }),
+      await canvas.findByRole(
+        'button',
+        { name: /The Utility Belt/i },
+        { timeout: 5000 },
+      ),
     );
 
     // Wait for the first card to flip face-up, then click it.
