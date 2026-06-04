@@ -5,68 +5,13 @@ import {
   APPS,
   PACKS,
   RARITY,
-  ratingPct,
-  usersPct,
   type AppCard,
   type Pack,
 } from "@/lib/apps";
 import { Sound } from "@/lib/sound";
+import { CardFace } from "./Card";
 
 type Phase = "title" | "select" | "opening" | "reveal";
-
-/* ---------------- small presentational helpers ---------------- */
-
-function Segs({ pct }: { pct: number }) {
-  const N = 12;
-  const lit = Math.round((pct / 100) * N);
-  return (
-    <span className="segs">
-      {Array.from({ length: N }, (_, k) => (
-        <span key={k} className={"seg" + (k < lit ? " on" : "")} />
-      ))}
-    </span>
-  );
-}
-
-function CardFace({ app }: { app: AppCard }) {
-  const r = RARITY[app.rarity];
-  return (
-    <>
-      <div className="frametop">
-        <span className={"nm" + (app.name.length > 11 ? " long" : "")}>{app.name}</span>
-        <span className="hp">
-          <small>HP</small> {app.hp}
-        </span>
-      </div>
-      <div className="art">
-        <div className="layer l-glow" />
-        <span className="ring" />
-        <div className="layer l-icon">{app.icon}</div>
-        <div className="halftone" />
-        <div className="shine" />
-        <div className="glare" />
-      </div>
-      <div className="badges">
-        <span className="typebadge">{app.type.toUpperCase()}</span>
-        <span className="gem">
-          {r.gem} {r.label}
-        </span>
-      </div>
-      <span className="fire">🔥 ON FIRE</span>
-      <div className="statbox">
-        <p className="tgl">{app.tagline}</p>
-        <div className="statrow">
-          <span className="lbl">REACH</span>
-          <Segs pct={usersPct(app.stats.users)} />
-        </div>
-        <div className="statrow">
-          <span className="lbl">★ {app.stats.rating}</span>
-          <Segs pct={ratingPct(app.stats.rating)} />
-        </div>
-      </div>
-    </>
-  );
-}
 
 const cssVars = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 
