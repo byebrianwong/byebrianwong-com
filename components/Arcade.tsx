@@ -33,7 +33,7 @@ function CardFace({ app }: { app: AppCard }) {
   return (
     <>
       <div className="frametop">
-        <span className="nm">{app.name}</span>
+        <span className={"nm" + (app.name.length > 11 ? " long" : "")}>{app.name}</span>
         <span className="hp">
           <small>HP</small> {app.hp}
         </span>
@@ -559,7 +559,7 @@ export default function Arcade() {
               </div>
             </div>
             <div className="detail">
-              <div className="dh">{inspectApp.name}</div>
+              <div className={"dh" + (inspectApp.name.length > 11 ? " long" : "")}>{inspectApp.name}</div>
               <span
                 className="drar"
                 style={{ background: RAR_COLOR[inspectApp.rarity], color: "#0b1020" }}
@@ -588,13 +588,17 @@ export default function Arcade() {
                 <b>{inspectApp.year}</b>
               </div>
               <a
-                className="launch"
+                className={"launch" + (inspectApp.link === "#" ? " soon" : "")}
                 href={inspectApp.link}
+                target={inspectApp.link === "#" ? undefined : "_blank"}
+                rel={inspectApp.link === "#" ? undefined : "noopener noreferrer"}
                 onClick={(e) => {
                   if (inspectApp.link === "#") e.preventDefault();
                 }}
               >
-                ▶ LAUNCH {inspectApp.name.toUpperCase()}
+                {inspectApp.link === "#"
+                  ? "🔒 COMING SOON"
+                  : `▶ LAUNCH ${inspectApp.name.toUpperCase()}`}
               </a>
             </div>
           </>
