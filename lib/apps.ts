@@ -30,7 +30,7 @@ export interface Pack {
 }
 
 export const PACKS: Pack[] = [
-  { id: "toolkit", name: "The Toolkit", tagline: "Serious & useful", icon: "🛠️", a: "#22d3ee", b: "#3b82f6" },
+  { id: "toolkit", name: "The Utility Belt", tagline: "Serious & useful", icon: "🛠️", a: "#22d3ee", b: "#3b82f6" },
   { id: "arcade", name: "The Arcade", tagline: "Fun & games", icon: "🎮", a: "#fb923c", b: "#f43f5e" },
 ];
 

@@ -374,7 +374,7 @@ export default function Arcade() {
     }
   };
 
-  const subLabel = (id: Pack["id"]) => (id === "toolkit" ? "SERIOUS BUSINESS" : "FUN ZONE");
+  const subLabel = (id: Pack["id"]) => (id === "toolkit" ? "TOOL TIME" : "GAME TIME");
 
   return (
     <>
@@ -419,10 +419,6 @@ export default function Arcade() {
           <h1>
             RIP A <span className="pop">BOOSTER</span> PACK
           </h1>
-          <p className="lede">
-            Pick a pack, tear it open, and watch the cards flip — rarest last. Hover for holo foil
-            &amp; fire; click a card to inspect it.
-          </p>
         </header>
 
         {/* PACK SELECT */}
