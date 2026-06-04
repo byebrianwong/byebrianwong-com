@@ -1,0 +1,27 @@
+name: Chromatic
+
+# Publishes Storybook to Chromatic so every component's visual history is
+# tracked across commits. Requires a CHROMATIC_PROJECT_TOKEN repo secret
+# (Settings → Secrets and variables → Actions).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  chromatic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Chromatic needs full git history to compare against past baselines.
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Publish to Chromatic
+        uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
