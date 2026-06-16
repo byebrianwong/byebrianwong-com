@@ -56,7 +56,16 @@ function noise({ dur = 0.2, vol = 0.2, delay = 0, hp = 700 }: { dur?: number; vo
 }
 
 export const Sound = {
-  coin() { tone({ freq: 988, dur: 0.07, vol: 0.2 }); tone({ freq: 1319, dur: 0.13, vol: 0.2, delay: 0.07 }); },
+  coin() {
+    // rising chime while the coin falls...
+    tone({ freq: 988, dur: 0.07, vol: 0.2 });
+    tone({ freq: 1319, dur: 0.12, vol: 0.2, delay: 0.07 });
+    // ...then a clunk + "ka-ching" timed to it sliding into the slot (~0.86s)
+    tone({ freq: 200, slideTo: 70, type: "sawtooth", dur: 0.12, vol: 0.16, delay: 0.8 });
+    noise({ dur: 0.05, vol: 0.12, hp: 2200, delay: 0.8 });
+    tone({ freq: 1568, dur: 0.09, vol: 0.16, delay: 0.86 });
+    tone({ freq: 2093, dur: 0.16, vol: 0.16, delay: 0.94 });
+  },
   rip() { noise({ dur: 0.28, vol: 0.28, hp: 500 }); tone({ freq: 300, slideTo: 90, type: "sawtooth", dur: 0.25, vol: 0.12 }); },
   whoosh() { tone({ freq: 180, slideTo: 620, type: "sawtooth", dur: 0.16, vol: 0.12 }); },
   blip() { tone({ freq: 600, dur: 0.05, vol: 0.12 }); },

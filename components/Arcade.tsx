@@ -10,6 +10,7 @@ import {
 } from "@/lib/apps";
 import { Sound } from "@/lib/sound";
 import { CardFace } from "./Card";
+import { CoinInsert } from "./CoinInsert";
 
 type Phase = "title" | "select" | "opening" | "reveal";
 
@@ -80,7 +81,7 @@ export default function Arcade() {
         window.setTimeout(() => {
           setPhase("select");
           setCoin(false);
-        }, reduce ? 140 : 900)
+        }, reduce ? 140 : 1000)
       );
       return true;
     });
@@ -350,13 +351,7 @@ export default function Arcade() {
           </div>
           <div className="sub">★ ARCADE EMPORIUM ★</div>
           <div className={"press" + (coin ? "" : " blink")}>▸ INSERT COIN ◂</div>
-          {coin && (
-            <div className="coinfx">
-              <span className="coin">B</span>
-              <span className="slot" />
-              <div className="coinflash" />
-            </div>
-          )}
+          {coin && <CoinInsert />}
         </section>
 
         <header>
