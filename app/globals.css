@@ -23,10 +23,20 @@ body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opa
   letter-spacing: .06em; color: #ffd23f; text-shadow: 2px 2px 0 #0b1020; display: none; gap: 16px; }
 .hud[data-show="true"] { display: flex; }
 .hud .v { color: #fff; }
-.sound { position: fixed; top: 12px; right: 16px; z-index: 80; width: 42px; height: 42px; border-radius: 10px;
+/* sound sits just left of the persistent .site-nav cluster (About + GitHub) */
+.sound { position: fixed; top: 12px; right: 120px; z-index: 80; width: 42px; height: 42px; border-radius: 10px;
   border: 3px solid #0b1020; background: #ffd23f; color: #0b1020; font-size: 18px; cursor: pointer;
   box-shadow: 0 4px 0 rgba(0,0,0,.35); transition: transform .1s ease; }
 .sound:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.35); }
+
+/* ===================== SITE NAV (about + github, all pages) ===================== */
+.site-nav { position: fixed; top: 12px; right: 16px; z-index: 80; display: flex; gap: 10px; }
+.site-nav .snav { width: 42px; height: 42px; border-radius: 10px; border: 3px solid #0b1020;
+  background: #ffd23f; color: #0b1020; display: grid; place-items: center; cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0,0,0,.35); transition: transform .1s ease, background .15s ease; }
+.site-nav .snav:hover { background: #ffe27a; }
+.site-nav .snav:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.35); }
+.site-nav .snav svg { width: 22px; height: 22px; fill: currentColor; display: block; }
 
 /* ===================== TITLE (INSERT COIN) ===================== */
 .title { display: none; min-height: 100vh; flex-direction: column; align-items: center; justify-content: center;
@@ -257,7 +267,35 @@ h1 .pop { color: #ffd23f; }
   background:#ffd23f; border:3px solid #0b1020; border-radius:8px; padding:8px 12px; box-shadow:0 4px 0 rgba(0,0,0,.35); cursor:pointer; }
 .footer-note { text-align: center; color: #e7e9ff; opacity: .7; font-size: 12px; padding: 0 0 50px; }
 
+/* ===================== ABOUT PAGE ===================== */
+.about { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; padding: 96px 22px 64px; }
+.about-card { position: relative; width: 100%; max-width: 640px; border-radius: 22px; padding: 30px clamp(22px,5vw,46px) 34px;
+  background: linear-gradient(160deg, rgba(76,29,149,.6), rgba(17,20,42,.82));
+  border: 5px solid #0b1020; box-shadow: 0 0 0 3px #ffd23f inset, 0 22px 44px -16px rgba(0,0,0,.6);
+  backdrop-filter: blur(2px); }
+.about-avatar { width: 78px; height: 78px; margin: -64px auto 6px; border-radius: 50%; font-size: 40px;
+  display: grid; place-items: center; background: radial-gradient(circle at 36% 30%, #fff6c2, #ffd23f 60%, #d99a18);
+  border: 4px solid #0b1020; box-shadow: 0 6px 0 rgba(0,0,0,.3), 0 0 22px rgba(255,210,63,.55);
+  animation: bob 5s ease-in-out infinite; }
+.about-title { margin: 6px 0 18px; font-family: "Bungee"; font-size: clamp(28px,6vw,46px); line-height: 1; color: #fff;
+  text-shadow: 0 2px 0 #1e3a8a, 0 4px 0 #1e3a8a, 4px 6px 0 rgba(0,0,0,.35), 0 0 22px rgba(255,210,63,.4); }
+.about-title .pop { color: #ffd23f; }
+.about-card p { color: #e7e9ff; font-size: clamp(15px,2.2vw,17px); line-height: 1.7; font-weight: 500; margin: 0 0 14px; }
+.about-card p:last-of-type { margin-bottom: 0; }
+.about-card .ln { color: #ffd23f; font-weight: 700; text-decoration: none; white-space: nowrap;
+  border-bottom: 2px solid rgba(255,210,63,.4); transition: color .15s ease, border-color .15s ease; }
+.about-card .ln:hover { color: #fff; border-bottom-color: #fff; }
+.about-actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 26px; }
+.about-btn { font-family: "Bungee"; font-size: 13px; color: #0b1020; background: #ffd23f; padding: 12px 20px;
+  border-radius: 10px; border: 3px solid #0b1020; box-shadow: 0 5px 0 rgba(0,0,0,.4); text-decoration: none;
+  transition: transform .1s ease, box-shadow .1s ease, background .15s ease; }
+.about-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(0,0,0,.4); }
+.about-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,.4); }
+.about-btn.say-hi { background: #ef4444; color: #fff; }
+.about-btn.say-hi:hover { background: #f97316; }
+
 @media (prefers-reduced-motion: reduce) {
-  .pack, .float, .ring, .title .logo, .r-legendary .front::before { animation: none !important; }
+  .pack, .float, .ring, .title .logo, .r-legendary .front::before, .about-avatar { animation: none !important; }
   .coinfx { display: none !important; }
 }
