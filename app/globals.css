@@ -353,7 +353,7 @@ h1 .pop { color: #ffd23f; }
 .about-title { margin: 6px 0 18px; font-family: "Bungee"; font-size: clamp(28px,6vw,46px); line-height: 1; color: #fff;
   text-shadow: 0 2px 0 #1e3a8a, 0 4px 0 #1e3a8a, 4px 6px 0 rgba(0,0,0,.35), 0 0 22px rgba(255,210,63,.4); }
 .about-title .pop { color: #ffd23f; }
-.about-card p { color: #e7e9ff; font-size: clamp(15px,2.2vw,17px); line-height: 1.7; font-weight: 500; margin: 0 0 14px; }
+.about-card p { color: #e7e9ff; font-size: clamp(15px,2.2vw,17px); line-height: 1.7; font-weight: 500; margin: 0 0 14px; text-wrap: balance; }
 .about-card p:last-of-type { margin-bottom: 0; }
 .about-card .ln { color: #ffd23f; font-weight: 700; text-decoration: none; white-space: nowrap;
   border-bottom: 2px solid rgba(255,210,63,.4); transition: color .15s ease, border-color .15s ease; }
@@ -364,8 +364,6 @@ h1 .pop { color: #ffd23f; }
   transition: transform .1s ease, box-shadow .1s ease, background .15s ease; }
 .about-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(0,0,0,.4); }
 .about-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,.4); }
-.about-btn.say-hi { background: #ef4444; color: #fff; }
-.about-btn.say-hi:hover { background: #f97316; }
 
 @media (prefers-reduced-motion: reduce) {
   .pack, .float, .ring, .title .logo, .r-legendary .front::before, .about-avatar { animation: none !important; }

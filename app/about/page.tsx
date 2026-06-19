@@ -39,9 +39,6 @@ export default function About() {
           <a className="ln" href="mailto:brian@byebrianwong.com">message</a>!
         </p>
         <div className="about-actions">
-          <a className="about-btn say-hi" href="mailto:brian@byebrianwong.com">
-            ✉ SAY HI
-          </a>
           <Link className="about-btn" href="/">
             ◄ ENTER THE ARCADE
           </Link>
