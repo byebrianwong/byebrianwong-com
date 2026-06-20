@@ -141,7 +141,7 @@ export default function Arcade() {
         if (opener) burst(opener, ["#ffd23f", p.a, p.b, "#fff", "#ef4444"], 26);
       }, 260)
     );
-    timeouts.current.push(window.setTimeout(() => revealStart(p), 980));
+    timeouts.current.push(window.setTimeout(() => revealStart(p), 1120));
   };
 
   /* ---- reveal sequence (deal-in, then flip left-to-right in source order) ---- */
@@ -440,19 +440,21 @@ export default function Arcade() {
               );
             })}
           </div>
-          <p className="footer-note">
-            Hover: tilt · holo foil · fire&nbsp;&nbsp;|&nbsp;&nbsp;Click a card to inspect &amp; launch
-          </p>
         </section>
 
         {/* OPENER */}
         <div className="opener" ref={openerRef}>
           <div className="flash" />
           <div className="pk" ref={pkRef}>
-            <div className="half top" />
+            <div className="pk-cards" aria-hidden="true">
+              <span className="pcard c1" />
+              <span className="pcard c2" />
+              <span className="pcard c3" />
+            </div>
             <div className="half bot">
               <span className="pemoji" />
             </div>
+            <div className="half top" />
           </div>
         </div>
       </div>

@@ -62,9 +62,13 @@ export const PackSelect: Story = {
 };
 
 /**
- * Tearing open the Utility Belt pack: after the rip animation the reveal stage
- * shows the pack title and deals the cards in, flipping them face-up. Kept
- * data-agnostic (wait for *any* card to flip) so it survives app-data changes.
+ * Tearing open the Utility Belt pack: clicking it runs the rip animation — the
+ * foil lid tears off and face-down cards fan up out of the torn opening — then
+ * the reveal stage shows the pack title and deals the cards in, flipping them
+ * face-up. Kept data-agnostic (wait for *any* card to flip) so it survives
+ * app-data changes. This is an interaction test only; the file stays out of
+ * Chromatic, so it asserts the end state (cards revealed) rather than a frame
+ * of the time-based tear animation.
  */
 export const OpenToolkitPack: Story = {
   play: async ({ canvas, canvasElement, userEvent }) => {
@@ -80,6 +84,11 @@ export const OpenToolkitPack: Story = {
       { timeout: 5000 },
     );
     await userEvent.click(pack);
+
+    // The torn-pack opener (lid + the face-down cards that fan out) is wired up.
+    await expect(
+      canvasElement.querySelectorAll('.opener .pk-cards .pcard'),
+    ).toHaveLength(3);
 
     // The opener animation runs (~1s) before the reveal stage becomes visible.
     await waitFor(
