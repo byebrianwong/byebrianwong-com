@@ -55,6 +55,24 @@ function noise({ dur = 0.2, vol = 0.2, delay = 0, hp = 700 }: { dur?: number; vo
   s.start(t);
 }
 
+// A long, organic tear: a dense run of short noise crackles that travels and
+// builds across `total`, getting fuller as the highpass drops, over a low body.
+// Slight per-tick jitter means every rip sounds a little different.
+function tear({ total, count, hpStart, hpEnd, peak, jitter = 0.01, bodyFreq, bodyVol = 0.05 }: {
+  total: number; count: number; hpStart: number; hpEnd: number; peak: number;
+  jitter?: number; bodyFreq?: number; bodyVol?: number;
+}) {
+  if (!on) return;
+  for (let i = 0; i < count; i++) {
+    const p = count === 1 ? 0 : i / (count - 1); // 0..1 progress across the tear
+    const delay = Math.max(0, p * total + (Math.random() - 0.5) * jitter);
+    const vol = Math.max(0.01, peak * (0.25 + 0.75 * p) * (0.6 + Math.random() * 0.7));
+    const hp = Math.max(120, hpStart + (hpEnd - hpStart) * p + (Math.random() - 0.5) * 400);
+    noise({ dur: 0.05, vol, hp, delay });
+  }
+  if (bodyFreq) tone({ freq: bodyFreq, slideTo: bodyFreq * 0.4, type: "sawtooth", dur: total, vol: bodyVol });
+}
+
 export const Sound = {
   coin() {
     // rising chime while the coin falls...
@@ -66,11 +84,11 @@ export const Sound = {
     tone({ freq: 1568, dur: 0.09, vol: 0.16, delay: 0.86 });
     tone({ freq: 2093, dur: 0.16, vol: 0.16, delay: 0.94 });
   },
-  rip() { noise({ dur: 0.28, vol: 0.28, hp: 500 }); tone({ freq: 300, slideTo: 90, type: "sawtooth", dur: 0.25, vol: 0.12 }); },
+  rip() { tear({ total: 0.5, count: 26, hpStart: 3600, hpEnd: 1500, peak: 0.14, jitter: 0.008, bodyFreq: 300, bodyVol: 0.04 }); },
   whoosh() { tone({ freq: 180, slideTo: 620, type: "sawtooth", dur: 0.16, vol: 0.12 }); },
   blip() { tone({ freq: 600, dur: 0.05, vol: 0.12 }); },
   flip() { tone({ freq: 320, slideTo: 520, dur: 0.07, vol: 0.12 }); },
-  fire() { tone({ freq: 140, slideTo: 40, type: "sawtooth", dur: 0.3, vol: 0.16 }); noise({ dur: 0.3, vol: 0.08, hp: 1200 }); },
+  fire() { tone({ freq: 784, type: "triangle", dur: 0.06, vol: 0.06 }); tone({ freq: 1175, type: "triangle", dur: 0.07, vol: 0.04, delay: 0.018 }); },
   rare() { [523, 659, 784, 1046, 1318].forEach((f, i) => tone({ freq: f, dur: 0.14, vol: 0.2, delay: i * 0.1 })); },
   select() { tone({ freq: 440, dur: 0.06, vol: 0.15 }); tone({ freq: 660, dur: 0.1, vol: 0.15, delay: 0.05 }); },
   toggle() { on = !on; if (on) Sound.blip(); return on; },
