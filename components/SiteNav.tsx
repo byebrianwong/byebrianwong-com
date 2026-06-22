@@ -1,15 +1,28 @@
+"use client";
+
 import Link from "next/link";
+import { Sound } from "@/lib/sound";
 
 /**
  * Persistent site chrome shown on every page (rendered from the root layout):
  * an "About Brian" link and a GitHub link. Styled to match the arcade's other
  * fixed corner controls (the sound toggle, HUD). The arcade's sound button is
  * positioned just to the left of this cluster so they read as one group.
+ *
+ * Both buttons borrow the arcade's pack-button SFX so the chrome speaks the
+ * same sound language: a short blip on hover, a two-note select on click.
  */
 export default function SiteNav() {
   return (
     <nav className="site-nav" aria-label="Site">
-      <Link href="/about" className="snav" aria-label="About Brian" title="About Brian">
+      <Link
+        href="/about"
+        className="snav"
+        aria-label="About Brian"
+        title="About Brian"
+        onMouseEnter={() => Sound.blip()}
+        onClick={() => Sound.select()}
+      >
         {/* person / profile glyph */}
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 12.5a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 1.8c-5.2 0-9.2 2.7-9.2 6.1V22h18.4v-1.6c0-3.4-4-6.1-9.2-6.1Z" />
@@ -22,6 +35,8 @@ export default function SiteNav() {
         rel="noopener noreferrer"
         aria-label="Brian on GitHub"
         title="GitHub"
+        onMouseEnter={() => Sound.blip()}
+        onClick={() => Sound.select()}
       >
         {/* GitHub mark */}
         <svg viewBox="0 0 16 16" aria-hidden="true">
