@@ -28,8 +28,10 @@ export default function About() {
         </h1>
         <p>
           An SF Bay Area native who enjoys building fun things and playing sportsballs. Come check
-          out some weird tools, apps, and games I&apos;ve built. I currently lead product{" "}
-          <Ln href="https://www.chromatic.com">@chromatic</Ln> (makers of{" "}
+          out some weird tools, apps, and games I&apos;ve built.
+        </p>
+        <p>
+          I currently lead product <Ln href="https://www.chromatic.com">@chromatic</Ln> (makers of{" "}
           <Ln href="https://storybook.js.org">@storybook</Ln>) for all your agentic AI UI workflows.
           If you like to touch grass and the real analog world, check out stationery and
           journaling <Ln href="https://www.instagram.com/paperandmilk/">@paperandmilk</Ln>. And if
