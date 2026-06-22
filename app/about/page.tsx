@@ -27,8 +27,8 @@ export default function About() {
           HI, I&apos;M <span className="pop">BRIAN</span>
         </h1>
         <p>
-          An SF Bay Area native who enjoys building fun things and playing sportsballs. Come check
-          out some weird tools, apps, and games I&apos;ve built.
+          An SF Bay Area native who enjoys building fun things and playing sportsballs. Check out
+          the weird tools, apps, and games I&apos;ve built.
         </p>
         <p>
           I currently lead product <Ln href="https://www.chromatic.com">@chromatic</Ln> (makers of{" "}
