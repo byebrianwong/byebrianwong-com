@@ -20,6 +20,17 @@ const arcadePack = PACKS.find((p) => p.id === 'arcade')!;
 const meta = {
   component: Arcade,
   tags: ['ai-generated'],
+  // Every screen now writes a hash to the URL so the browser back button walks
+  // the flow. Stories share one document, so a previous story's hash would boot
+  // the next one straight into a reveal — reset the URL (and the depth marker
+  // the component stamps into `history.state`) before each play.
+  beforeEach: () => {
+    window.history.replaceState(
+      null,
+      '',
+      window.location.pathname + window.location.search,
+    );
+  },
   parameters: {
     layout: 'fullscreen',
     // These are interaction tests: each story clicks through the phase machine
@@ -145,6 +156,127 @@ export const InspectCard: Story = {
       { timeout: 4000 },
     );
     await expect(canvasElement.querySelector('.launch')!).toBeVisible();
+  },
+};
+
+/**
+ * The browser back button walks back through the flow instead of leaving the
+ * site: each screen pushes a hash entry (`#/packs`, `#/pack/<id>`), so popping
+ * history rewinds reveal → pack select → attract screen.
+ */
+export const BackButtonNavigation: Story = {
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    await userEvent.click(canvasElement.querySelector('.title')!);
+
+    const pack = await waitFor(
+      () => {
+        const el = canvas.getByText(toolkit.name);
+        expect(el).toBeVisible();
+        return el;
+      },
+      { timeout: 5000 },
+    );
+    await expect(window.location.hash).toBe('#/packs');
+
+    await userEvent.click(pack);
+    await waitFor(
+      () => expect(canvas.getByText(toolkit.name.toUpperCase())).toBeVisible(),
+      { timeout: 6000 },
+    );
+    await expect(window.location.hash).toBe(`#/pack/${toolkit.id}`);
+
+    // Back out of the reveal: the packs are selectable again.
+    window.history.back();
+    await waitFor(() => expect(canvas.getByText(toolkit.name)).toBeVisible(), {
+      timeout: 5000,
+    });
+    await expect(window.location.hash).toBe('#/packs');
+
+    // ...and once more lands on the attract screen, still inside the app.
+    window.history.back();
+    await waitFor(
+      () => expect(canvasElement.querySelector('.title')).toBeVisible(),
+      { timeout: 5000 },
+    );
+    await expect(window.location.hash).toBe('');
+  },
+};
+
+/**
+ * The inspect modal is a screen of its own, so back closes it and leaves you on
+ * the revealed cards rather than dropping the whole pack.
+ */
+export const BackClosesInspect: Story = {
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    await userEvent.click(canvasElement.querySelector('.title')!);
+
+    const pack = await waitFor(
+      () => {
+        const el = canvas.getByText(toolkit.name);
+        expect(el).toBeVisible();
+        return el;
+      },
+      { timeout: 5000 },
+    );
+    await userEvent.click(pack);
+
+    const card = await waitFor(
+      () => {
+        const el = canvasElement.querySelector<HTMLElement>(
+          '.cards .card.revealed',
+        );
+        expect(el).not.toBeNull();
+        return el!;
+      },
+      { timeout: 8000 },
+    );
+    await userEvent.click(card);
+    await waitFor(
+      () => expect(canvasElement.querySelector('.inspect')).toHaveClass('on'),
+      { timeout: 4000 },
+    );
+    await expect(window.location.hash).toBe(
+      `#/pack/${toolkit.id}/${card.dataset.app}`,
+    );
+
+    window.history.back();
+    await waitFor(
+      () =>
+        expect(canvasElement.querySelector('.inspect')).not.toHaveClass('on'),
+      { timeout: 4000 },
+    );
+    await expect(window.location.hash).toBe(`#/pack/${toolkit.id}`);
+    await expect(canvas.getByText(toolkit.name.toUpperCase())).toBeVisible();
+  },
+};
+
+/**
+ * Loading a pack URL directly (a reload, or a shared link) rebuilds that screen
+ * straight away with the cards already face-up — no rip animation to sit
+ * through. There's no arcade entry behind a cold landing like this, so the
+ * in-app back button steps up to pack select in place instead of bouncing the
+ * visitor off the site.
+ */
+export const DeepLinkToPack: Story = {
+  beforeEach: () => {
+    window.location.hash = `#/pack/${arcadePack.id}`;
+  },
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    await waitFor(
+      () =>
+        expect(canvas.getByText(arcadePack.name.toUpperCase())).toBeVisible(),
+      { timeout: 5000 },
+    );
+    await expect(
+      canvasElement.querySelectorAll('.cards .card.revealed').length,
+    ).toBeGreaterThan(0);
+
+    await userEvent.click(canvasElement.querySelector('.back')!);
+    await waitFor(
+      () => expect(canvas.getByText(arcadePack.name)).toBeVisible(),
+      { timeout: 5000 },
+    );
+    await expect(window.location.hash).toBe('#/packs');
   },
 };
 

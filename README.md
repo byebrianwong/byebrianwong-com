@@ -28,6 +28,10 @@ npm run start
 - `lib/apps.ts` — the apps + packs data. **Swap these for real apps.** Set each app's
   `pack` (`toolkit` | `arcade`) and `rarity` (`common` | `rare` | `holo` | `legendary`);
   point `link` at the real app URL so the LAUNCH button works.
+- `lib/arcadeRoute.ts` — the screen ↔ URL hash mapping (`#/packs`, `#/pack/<pack>`,
+  `#/pack/<pack>/<app>`) that gives each screen its own history entry, so browser
+  back walks the flow instead of leaving the site — and a pack or card URL can be
+  reloaded or shared
 - `lib/sound.ts` — synthesized arcade SFX (Web Audio, no asset files)
 - `prototypes/` — the original standalone HTML explorations (reference only; not part of the build)
 

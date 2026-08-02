@@ -8,11 +8,37 @@ import {
   type AppCard,
   type Pack,
 } from "@/lib/apps";
+import {
+  TITLE_ROUTE,
+  parentRoute,
+  parseHash,
+  routeToHash,
+  sameRoute,
+  type ArcadeRoute,
+} from "@/lib/arcadeRoute";
 import { Sound } from "@/lib/sound";
 import { CardFace } from "./Card";
 import { CoinInsert } from "./CoinInsert";
 
 type Phase = "title" | "select" | "opening" | "reveal";
+
+/**
+ * Key our history entries are stamped under in `history.state`. The screen
+ * itself lives in the URL hash; what we keep here is how deep into the arcade
+ * an entry sits. That tells the in-app back control whether there's an entry of
+ * ours behind it to pop (normal browsing) or whether this is where the tab
+ * landed — a reload or a shared link, where `history.back()` would leave the
+ * site and we step up in place instead.
+ */
+const HISTORY_KEY = "arcade";
+
+type ArcadeHistoryState = { depth: number };
+
+const readDepth = (): number => {
+  const state = window.history.state as Record<string, unknown> | null;
+  const entry = state?.[HISTORY_KEY] as ArcadeHistoryState | undefined;
+  return typeof entry?.depth === "number" ? entry.depth : 0;
+};
 
 const cssVars = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 
@@ -69,6 +95,117 @@ export default function Arcade() {
 
   useEffect(() => () => clearTimers(), [clearTimers]);
 
+  /* ---------------- history / back-button wiring ----------------
+     `routeRef` mirrors the entry currently in the address bar. Forward moves
+     animate themselves and then record where they landed; back/forward moves
+     come in through `popstate` and are applied instantly by `showRoute`. */
+  const routeRef = useRef<ArcadeRoute>(TITLE_ROUTE);
+  const depthRef = useRef(0);
+
+  /** Point the URL at `route`, either as a new history entry or in place. */
+  const writeHistory = useCallback((route: ArcadeRoute, mode: "push" | "replace") => {
+    // Re-entering the screen we're already on (a double-tap, say) shouldn't
+    // stack an identical entry that back would have to chew through.
+    const push = mode === "push" && !sameRoute(route, routeRef.current);
+    const depth = push ? depthRef.current + 1 : depthRef.current;
+    const { pathname, search } = window.location;
+    const url = pathname + search + routeToHash(route);
+    const state = { ...window.history.state, [HISTORY_KEY]: { depth } };
+
+    if (push) window.history.pushState(state, "", url);
+    else window.history.replaceState(state, "", url);
+
+    routeRef.current = route;
+    depthRef.current = depth;
+  }, []);
+
+  /** Rebuild the arcade at `route` with no transition — how back/forward and a
+      reload land on a screen, versus the animated path a click takes. */
+  const showRoute = useCallback(
+    (route: ArcadeRoute) => {
+      clearTimers();
+      setCoin(false);
+      setPopId(null);
+      setBanner(null);
+      // The rip is mid-flight if we left during "opening"; wind it back.
+      openerRef.current?.classList.remove("rip");
+      pkRef.current?.classList.remove("shake");
+
+      if (route.view === "title" || route.view === "select") {
+        setPhase(route.view);
+        setPack(null);
+        setRevealApps([]);
+        setRevealed(new Set());
+        setInspectApp(null);
+        return;
+      }
+
+      const p = PACKS.find((x) => x.id === route.packId);
+      if (!p) return;
+      const apps = APPS.filter((a) => a.pack === p.id);
+
+      setPack(p);
+      setRevealApps(apps);
+      // Cards you've already torn open stay face-up — replaying the deal every
+      // time you press back would be a slog.
+      setRevealed(new Set(apps.map((a) => a.id)));
+      setSeen((prev) => {
+        const next = new Set(prev);
+        apps.forEach((a) => next.add(a.id));
+        return next;
+      });
+      // Landing here cold (reload / shared link) still counts as a pack opened.
+      setPacksOpened((n) => Math.max(n, 1));
+      setPhase("reveal");
+      setInspectApp(
+        route.view === "inspect" ? apps.find((a) => a.id === route.appId) ?? null : null
+      );
+    },
+    [clearTimers]
+  );
+
+  /** Record a screen the user just navigated into (it animates itself). */
+  const goTo = useCallback(
+    (route: ArcadeRoute) => writeHistory(route, "push"),
+    [writeHistory]
+  );
+
+  /** In-app back controls defer to real history so the two stay in step. */
+  const goBack = useCallback(() => {
+    if (depthRef.current > 0) {
+      window.history.back();
+      return;
+    }
+    // Nothing of ours behind this entry (deep link or reload): step up a level
+    // in place rather than throwing the visitor off the site.
+    const up = parentRoute(routeRef.current);
+    writeHistory(up, "replace");
+    showRoute(up);
+  }, [showRoute, writeHistory]);
+
+  /* Adopt whatever the URL says on mount — a shared link, a reload, or coming
+     back from /about — and stamp this entry so `goBack` knows where it stands. */
+  useEffect(() => {
+    const route = parseHash(window.location.hash);
+    depthRef.current = readDepth();
+    routeRef.current = route;
+    writeHistory(route, "replace");
+    if (route.view !== "title") showRoute(route);
+  }, [showRoute, writeHistory]);
+
+  useEffect(() => {
+    const onPop = () => {
+      // The hash is the source of truth: it's validated by `parseHash`, so a
+      // hand-edited or stale URL can't push us into an impossible screen.
+      const route = parseHash(window.location.hash);
+      depthRef.current = readDepth();
+      routeRef.current = route;
+      showRoute(route);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [showRoute]);
+
   /* title -> (coin insert) -> select */
   const start = useCallback(() => {
     setCoin((already) => {
@@ -81,18 +218,20 @@ export default function Arcade() {
         window.setTimeout(() => {
           setPhase("select");
           setCoin(false);
+          goTo({ view: "select" });
         }, reduce ? 140 : 1000)
       );
       return true;
     });
-  }, []);
+  }, [goTo]);
 
+  /* Closing the inspect modal is a back step: it has its own history entry, so
+     Esc and the backdrop pop it rather than editing state behind history's back. */
   const closeInspect = useCallback(() => {
-    setInspectApp((cur) => {
-      if (cur) Sound.blip();
-      return null;
-    });
-  }, []);
+    if (!inspectApp) return;
+    Sound.blip();
+    goBack();
+  }, [inspectApp, goBack]);
 
   /* keyboard: any key starts; Esc closes inspect */
   useEffect(() => {
@@ -118,6 +257,8 @@ export default function Arcade() {
   const openPack = (p: Pack) => {
     clearTimers();
     Sound.select();
+    // Claim the entry up front so back during the ~1s rip returns to the packs.
+    goTo({ view: "reveal", packId: p.id });
     setPack(p);
     setPhase("opening");
     const opener = openerRef.current;
@@ -194,16 +335,14 @@ export default function Arcade() {
   };
 
   const back = () => {
-    clearTimers();
     Sound.blip();
-    setPhase("select");
-    setRevealApps([]);
-    setRevealed(new Set());
+    goBack();
   };
 
   const openInspect = (app: AppCard) => {
     Sound.select();
     setInspectApp(app);
+    goTo({ view: "inspect", packId: app.pack, appId: app.id });
   };
 
   /* ---- tilt handlers ---- */
