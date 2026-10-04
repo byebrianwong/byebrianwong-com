@@ -74,15 +74,23 @@ function tear({ total, count, hpStart, hpEnd, peak, jitter = 0.01, bodyFreq, bod
 }
 
 export const Sound = {
-  coin() {
-    // rising chime while the coin falls...
-    tone({ freq: 988, dur: 0.07, vol: 0.2 });
-    tone({ freq: 1319, dur: 0.12, vol: 0.2, delay: 0.07 });
-    // ...then a clunk + "ka-ching" timed to it sliding into the slot (~0.86s)
-    tone({ freq: 200, slideTo: 70, type: "sawtooth", dur: 0.12, vol: 0.16, delay: 0.8 });
-    noise({ dur: 0.05, vol: 0.12, hp: 2200, delay: 0.8 });
-    tone({ freq: 1568, dur: 0.09, vol: 0.16, delay: 0.86 });
-    tone({ freq: 2093, dur: 0.16, vol: 0.16, delay: 0.94 });
+  /** The pack gathering energy before it tears: a rising buzz with a quickening tick. */
+  charge() {
+    tone({ freq: 110, slideTo: 440, type: "sawtooth", dur: 0.75, vol: 0.06 });
+    tone({ freq: 220, slideTo: 880, type: "triangle", dur: 0.75, vol: 0.05 });
+    [0, 0.22, 0.38, 0.5, 0.59, 0.66, 0.71].forEach((d, i) => tone({ freq: 500 + i * 90, dur: 0.035, vol: 0.06, delay: d }));
+  },
+  /** Cards spraying out of the open pack: a bright sweep and a sparkle run. */
+  burst() {
+    noise({ dur: 0.35, vol: 0.12, hp: 1800 });
+    tone({ freq: 300, slideTo: 1200, type: "triangle", dur: 0.3, vol: 0.1 });
+    [1046, 1318, 1568, 2093].forEach((f, i) => tone({ freq: f, type: "triangle", dur: 0.08, vol: 0.06, delay: 0.12 + i * 0.05 }));
+  },
+  /** A camera shutter: two mechanical clicks a beat apart. */
+  shutter() {
+    noise({ dur: 0.03, vol: 0.22, hp: 2500 });
+    tone({ freq: 1800, slideTo: 900, type: "square", dur: 0.025, vol: 0.05 });
+    noise({ dur: 0.045, vol: 0.16, hp: 1400, delay: 0.07 });
   },
   rip() { tear({ total: 0.5, count: 26, hpStart: 3600, hpEnd: 1500, peak: 0.14, jitter: 0.008, bodyFreq: 300, bodyVol: 0.04 }); },
   whoosh() { tone({ freq: 180, slideTo: 620, type: "sawtooth", dur: 0.16, vol: 0.12 }); },

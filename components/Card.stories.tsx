@@ -5,8 +5,12 @@ import { Card } from './Card';
 
 // Pick a representative app per rarity, so these stories survive app-data
 // churn: the specific apps (ids/names) change often, but the four rarities are
-// fixed by the `Rarity` type and always present in the set.
-const sample = (rarity: AppCard['rarity']) => APPS.find((a) => a.rarity === rarity)!;
+// fixed by the `Rarity` type and always present in the set. Cards with footage
+// are left out here and get their own story, so video never lands in these
+// baselines.
+const sample = (rarity: AppCard['rarity']) =>
+  APPS.find((a) => a.rarity === rarity && !a.live)!;
+const liveApp = APPS.find((a) => a.live)!;
 
 /**
  * A single holographic trading card, rendered in isolation. Unlike the `Arcade`
@@ -54,6 +58,27 @@ export const Legendary: Story = {
   },
 };
 
+/**
+ * A card with real footage in its art window (Window Seat's gameplay), a
+ * viewfinder on top, and the app's own move and numbers in place of the stat
+ * bars. Held on its poster frame so the snapshot is stable.
+ */
+export const LiveFootage: Story = {
+  args: { app: liveApp, playing: false },
+  play: async ({ canvas, canvasElement, args }) => {
+    await expect(canvas.getByText(args.app.name)).toBeVisible();
+    const video = canvasElement.querySelector<HTMLVideoElement>('.live video')!;
+    await expect(video.getAttribute('poster')).toBe(args.app.live!.poster);
+    await expect(canvas.getByText(args.app.move!.name)).toBeVisible();
+  },
+};
+
+/** The same card with its footage running: it takes a photo at each scored moment. */
+export const LiveFootagePlaying: Story = {
+  args: { app: liveApp, playing: true },
+  parameters: { chromatic: { disableSnapshot: true } },
+};
+
 /** The foil back shown before a card is flipped face-up. */
 export const FaceDown: Story = {
   args: { app: sample('legendary'), revealed: false },
@@ -78,7 +103,7 @@ export const Gallery: Story = {
       }}
     >
       {APPS.map((app) => (
-        <Card key={app.id} app={app} />
+        <Card key={app.id} app={app} playing={false} />
       ))}
     </div>
   ),
@@ -137,7 +162,6 @@ export const Playground: StoryObj<PlaygroundArgs> = {
       revealed={a.revealed}
       app={{
         id: 'playground',
-        pack: 'toolkit',
         name: a.name,
         tagline: a.tagline,
         type: a.type,

@@ -10,64 +10,53 @@
 // route, and every hash starts with `/` so it can never collide with an element
 // id and trigger the browser's scroll-to-anchor behaviour.
 
-import { APPS, PACKS, type PackId } from "./apps";
+import { APPS } from "./apps";
 
 export type ArcadeRoute =
-  | { view: "title" }
-  | { view: "select" }
-  | { view: "reveal"; packId: PackId }
-  | { view: "inspect"; packId: PackId; appId: string };
+  | { view: "pack" }
+  | { view: "cards" }
+  | { view: "inspect"; appId: string };
 
-export const TITLE_ROUTE: ArcadeRoute = { view: "title" };
+export const PACK_ROUTE: ArcadeRoute = { view: "pack" };
 
-/** The hash a route is written to the URL as ("" for the attract screen). */
+/** The hash a route is written to the URL as ("" for the sealed pack). */
 export function routeToHash(route: ArcadeRoute): string {
   switch (route.view) {
-    case "title":
+    case "pack":
       return "";
-    case "select":
-      return "#/packs";
-    case "reveal":
-      return `#/pack/${route.packId}`;
+    case "cards":
+      return "#/cards";
     case "inspect":
-      return `#/pack/${route.packId}/${route.appId}`;
+      return `#/card/${route.appId}`;
   }
 }
 
+const appRoute = (id: string | undefined): ArcadeRoute =>
+  APPS.some((a) => a.id === id) ? { view: "inspect", appId: id! } : { view: "cards" };
+
 /**
- * Read a route back out of a hash. Anything unrecognised — a stale link, a
- * renamed app, a hand-typed URL — falls back to the nearest screen that does
- * exist (ultimately the title), so a bad hash can never strand the arcade in a
- * phase with no data behind it.
+ * Read a route back out of a hash. Anything unrecognised (a stale link, a
+ * renamed app, a hand-typed URL) falls back to the nearest screen that does
+ * exist, so a bad hash can never strand the arcade on a screen with no data.
+ *
+ * Links from the old two-pack layout still work: `#/packs` is the pack,
+ * `#/pack/<pack>` is the cards, and `#/pack/<pack>/<app>` is that card.
  */
 export function parseHash(hash: string): ArcadeRoute {
   const parts = hash.replace(/^#\/?/, "").split("/").filter(Boolean);
 
-  if (parts.length === 0) return TITLE_ROUTE;
-  if (parts[0] === "packs" && parts.length === 1) return { view: "select" };
-  if (parts[0] !== "pack") return TITLE_ROUTE;
-
-  const pack = PACKS.find((p) => p.id === parts[1]);
-  if (!pack) return TITLE_ROUTE;
-  if (parts.length === 2) return { view: "reveal", packId: pack.id };
-  if (parts.length > 3) return TITLE_ROUTE;
-
-  const app = APPS.find((a) => a.id === parts[2] && a.pack === pack.id);
-  return app
-    ? { view: "inspect", packId: pack.id, appId: app.id }
-    : { view: "reveal", packId: pack.id };
+  if (parts.length === 0) return PACK_ROUTE;
+  if (parts[0] === "cards" && parts.length === 1) return { view: "cards" };
+  if (parts[0] === "card" && parts.length === 2) return appRoute(parts[1]);
+  if (parts[0] === "packs" && parts.length === 1) return PACK_ROUTE;
+  if (parts[0] === "pack" && parts.length === 2) return { view: "cards" };
+  if (parts[0] === "pack" && parts.length === 3) return appRoute(parts[2]);
+  return PACK_ROUTE;
 }
 
 /** The screen one level up — where an in-app back control should land. */
 export function parentRoute(route: ArcadeRoute): ArcadeRoute {
-  switch (route.view) {
-    case "inspect":
-      return { view: "reveal", packId: route.packId };
-    case "reveal":
-      return { view: "select" };
-    default:
-      return TITLE_ROUTE;
-  }
+  return route.view === "inspect" ? { view: "cards" } : PACK_ROUTE;
 }
 
 export const sameRoute = (a: ArcadeRoute, b: ArcadeRoute) =>
