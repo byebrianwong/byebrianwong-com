@@ -1,0 +1,76 @@
+{
+  "card": {
+    "video": "/cards/edm-atlas/card.mp4",
+    "poster": "/cards/edm-atlas/card.jpg",
+    "duration": 16.26,
+    "marks": [
+      {
+        "t": 0.29,
+        "label": "31 GENRES",
+        "sub": "8 families"
+      },
+      {
+        "t": 1.89,
+        "label": "DUBSTEP",
+        "sub": "140 BPM · Bass music"
+      },
+      {
+        "t": 5.96,
+        "label": "TRANCE",
+        "sub": "138 BPM · Trance"
+      },
+      {
+        "t": 9.94,
+        "label": "AMAPIANO",
+        "sub": "112 BPM · Global"
+      },
+      {
+        "t": 14.06,
+        "label": "31 GENRES",
+        "sub": "8 families"
+      }
+    ]
+  },
+  "reel": {
+    "video": "/cards/edm-atlas/reel.mp4",
+    "poster": "/cards/edm-atlas/reel.jpg",
+    "duration": 24.3,
+    "marks": [
+      {
+        "t": 0.28,
+        "label": "Enter the atlas",
+        "sub": "Every star is a genre, grouped into eight families."
+      },
+      {
+        "t": 4.73,
+        "label": "Orbit",
+        "sub": "Drag to turn the whole map in 3D."
+      },
+      {
+        "t": 7.61,
+        "label": "Fly to a genre",
+        "sub": "Search or click a star: the camera flies there and the panel explains it."
+      },
+      {
+        "t": 12.13,
+        "label": "Read it",
+        "sub": "What makes it unique, its signature sound, and its history."
+      },
+      {
+        "t": 15.08,
+        "label": "Hear the building blocks",
+        "sub": "A synthesized loop of the genre’s rhythm, bass and signature effect."
+      },
+      {
+        "t": 18.19,
+        "label": "Follow a connection",
+        "sub": "Related genres link into constellations; jump along them."
+      },
+      {
+        "t": 21.7,
+        "label": "Back out",
+        "sub": "Zoom back to the whole atlas."
+      }
+    ]
+  }
+}

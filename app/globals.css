@@ -317,6 +317,21 @@ h1 .pop { color: #ffd23f; }
   80% { opacity: 1; transform: rotate(4deg) scale(1); }
   100% { opacity: 0; transform: translate(10%, 10%) rotate(10deg) scale(.8); }
 }
+/* tags style: a browser bar with the app's address, and a label for each step */
+.live-tags video { top: 13px; height: calc(100% - 13px); }
+.live .lt-bar { position: absolute; left: 0; right: 0; top: 0; height: 13px; z-index: 2; display: flex; align-items: center; gap: 3px;
+  padding: 0 6px; background: #1d2238; border-bottom: 1px solid rgba(255,255,255,.12); }
+.live .lt-bar i { width: 5px; height: 5px; border-radius: 50%; background: #ff5f57; }
+.live .lt-bar i:nth-child(2) { background: #febc2e; }
+.live .lt-bar i:nth-child(3) { background: #28c840; }
+.live .lt-bar span { flex: 1; margin: 0 14px 0 6px; height: 8px; border-radius: 3px; background: rgba(255,255,255,.1);
+  font-size: 6px; line-height: 8px; color: rgba(255,255,255,.7); text-align: center; letter-spacing: .02em; overflow: hidden; white-space: nowrap; }
+.live .lt-tag { position: absolute; left: 7px; bottom: 7px; z-index: 3; max-width: 78%; padding: 4px 7px 4px 8px; border-radius: 5px;
+  background: rgba(11,16,32,.82); border-left: 3px solid var(--accent); box-shadow: 0 3px 8px rgba(0,0,0,.45);
+  animation: ltTag .45s cubic-bezier(.2,.9,.3,1.3) both; }
+.live .lt-tag b { display: block; font-family: "Bungee"; font-weight: 400; font-size: 9px; line-height: 1.1; color: #fff; }
+.live .lt-tag em { display: block; font-style: normal; font-size: 8px; font-weight: 600; line-height: 1.2; color: #c7d2fe; }
+@keyframes ltTag { from { opacity: 0; transform: translateY(8px) scale(.85); } }
 /* the move + facts box that replaces the generic stat bars on app-specific cards */
 .movebox { padding: 8px 10px 9px; }
 .movebox .mv { margin: 0 0 7px; font-size: 10.5px; font-weight: 600; line-height: 1.25; color: #4b3f6b; }
@@ -501,6 +516,38 @@ h1 .pop { color: #ffd23f; }
   border-radius: 10px; border: 3px solid #0b1020; box-shadow: 0 5px 0 rgba(0,0,0,.4); text-decoration: none; transition: transform .1s ease, box-shadow .1s ease; }
 .sc-side .launch:hover { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(0,0,0,.4); }
 
+/* reel showcase: the card's art window grows into a browser window playing a walkthrough of the app */
+.rs-window { position: relative; width: min(100%, calc((100vh - 140px) * 1.6)); justify-self: center; border-radius: 14px; overflow: hidden;
+  background: #0b0d18; border: 5px solid #0b1020;
+  box-shadow: 0 0 0 3px var(--accent), 0 0 44px -6px color-mix(in srgb, var(--accent) 60%, transparent), 0 30px 60px -20px rgba(0,0,0,.8); }
+.rs-bar { display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 14px; background: #1d2238; border-bottom: 1px solid rgba(255,255,255,.1); }
+.rs-bar i { width: 11px; height: 11px; border-radius: 50%; background: #ff5f57; }
+.rs-bar i:nth-child(2) { background: #febc2e; }
+.rs-bar i:nth-child(3) { background: #28c840; }
+.rs-url { flex: 1; max-width: 420px; margin: 0 auto; height: 22px; border-radius: 6px; background: rgba(255,255,255,.08);
+  font-size: 12px; font-weight: 600; line-height: 22px; text-align: center; color: rgba(255,255,255,.75); }
+.rs-screen { position: relative; aspect-ratio: 16/10; }
+.rs-screen video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
+.rs-caption { position: absolute; left: 14px; bottom: 18px; max-width: min(70%, 520px); padding: 9px 13px 10px 14px; border-radius: 8px;
+  background: rgba(11,16,32,.86); border-left: 4px solid var(--accent); color: #dbe3ff; font-size: 13px; font-weight: 600; line-height: 1.35;
+  box-shadow: 0 6px 18px rgba(0,0,0,.45); pointer-events: none; animation: ltTag .5s cubic-bezier(.2,.9,.3,1.2) both; }
+.rs-caption b { display: block; font-family: "Bungee"; font-weight: 400; font-size: 14px; color: #fff; margin-bottom: 2px; }
+.rs-paused { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-family: "Bungee"; font-size: 14px; color: #fff;
+  background: rgba(11,16,32,.8); padding: 8px 14px; border-radius: 8px; pointer-events: none; }
+.rs-chapters { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.rs-chapters button { width: 100%; display: flex; gap: 10px; align-items: flex-start; text-align: left; cursor: pointer; font: inherit;
+  color: #aab4e8; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 8px 10px;
+  transition: background .15s ease, border-color .15s ease, color .15s ease; }
+.rs-chapters button:hover { background: rgba(255,255,255,.08); }
+.rs-chapters button.on { color: #fff; border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, rgba(11,16,32,.6)); }
+.rs-chapters .n { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-family: "Bungee"; font-size: 11px;
+  color: #0b1020; background: rgba(255,255,255,.6); }
+.rs-chapters button.on .n { background: var(--accent); }
+.rs-chapters .tx { font-size: 12.5px; line-height: 1.35; font-weight: 500; }
+.rs-chapters .tx b { display: block; font-size: 13px; font-weight: 700; color: inherit; }
+@media (max-width: 980px) { .rs-window { width: 100%; } }
+@media (max-width: 640px) { .rs-caption { font-size: 11px; left: 8px; bottom: 12px; max-width: 86%; } .rs-caption b { font-size: 12px; } .rs-bar { height: 26px; } }
+
 @media (max-width: 980px) {
   .sc-layout { grid-template-columns: 1fr; }
   .sc-vf { --vfw: min(100%, calc((100svh - 84px) * 4 / 3)); }
@@ -548,5 +595,5 @@ h1 .pop { color: #ffd23f; }
 @media (prefers-reduced-motion: reduce) {
   .float, .ring, .r-legendary .front::before, .about-avatar,
   .bp-float, .bp-shadow, .bs-rays, .bs-glow, .bs-hint, .bp-ring, .bp-orb i, .bp-gloss, .bp-sticker, .bp-fan .m3,
-  .sc-reticle, .sc-shutter { animation: none !important; }
+  .sc-reticle, .sc-shutter, .lt-tag, .rs-caption { animation: none !important; }
 }

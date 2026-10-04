@@ -1,18 +1,28 @@
 import { SUBJECT_COUNT, WINDOW_SEAT_CARD } from "./showcases/windowSeat";
+import { fromRecording, type WebFootage } from "./footage";
+import edmAtlasFootage from "./footage/edm-atlas.json";
+import trivealFootage from "./footage/triveal.json";
+
+const edmAtlas = fromRecording(edmAtlasFootage as WebFootage, "edmatlas.byebrianwong.com");
+const triveal = fromRecording(trivealFootage as WebFootage, "triveal.vercel.app");
 
 // App data for the arcade. Every app is one card in the single booster pack.
 // Set each app's `rarity` to control its foil treatment and fanfare.
 
 export type Rarity = "common" | "rare" | "holo" | "legendary";
 
-/** A scored moment in a card's footage: the card's shutter fires here. */
+/**
+ * A point in a card's footage where something happens. On a viewfinder card
+ * the shutter fires here and `stars` rates the photo; on a tags card the
+ * label changes to `name`, with `from` underneath.
+ */
 export interface LiveMoment {
   t: number;
   name: string;
-  from: string;
-  pose: string;
-  stars: number;
-  total: number;
+  from?: string;
+  pose?: string;
+  stars?: number;
+  total?: number;
 }
 
 /** Real footage of the app, played in the card's art window. */
@@ -20,9 +30,26 @@ export interface LiveMedia {
   video: string;
   poster: string;
   duration: number;
-  /** Shots on a roll of film; the card counts down from here as it snaps. */
-  film: number;
+  /**
+   * What's drawn over the footage. "viewfinder" is a camera (for a photo
+   * game): corner brackets, a film counter, and a polaroid at each moment.
+   * "tags" is a browser bar with the app's address and a label for each step.
+   */
+  style?: "viewfinder" | "tags";
+  /** Shots on a roll of film; a viewfinder card counts down from here as it snaps. */
+  film?: number;
+  /** The address shown in a tags card's browser bar. */
+  url?: string;
   moments: LiveMoment[];
+}
+
+/** A longer walkthrough of the real app for the full-screen view, in chapters. */
+export interface AppReel {
+  video: string;
+  poster: string;
+  duration: number;
+  url: string;
+  chapters: { t: number; title: string; text: string }[];
 }
 
 export interface AppCard {
@@ -44,8 +71,10 @@ export interface AppCard {
   facts?: { label: string; value: string }[];
   /** What you actually do in the app, written like a trading-card move. */
   move?: { name: string; text: string };
-  /** A full-screen view built for this app, opened in place of the standard detail panel. */
-  showcase?: "window-seat";
+  /** A walkthrough of the real app, shown full screen by the "reel" showcase. */
+  reel?: AppReel;
+  /** A full-screen view opened in place of the standard detail panel. */
+  showcase?: "window-seat" | "reel";
 }
 
 export const APPS: AppCard[] = [
@@ -82,8 +111,50 @@ export const APPS: AppCard[] = [
   { id: "second-guess", name: "Second Guess", tagline: "Be #2 to become #1", type: "Party", icon: "🥈", year: 2026, accent: "#8b5cf6", hp: 110, rarity: "holo", link: "https://secondguess.byebrianwong.com", stats: { users: "85K", rating: "4.9", platform: "Web" }, blurb: "A real-time party game where being popular loses. Match the crowd's second-favorite answer — take silver to win gold." },
   { id: "piano-note", name: "Piano Note", tagline: "3D pitch-training game", type: "Music", icon: "🎹", year: 2026, accent: "#06b6d4", hp: 90, rarity: "rare", link: "https://github.com/byebrianwong/piano-note", stats: { users: "40K", rating: "4.7", platform: "Web" }, blurb: "A 3D interactive piano keyboard that trains your ear — play, listen, and sharpen your pitch one note at a time." },
   { id: "dont-say-it", name: "Don't Say It", tagline: "Taboo-style word game", type: "Party", icon: "🤐", year: 2026, accent: "#f97316", hp: 75, rarity: "common", link: "https://github.com/byebrianwong/dont-say-it-word-game", stats: { users: "28K", rating: "4.7", platform: "Web" }, blurb: "Get your team to guess the word — without saying any of the forbidden ones. A fast, frantic take on the classic party word game." },
-  { id: "edm-atlas", name: "EDM Atlas", tagline: "Map the world of EDM", type: "Music", icon: "🗺️", year: 2026, accent: "#d946ef", hp: 95, rarity: "rare", link: "https://edmatlas.byebrianwong.com", stats: { users: "—", rating: "—", platform: "Web" }, blurb: "Explore electronic dance music as an interactive star map — genres, subgenres, and the artists that connect them, charted across the galaxy." },
-  { id: "triveal", name: "Triveal", tagline: "Countdown-clue trivia", type: "Trivia", icon: "🧠", year: 2026, accent: "#14b8a6", hp: 95, rarity: "rare", link: "https://triveal.vercel.app", stats: { users: "—", rating: "—", platform: "Web" }, blurb: "A daily trivia game of counting-down clues — guess early for glory, or hold out for the giveaway. The longer you wait, the less it's worth." },
+  {
+    id: "edm-atlas",
+    name: "EDM Atlas",
+    tagline: "Map the world of EDM",
+    type: "Music",
+    icon: "🗺️",
+    year: 2026,
+    accent: "#d946ef",
+    hp: 95,
+    rarity: "rare",
+    link: "https://edmatlas.byebrianwong.com",
+    stats: { users: "—", rating: "—", platform: "Web" },
+    blurb: "Explore electronic dance music as a 3D star map. Every genre is a star, related genres link into constellations, and each one comes with what makes it sound that way, real tracks to hear, and a synthesized demo of its building blocks.",
+    ...edmAtlas,
+    facts: [
+      { label: "GENRES", value: "31" },
+      { label: "FAMILIES", value: "8" },
+      { label: "SYNTHS", value: "31" },
+    ],
+    move: { name: "FLY TO", text: "Pick a genre and the camera flies to its star." },
+    showcase: "reel",
+  },
+  {
+    id: "triveal",
+    name: "Triveal",
+    tagline: "Countdown-clue trivia",
+    type: "Trivia",
+    icon: "🧠",
+    year: 2026,
+    accent: "#14b8a6",
+    hp: 95,
+    rarity: "rare",
+    link: "https://triveal.vercel.app",
+    stats: { users: "—", rating: "—", platform: "Web" },
+    blurb: "A daily trivia game of counting-down clues — guess early for glory, or hold out for the giveaway. The longer you wait, the less it's worth.",
+    ...triveal,
+    facts: [
+      { label: "CLUES", value: "4" },
+      { label: "TOP SCORE", value: "10" },
+      { label: "MODES", value: "2" },
+    ],
+    move: { name: "GUESS EARLY", text: "Fewer clues, more points. Wrong guesses cost one." },
+    showcase: "reel",
+  },
   { id: "saturday-boring-cereal", name: "Saturday Boring Cereal", tagline: "Healthy cereal, ranked", type: "Reviews", icon: "🥣", year: 2026, accent: "#eab308", hp: 70, rarity: "common", link: "https://saturdayboringcereal.byebrianwong.com", stats: { users: "—", rating: "—", platform: "Web" }, blurb: "One reviewer walks the healthy-cereal aisle so you don't have to — every box tasted, weighed, and priced in cold, hard macros. The only aisle where boring is a brag." },
 ];
 
