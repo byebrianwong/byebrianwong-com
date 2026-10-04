@@ -40,7 +40,7 @@ const stars = (n: number) => (
 );
 
 /**
- * The full-screen view for the Window Seat card: the card's art window opens
+ * The full-screen view for the Wonder Lens card: the card's art window opens
  * up into the game's viewfinder.
  *
  * It plays a reel of real gameplay from one of the three worlds and works like
@@ -236,7 +236,7 @@ export default function WindowSeatShowcase({
 
           <div className="sc-top">
             <div className="sc-where">
-              <b>{reel?.title ?? "Window Seat"}</b>
+              <b>{reel?.title ?? app.name}</b>
               <span key={caption} className="sc-caption">
                 {caption}
               </span>

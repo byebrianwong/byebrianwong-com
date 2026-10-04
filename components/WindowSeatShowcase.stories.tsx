@@ -6,7 +6,7 @@ import WindowSeatShowcase from './WindowSeatShowcase';
 const app = APPS.find((a) => a.showcase === 'window-seat')!;
 
 /**
- * Window Seat's full-screen view: the card's art window opened up into the
+ * Wonder Lens's full-screen view: the card's art window opened up into the
  * game's viewfinder. It plays real gameplay from public/cards/window-seat/,
  * names whoever is under the reticle, and scores each photo you take with the
  * points the game gave that frame. Video makes it a poor visual baseline, so

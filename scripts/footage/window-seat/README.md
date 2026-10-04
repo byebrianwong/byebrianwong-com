@@ -1,6 +1,6 @@
-# Window Seat footage
+# Wonder Lens footage
 
-These scripts record the gameplay shown on the Window Seat card and in its
+These scripts record the gameplay shown on the Wonder Lens card and in its
 full-screen view. They run the real game
 ([byebrianwong/wonder-lens](https://github.com/byebrianwong/wonder-lens)) in a
 headless Chromium, so the footage is the game itself, not a mock-up.
