@@ -1,8 +1,14 @@
 # byebrianwong.com — The App Arcade
 
-A booster-pack arcade portfolio. Pick a pack, rip it open, and the app cards flip
-out — rarest last, with holographic foil, an "on fire" hover, arcade sound, and a
-click-to-inspect detail view.
+A booster-pack arcade portfolio. The site opens on one sealed 3D booster pack.
+Click it and it tears open, and every app card flies out into a grid, flipping
+face-up as it lands. Cards have holographic foil, an "on fire" hover, arcade
+sound, and a click-to-inspect view.
+
+Some cards show real footage of the app instead of an icon. Window Seat's card
+plays recorded gameplay under a camera viewfinder, and its full-screen view is
+the game's viewfinder: you can switch worlds and take photos that are scored
+the way the game scores them.
 
 Built with **Next.js (App Router) + React + TypeScript**. The whole experience is one
 client component; there's no backend.
@@ -24,14 +30,22 @@ npm run start
 ## Where things live
 
 - `app/` — Next.js App Router (`layout.tsx`, `page.tsx`, `globals.css`, `icon.svg`)
-- `components/Arcade.tsx` — the full arcade experience (title → pack select → rip → reveal → inspect)
-- `lib/apps.ts` — the apps + packs data. **Swap these for real apps.** Set each app's
-  `pack` (`toolkit` | `arcade`) and `rarity` (`common` | `rare` | `holo` | `legendary`);
-  point `link` at the real app URL so the LAUNCH button works.
-- `lib/arcadeRoute.ts` — the screen ↔ URL hash mapping (`#/packs`, `#/pack/<pack>`,
-  `#/pack/<pack>/<app>`) that gives each screen its own history entry, so browser
-  back walks the flow instead of leaving the site — and a pack or card URL can be
-  reloaded or shared
+- `components/Arcade.tsx` — the whole flow: sealed pack → opening → card grid → inspect
+- `components/Booster.tsx` — the 3D booster pack and its opening animation
+- `components/Card.tsx` — the card face; `components/LiveArt.tsx` plays footage in the art window
+- `components/WindowSeatShowcase.tsx` — Window Seat's full-screen viewfinder
+- `lib/apps.ts` — the app data. Set each app's `rarity` (`common` | `rare` | `holo` |
+  `legendary`) and point `link` at the real app URL so the LAUNCH button works.
+  Optional fields make a card specific to its app: `live` (footage for the art
+  window), `move` and `facts` (shown in place of the generic stat bars), and
+  `showcase` (a full-screen view of its own).
+- `lib/showcases/windowSeat.ts` — Window Seat's card loop and score-timeline types
+- `public/cards/<app>/` — each app's footage
+- `scripts/footage/window-seat/` — how Window Seat's footage was recorded (see its README)
+- `lib/arcadeRoute.ts` — the screen ↔ URL hash mapping (`#/cards`, `#/card/<app>`)
+  that gives each screen its own history entry, so browser back walks the flow
+  instead of leaving the site, and a card URL can be reloaded or shared. Links
+  from the old two-pack layout (`#/pack/...`) still resolve.
 - `lib/sound.ts` — synthesized arcade SFX (Web Audio, no asset files)
 - `prototypes/` — the original standalone HTML explorations (reference only; not part of the build)
 

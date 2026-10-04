@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { RARITY, ratingPct, usersPct, type AppCard } from "@/lib/apps";
+import { LiveArt } from "./LiveArt";
 
 const cssVars = (vars: Record<string, string | number>) => vars as CSSProperties;
 
@@ -18,8 +19,15 @@ export function Segs({ pct }: { pct: number }) {
   );
 }
 
-/** The front-face contents of a card: name, HP, art, type/rarity badges, stats. */
-export function CardFace({ app }: { app: AppCard }) {
+/**
+ * The front-face contents of a card: name, HP, art, type/rarity badges, stats.
+ *
+ * Apps with footage (`app.live`) get a bigger art window that plays it, and
+ * apps with a `move` or `facts` show those in place of the generic stat bars,
+ * so the card says something true about that particular app. `playing` lets
+ * the footage run; it should be on only while the card is face-up.
+ */
+export function CardFace({ app, playing = true }: { app: AppCard; playing?: boolean }) {
   const r = RARITY[app.rarity];
   return (
     <>
@@ -29,11 +37,17 @@ export function CardFace({ app }: { app: AppCard }) {
           <small>HP</small> {app.hp}
         </span>
       </div>
-      <div className="art">
-        <div className="layer l-glow" />
-        <span className="ring" />
-        <div className="layer l-icon">{app.icon}</div>
-        <div className="halftone" />
+      <div className={"art" + (app.live ? " is-live" : "")}>
+        {app.live ? (
+          <LiveArt media={app.live} playing={playing} />
+        ) : (
+          <>
+            <div className="layer l-glow" />
+            <span className="ring" />
+            <div className="layer l-icon">{app.icon}</div>
+            <div className="halftone" />
+          </>
+        )}
         <div className="shine" />
         <div className="glare" />
       </div>
@@ -44,17 +58,37 @@ export function CardFace({ app }: { app: AppCard }) {
         </span>
       </div>
       <span className="fire">🔥 ON FIRE</span>
-      <div className="statbox">
-        <p className="tgl">{app.tagline}</p>
-        <div className="statrow">
-          <span className="lbl">REACH</span>
-          <Segs pct={usersPct(app.stats.users)} />
+      {app.move || app.facts ? (
+        <div className="statbox movebox">
+          {app.move && (
+            <p className="mv">
+              <b>{app.move.name}</b> {app.move.text}
+            </p>
+          )}
+          {app.facts && (
+            <div className="facts">
+              {app.facts.map((f) => (
+                <span key={f.label}>
+                  <b>{f.value}</b>
+                  {f.label}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="statrow">
-          <span className="lbl">★ {app.stats.rating}</span>
-          <Segs pct={ratingPct(app.stats.rating)} />
+      ) : (
+        <div className="statbox">
+          <p className="tgl">{app.tagline}</p>
+          <div className="statrow">
+            <span className="lbl">REACH</span>
+            <Segs pct={usersPct(app.stats.users)} />
+          </div>
+          <div className="statrow">
+            <span className="lbl">★ {app.stats.rating}</span>
+            <Segs pct={ratingPct(app.stats.rating)} />
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
@@ -71,15 +105,18 @@ export function Card({
   app,
   revealed = true,
   seen = true,
+  playing = revealed,
 }: {
   app: AppCard;
   /** Face-up (`true`) or showing the foil back (`false`). */
   revealed?: boolean;
   /** Whether stat segments use the accent color (the "collected" treatment). */
   seen?: boolean;
+  /** Whether a live card's footage runs. Off, it shows the poster frame. */
+  playing?: boolean;
 }) {
   const cls =
-    `card r-${app.rarity}` + (revealed ? " revealed" : "") + (seen ? " seen" : "");
+    `card r-${app.rarity}` + (app.live ? " has-live" : "") + (revealed ? " revealed" : "") + (seen ? " seen" : "");
   return (
     <div
       className={cls}
@@ -90,7 +127,7 @@ export function Card({
         <div className="tilt">
           <div className="flipper">
             <div className="face front">
-              <CardFace app={app} />
+              <CardFace app={app} playing={playing} />
             </div>
             <div className="face back-face">
               <span className="bhalf" />

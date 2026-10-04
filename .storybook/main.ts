@@ -11,6 +11,8 @@ const config: StorybookConfig = {
     "@storybook/addon-docs",
     "@storybook/addon-mcp"
   ],
-  "framework": "@storybook/nextjs-vite"
+  "framework": "@storybook/nextjs-vite",
+  // The card footage and score timelines live in public/ (e.g. /cards/window-seat/).
+  "staticDirs": ["../public"]
 };
 export default config;

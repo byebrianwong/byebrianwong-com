@@ -1,29 +1,43 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, waitFor } from 'storybook/test';
 import Arcade from './Arcade';
-import { PACKS } from '@/lib/apps';
+import { APPS } from '@/lib/apps';
 import { Sound } from '@/lib/sound';
 
-// Read pack names from data rather than hard-coding copy, so a future rename in
-// lib/apps.ts (or the title) doesn't break these flow tests. The flow is driven
-// structurally (click the `.title` section, wait for `.card.revealed`, etc.).
-const toolkit = PACKS.find((p) => p.id === 'toolkit')!;
-const arcadePack = PACKS.find((p) => p.id === 'arcade')!;
+// Pick apps from data rather than hard-coding names, so a future change to
+// lib/apps.ts doesn't break these flow tests. A "plain" app opens the standard
+// inspect modal; a showcase app opens its own full-screen view.
+const plainApp = APPS.find((a) => !a.showcase)!;
+const showcaseApp = APPS.find((a) => a.showcase)!;
+
+const rip = (canvasElement: HTMLElement) =>
+  canvasElement.querySelector<HTMLButtonElement>('.booster')!;
+
+/** Wait until every card has landed face-up. */
+const allRevealed = (canvasElement: HTMLElement) =>
+  waitFor(
+    () =>
+      expect(canvasElement.querySelectorAll('.cards .card.revealed')).toHaveLength(
+        APPS.length,
+      ),
+    { timeout: 8000 },
+  );
 
 /**
- * `Arcade` is the whole portfolio experience: a single client component that
- * drives a phase machine — title → pack select → rip animation → card reveal —
- * plus an inspect modal. It takes no props, so each story is a different point
- * in that flow reached through a `play` interaction. All styling comes from the
- * app's global stylesheet (imported once in `.storybook/preview.tsx`).
+ * `Arcade` is the whole portfolio experience: one client component with three
+ * screens. The sealed booster pack (the landing), the opening animation, and
+ * the grid of every app card, plus an inspect view per card. It takes no props,
+ * so each story is a different point in that flow reached through a `play`
+ * interaction. All styling comes from the app's global stylesheet (imported
+ * once in `.storybook/preview.tsx`).
  */
 const meta = {
   component: Arcade,
   tags: ['ai-generated'],
-  // Every screen now writes a hash to the URL so the browser back button walks
-  // the flow. Stories share one document, so a previous story's hash would boot
-  // the next one straight into a reveal — reset the URL (and the depth marker
-  // the component stamps into `history.state`) before each play.
+  // Every screen writes a hash to the URL so the browser back button walks the
+  // flow. Stories share one document, so a previous story's hash would boot the
+  // next one straight into the cards. Reset the URL (and the depth marker the
+  // component stamps into `history.state`) before each play.
   beforeEach: () => {
     window.history.replaceState(
       null,
@@ -33,11 +47,11 @@ const meta = {
   },
   parameters: {
     layout: 'fullscreen',
-    // These are interaction tests: each story clicks through the phase machine
-    // and ends in an animated / non-deterministic state (particle bursts, the
-    // sound singleton, etc.). They run as vitest browser tests, but they make
-    // poor visual baselines, so keep the whole file out of Chromatic — the
-    // deterministic Card stories are what we track for visual history.
+    // These are interaction tests: each story clicks through the flow and ends
+    // in an animated, non-deterministic state (particle bursts, video, the
+    // sound singleton). They run as vitest browser tests but make poor visual
+    // baselines, so the whole file stays out of Chromatic. The Card and
+    // Booster stories are the tracked visual history.
     chromatic: { disableSnapshot: true },
   },
 } satisfies Meta<typeof Arcade>;
@@ -45,238 +59,149 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/**
- * The "insert coin" attract screen the arcade boots into. The packs already
- * exist in the DOM but the `title` phase hides the whole `.select` section via
- * global CSS, so their names aren't visible yet.
- */
-export const Title: Story = {
+/** The landing: one sealed booster pack and nothing else. The cards are in the DOM but hidden. */
+export const SealedPack: Story = {
   play: async ({ canvas, canvasElement }) => {
-    await expect(canvasElement.querySelector('.title')!).toBeVisible();
-    // Phase-gating proof: the pack name is in the DOM but hidden on the title.
-    await expect(canvas.getByText(toolkit.name)).not.toBeVisible();
-  },
-};
-
-/**
- * Clicking the title section advances past the attract screen (after a ~900ms
- * coin-insert animation) to pack select, revealing both booster packs.
- */
-export const PackSelect: Story = {
-  play: async ({ canvas, canvasElement, userEvent }) => {
-    await userEvent.click(canvasElement.querySelector('.title')!);
-    await waitFor(() => expect(canvas.getByText(toolkit.name)).toBeVisible(), {
-      timeout: 5000,
-    });
-    await expect(canvas.getByText(arcadePack.name)).toBeVisible();
-  },
-};
-
-/**
- * Tearing open the Utility Belt pack: clicking it runs the rip animation — the
- * foil lid tears off and face-down cards fan up out of the torn opening — then
- * the reveal stage shows the pack title and deals the cards in, flipping them
- * face-up. Kept data-agnostic (wait for *any* card to flip) so it survives
- * app-data changes. This is an interaction test only; the file stays out of
- * Chromatic, so it asserts the end state (cards revealed) rather than a frame
- * of the time-based tear animation.
- */
-export const OpenToolkitPack: Story = {
-  play: async ({ canvas, canvasElement, userEvent }) => {
-    await userEvent.click(canvasElement.querySelector('.title')!);
-
-    // Wait for the pack to be selectable, then tear it open.
-    const pack = await waitFor(
-      () => {
-        const el = canvas.getByText(toolkit.name);
-        expect(el).toBeVisible();
-        return el;
-      },
-      { timeout: 5000 },
-    );
-    await userEvent.click(pack);
-
-    // The torn-pack opener (lid + the face-down cards that fan out) is wired up.
     await expect(
-      canvasElement.querySelectorAll('.opener .pk-cards .pcard'),
-    ).toHaveLength(3);
-
-    // The opener animation runs (~1s) before the reveal stage becomes visible.
-    await waitFor(
-      () => expect(canvas.getByText(toolkit.name.toUpperCase())).toBeVisible(),
-      { timeout: 6000 },
-    );
-
-    // Cards deal in and flip face-up one at a time — wait for at least one.
-    await waitFor(
-      () =>
-        expect(
-          canvasElement.querySelector('.cards .card.revealed'),
-        ).not.toBeNull(),
-      { timeout: 8000 },
-    );
+      canvas.getByRole('button', { name: /rip open the booster pack/i }),
+    ).toBeVisible();
+    await expect(canvasElement.querySelector('.reveal')!).not.toBeVisible();
   },
 };
 
 /**
- * Clicking a revealed card opens the inspect modal, which surfaces the app's
- * blurb, stat rows, and a launch CTA. Proves the full open → reveal → inspect
- * interaction, including that the click is ignored until the card has flipped.
+ * Clicking the pack plays the opening (charge, tear, burst) and every card
+ * flies out of it into the grid, flipping face-up as it lands. All apps come
+ * out of the one pack.
+ */
+export const RipThePack: Story = {
+  play: async ({ canvasElement, userEvent }) => {
+    await userEvent.click(rip(canvasElement));
+    await expect(window.location.hash).toBe('#/cards');
+    await allRevealed(canvasElement);
+    // Once the deal is over the pack is gone.
+    await waitFor(() => expect(canvasElement.querySelector('.booster')).toBeNull(), {
+      timeout: 4000,
+    });
+  },
+};
+
+/**
+ * Clicking a card without a showcase opens the standard inspect modal, with the
+ * app's blurb, stat rows and launch button.
  */
 export const InspectCard: Story = {
-  play: async ({ canvas, canvasElement, userEvent }) => {
-    await userEvent.click(canvasElement.querySelector('.title')!);
-
-    const pack = await waitFor(
-      () => {
-        const el = canvas.getByText(toolkit.name);
-        expect(el).toBeVisible();
-        return el;
-      },
-      { timeout: 5000 },
+  play: async ({ canvasElement, userEvent }) => {
+    await userEvent.click(rip(canvasElement));
+    await allRevealed(canvasElement);
+    await userEvent.click(
+      canvasElement.querySelector<HTMLElement>(`.cards .card[data-app="${plainApp.id}"]`)!,
     );
-    await userEvent.click(pack);
-
-    // Wait for any card to flip face-up, then click it (data-agnostic).
-    const card = await waitFor(
-      () => {
-        const el = canvasElement.querySelector<HTMLElement>(
-          '.cards .card.revealed',
-        );
-        expect(el).not.toBeNull();
-        return el!;
-      },
-      { timeout: 8000 },
-    );
-    await userEvent.click(card);
-
-    // The inspect modal opens (gets the `on` class) with the app's launch CTA.
     await waitFor(
       () => expect(canvasElement.querySelector('.inspect')).toHaveClass('on'),
       { timeout: 4000 },
     );
-    await expect(canvasElement.querySelector('.launch')!).toBeVisible();
+    await expect(canvasElement.querySelector('.inspect .launch')!).toBeVisible();
+    await expect(window.location.hash).toBe(`#/card/${plainApp.id}`);
+  },
+};
+
+/**
+ * A card with a showcase opens its own full-screen view instead: for Window
+ * Seat, the game's viewfinder with a working shutter.
+ */
+export const OpenShowcase: Story = {
+  beforeEach: () => {
+    window.location.hash = '#/cards';
+  },
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    await allRevealed(canvasElement);
+    await userEvent.click(
+      canvasElement.querySelector<HTMLElement>(`.cards .card[data-app="${showcaseApp.id}"]`)!,
+    );
+    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible(), { timeout: 4000 });
+    await expect(canvas.getByRole('button', { name: 'Take a photo' })).toBeVisible();
+    await expect(window.location.hash).toBe(`#/card/${showcaseApp.id}`);
+    // The standard modal stays closed.
+    await expect(canvasElement.querySelector('.inspect')).not.toHaveClass('on');
   },
 };
 
 /**
  * The browser back button walks back through the flow instead of leaving the
- * site: each screen pushes a hash entry (`#/packs`, `#/pack/<id>`), so popping
- * history rewinds reveal → pack select → attract screen.
+ * site: back from the cards reseals the pack.
  */
 export const BackButtonNavigation: Story = {
-  play: async ({ canvas, canvasElement, userEvent }) => {
-    await userEvent.click(canvasElement.querySelector('.title')!);
+  play: async ({ canvasElement, userEvent }) => {
+    await userEvent.click(rip(canvasElement));
+    await allRevealed(canvasElement);
+    await expect(window.location.hash).toBe('#/cards');
 
-    const pack = await waitFor(
-      () => {
-        const el = canvas.getByText(toolkit.name);
-        expect(el).toBeVisible();
-        return el;
-      },
-      { timeout: 5000 },
-    );
-    await expect(window.location.hash).toBe('#/packs');
-
-    await userEvent.click(pack);
-    await waitFor(
-      () => expect(canvas.getByText(toolkit.name.toUpperCase())).toBeVisible(),
-      { timeout: 6000 },
-    );
-    await expect(window.location.hash).toBe(`#/pack/${toolkit.id}`);
-
-    // Back out of the reveal: the packs are selectable again.
     window.history.back();
-    await waitFor(() => expect(canvas.getByText(toolkit.name)).toBeVisible(), {
-      timeout: 5000,
-    });
-    await expect(window.location.hash).toBe('#/packs');
-
-    // ...and once more lands on the attract screen, still inside the app.
-    window.history.back();
-    await waitFor(
-      () => expect(canvasElement.querySelector('.title')).toBeVisible(),
-      { timeout: 5000 },
-    );
+    await waitFor(() => expect(rip(canvasElement)).toBeVisible(), { timeout: 5000 });
     await expect(window.location.hash).toBe('');
   },
 };
 
 /**
- * The inspect modal is a screen of its own, so back closes it and leaves you on
- * the revealed cards rather than dropping the whole pack.
+ * The inspect view is a screen of its own, so back closes it and leaves you on
+ * the cards rather than resealing the pack.
  */
 export const BackClosesInspect: Story = {
-  play: async ({ canvas, canvasElement, userEvent }) => {
-    await userEvent.click(canvasElement.querySelector('.title')!);
-
-    const pack = await waitFor(
-      () => {
-        const el = canvas.getByText(toolkit.name);
-        expect(el).toBeVisible();
-        return el;
-      },
-      { timeout: 5000 },
+  play: async ({ canvasElement, userEvent }) => {
+    await userEvent.click(rip(canvasElement));
+    await allRevealed(canvasElement);
+    await userEvent.click(
+      canvasElement.querySelector<HTMLElement>(`.cards .card[data-app="${plainApp.id}"]`)!,
     );
-    await userEvent.click(pack);
-
-    const card = await waitFor(
-      () => {
-        const el = canvasElement.querySelector<HTMLElement>(
-          '.cards .card.revealed',
-        );
-        expect(el).not.toBeNull();
-        return el!;
-      },
-      { timeout: 8000 },
-    );
-    await userEvent.click(card);
     await waitFor(
       () => expect(canvasElement.querySelector('.inspect')).toHaveClass('on'),
       { timeout: 4000 },
     );
-    await expect(window.location.hash).toBe(
-      `#/pack/${toolkit.id}/${card.dataset.app}`,
-    );
 
     window.history.back();
     await waitFor(
-      () =>
-        expect(canvasElement.querySelector('.inspect')).not.toHaveClass('on'),
+      () => expect(canvasElement.querySelector('.inspect')).not.toHaveClass('on'),
       { timeout: 4000 },
     );
-    await expect(window.location.hash).toBe(`#/pack/${toolkit.id}`);
-    await expect(canvas.getByText(toolkit.name.toUpperCase())).toBeVisible();
+    await expect(window.location.hash).toBe('#/cards');
   },
 };
 
 /**
- * Loading a pack URL directly (a reload, or a shared link) rebuilds that screen
- * straight away with the cards already face-up — no rip animation to sit
- * through. There's no arcade entry behind a cold landing like this, so the
- * in-app back button steps up to pack select in place instead of bouncing the
- * visitor off the site.
+ * Loading the cards URL directly (a reload, or a shared link) shows every card
+ * face-up straight away, with no opening to sit through. There's no arcade
+ * entry behind a cold landing like this, so the reseal button steps back to
+ * the pack in place instead of bouncing the visitor off the site.
  */
-export const DeepLinkToPack: Story = {
+export const DeepLinkToCards: Story = {
   beforeEach: () => {
-    window.location.hash = `#/pack/${arcadePack.id}`;
+    window.location.hash = '#/cards';
   },
-  play: async ({ canvas, canvasElement, userEvent }) => {
-    await waitFor(
-      () =>
-        expect(canvas.getByText(arcadePack.name.toUpperCase())).toBeVisible(),
-      { timeout: 5000 },
-    );
-    await expect(
-      canvasElement.querySelectorAll('.cards .card.revealed').length,
-    ).toBeGreaterThan(0);
+  play: async ({ canvasElement, userEvent }) => {
+    await allRevealed(canvasElement);
+    await expect(canvasElement.querySelector('.booster')).toBeNull();
 
     await userEvent.click(canvasElement.querySelector('.back')!);
+    await waitFor(() => expect(rip(canvasElement)).toBeVisible(), { timeout: 5000 });
+    await expect(window.location.hash).toBe('');
+  },
+};
+
+/**
+ * Links from the old two-pack layout still land somewhere sensible: a card link
+ * like `#/pack/<pack>/<app>` opens that card.
+ */
+export const OldPackLink: Story = {
+  beforeEach: () => {
+    window.location.hash = `#/pack/arcade/${plainApp.id}`;
+  },
+  play: async ({ canvasElement }) => {
     await waitFor(
-      () => expect(canvas.getByText(arcadePack.name)).toBeVisible(),
-      { timeout: 5000 },
+      () => expect(canvasElement.querySelector('.inspect')).toHaveClass('on'),
+      { timeout: 4000 },
     );
-    await expect(window.location.hash).toBe('#/packs');
+    await expect(window.location.hash).toBe(`#/card/${plainApp.id}`);
   },
 };
 

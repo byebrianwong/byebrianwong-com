@@ -1,15 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { APPS, RARITY, type AppCard } from "@/lib/apps";
 import {
-  APPS,
-  PACKS,
-  RARITY,
-  type AppCard,
-  type Pack,
-} from "@/lib/apps";
-import {
-  TITLE_ROUTE,
+  PACK_ROUTE,
   parentRoute,
   parseHash,
   routeToHash,
@@ -17,10 +11,17 @@ import {
   type ArcadeRoute,
 } from "@/lib/arcadeRoute";
 import { Sound } from "@/lib/sound";
+import { Booster, type BoosterHandle } from "./Booster";
 import { CardFace } from "./Card";
-import { CoinInsert } from "./CoinInsert";
+import WindowSeatShowcase from "./WindowSeatShowcase";
 
-type Phase = "title" | "select" | "opening" | "reveal";
+/**
+ * pack:    the sealed booster, the only thing on screen
+ * ripping: the opening plays; once the strip is off, the cards fly out of the
+ *          pack into the grid while the empty wrapper falls away
+ * cards:   the grid of every app card
+ */
+type Phase = "pack" | "ripping" | "cards";
 
 /**
  * Key our history entries are stamped under in `history.state`. The screen
@@ -42,12 +43,17 @@ const readDepth = (): number => {
 
 const cssVars = (vars: Record<string, string | number>) => vars as React.CSSProperties;
 
+const reducedMotion = () =>
+  typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
 const RAR_COLOR: Record<string, string> = {
   common: "#94a3b8",
   rare: "#e2e8f0",
   holo: "#67e8f9",
   legendary: "#fde047",
 };
+
+const ALL_IDS = () => new Set(APPS.map((a) => a.id));
 
 /* imperative confetti/star burst from the center of `host` */
 function burst(host: HTMLElement, colors: string[], n = 22) {
@@ -67,30 +73,41 @@ function burst(host: HTMLElement, colors: string[], n = 22) {
   }
 }
 
+/** A burst of particles at a fixed point on screen. */
+function burstAt(x: number, y: number, colors: string[], n: number) {
+  const fx = document.createElement("div");
+  fx.style.cssText = `position:fixed;left:${x}px;top:${y}px;z-index:95;pointer-events:none;`;
+  document.body.appendChild(fx);
+  burst(fx, colors, n);
+  setTimeout(() => fx.remove(), 1300);
+}
+
 /* ---------------- main component ---------------- */
 
 export default function Arcade() {
-  const [phase, setPhase] = useState<Phase>("title");
-  const [coin, setCoin] = useState(false);
-  const [pack, setPack] = useState<Pack | null>(null);
-  const [revealApps, setRevealApps] = useState<AppCard[]>([]);
+  const [phase, setPhase] = useState<Phase>("pack");
+  const [dealing, setDealing] = useState(false);
+  const [packKey, setPackKey] = useState(0);
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
-  const [seen, setSeen] = useState<Set<string>>(new Set());
   const [popId, setPopId] = useState<string | null>(null);
-  const [packsOpened, setPacksOpened] = useState(0);
   const [inspectApp, setInspectApp] = useState<AppCard | null>(null);
   const [soundOn, setSoundOn] = useState(true);
   const [showGyro, setShowGyro] = useState(false);
   const [banner, setBanner] = useState<{ variant: "leg" | "holo"; text: string } | null>(null);
   const [bannerN, setBannerN] = useState(0);
 
-  const openerRef = useRef<HTMLDivElement>(null);
-  const pkRef = useRef<HTMLDivElement>(null);
+  const boosterRef = useRef<BoosterHandle>(null);
   const timeouts = useRef<number[]>([]);
+  const flights = useRef<Animation[]>([]);
+  const packCenter = useRef({ x: 0, y: 0 });
+  const ripId = useRef(0);
+  const origin = useRef<DOMRect | null>(null);
 
   const clearTimers = useCallback(() => {
     timeouts.current.forEach((t) => clearTimeout(t));
     timeouts.current = [];
+    flights.current.forEach((a) => a.cancel());
+    flights.current = [];
   }, []);
 
   useEffect(() => () => clearTimers(), [clearTimers]);
@@ -99,7 +116,7 @@ export default function Arcade() {
      `routeRef` mirrors the entry currently in the address bar. Forward moves
      animate themselves and then record where they landed; back/forward moves
      come in through `popstate` and are applied instantly by `showRoute`. */
-  const routeRef = useRef<ArcadeRoute>(TITLE_ROUTE);
+  const routeRef = useRef<ArcadeRoute>(PACK_ROUTE);
   const depthRef = useRef(0);
 
   /** Point the URL at `route`, either as a new history entry or in place. */
@@ -124,42 +141,25 @@ export default function Arcade() {
   const showRoute = useCallback(
     (route: ArcadeRoute) => {
       clearTimers();
-      setCoin(false);
+      ripId.current += 1; // an opening still in flight is abandoned
       setPopId(null);
       setBanner(null);
-      // The rip is mid-flight if we left during "opening"; wind it back.
-      openerRef.current?.classList.remove("rip");
-      pkRef.current?.classList.remove("shake");
+      setDealing(false);
 
-      if (route.view === "title" || route.view === "select") {
-        setPhase(route.view);
-        setPack(null);
-        setRevealApps([]);
+      if (route.view === "pack") {
+        setPhase("pack");
+        setPackKey((k) => k + 1); // a fresh, sealed pack
         setRevealed(new Set());
         setInspectApp(null);
         return;
       }
 
-      const p = PACKS.find((x) => x.id === route.packId);
-      if (!p) return;
-      const apps = APPS.filter((a) => a.pack === p.id);
-
-      setPack(p);
-      setRevealApps(apps);
       // Cards you've already torn open stay face-up — replaying the deal every
       // time you press back would be a slog.
-      setRevealed(new Set(apps.map((a) => a.id)));
-      setSeen((prev) => {
-        const next = new Set(prev);
-        apps.forEach((a) => next.add(a.id));
-        return next;
-      });
-      // Landing here cold (reload / shared link) still counts as a pack opened.
-      setPacksOpened((n) => Math.max(n, 1));
-      setPhase("reveal");
-      setInspectApp(
-        route.view === "inspect" ? apps.find((a) => a.id === route.appId) ?? null : null
-      );
+      setPhase("cards");
+      setRevealed(ALL_IDS());
+      if (route.view === "inspect") origin.current = null;
+      setInspectApp(route.view === "inspect" ? APPS.find((a) => a.id === route.appId) ?? null : null);
     },
     [clearTimers]
   );
@@ -190,7 +190,7 @@ export default function Arcade() {
     depthRef.current = readDepth();
     routeRef.current = route;
     writeHistory(route, "replace");
-    if (route.view !== "title") showRoute(route);
+    if (route.view !== "pack") showRoute(route);
   }, [showRoute, writeHistory]);
 
   useEffect(() => {
@@ -206,26 +206,97 @@ export default function Arcade() {
     return () => window.removeEventListener("popstate", onPop);
   }, [showRoute]);
 
-  /* title -> (coin insert) -> select */
-  const start = useCallback(() => {
-    setCoin((already) => {
-      if (already) return true; // animation already running
-      Sound.coin();
-      const reduce =
-        typeof window !== "undefined" &&
-        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const fanfare = useCallback((app: AppCard) => {
+    const isLeg = app.rarity === "legendary";
+    setPopId(app.id);
+    timeouts.current.push(window.setTimeout(() => setPopId(null), 600));
+    const el = document.querySelector<HTMLElement>(`.cards .card[data-app="${app.id}"]`);
+    if (el) {
+      const r = el.getBoundingClientRect();
+      burstAt(
+        r.left + r.width / 2,
+        r.top + r.height / 2,
+        isLeg ? ["#fde047", "#fbbf24", "#fff", "#f59e0b"] : ["#67e8f9", "#a78bfa", "#f472b6", "#fff"],
+        34
+      );
+    }
+    setBanner({ variant: isLeg ? "leg" : "holo", text: isLeg ? "★ LEGENDARY! ★" : "✦ HOLO ✦" });
+    setBannerN((n) => n + 1);
+    Sound.rare();
+  }, []);
+
+  /* ---- rip the pack ---- */
+  const rip = () => {
+    if (phase !== "pack") return;
+    clearTimers();
+    Sound.select();
+    // Claim the entry up front so back during the opening returns to the pack.
+    goTo({ view: "cards" });
+    window.scrollTo(0, 0);
+
+    if (reducedMotion()) {
+      setRevealed(ALL_IDS());
+      setPhase("cards");
+      return;
+    }
+
+    setPhase("ripping");
+    const id = ++ripId.current;
+    boosterRef.current?.rip((center) => {
+      if (id !== ripId.current) return;
+      packCenter.current = center;
+      burstAt(center.x, center.y, ["#ffd23f", "#f472b6", "#67e8f9", "#fff", "#a78bfa"], 30);
+      setDealing(true);
+    });
+  };
+
+  /* ---- deal: every card flies out of the pack to its slot, flipping as it lands ----
+     Runs before paint, so no card is ever seen sitting in its slot first. */
+  useLayoutEffect(() => {
+    if (!dealing) return;
+    const { x, y } = packCenter.current;
+    const cards = Array.from(document.querySelectorAll<HTMLElement>(".cards > .card"));
+    const firstBig = APPS.find((a) => RARITY[a.rarity].rank >= 2);
+    let last = 0;
+    cards.forEach((el, i) => {
+      const r = el.getBoundingClientRect();
+      const dx = x - (r.left + r.width / 2);
+      const dy = y - (r.top + r.height / 2);
+      const spin = (i % 2 ? 1 : -1) * (14 + ((i * 37) % 22));
+      const fan = (i - (cards.length - 1) / 2) * 14; // spread them sideways as they rise
+      const delay = 40 + i * 55;
+      flights.current.push(
+        el.animate(
+          [
+            { transform: `translate(${dx}px, ${dy}px) scale(.3)`, opacity: 0, easing: "cubic-bezier(.2,.8,.4,1)" },
+            { transform: `translate(${dx + fan * 0.4}px, ${dy - 70}px) scale(.42) rotate(${spin * 0.2}deg)`, opacity: 1, offset: 0.14, easing: "cubic-bezier(.2,.8,.4,1)" },
+            { transform: `translate(${dx * 0.9 + fan}px, ${dy * 0.9 - 200}px) scale(.62) rotate(${spin * 0.5}deg)`, opacity: 1, offset: 0.34, easing: "cubic-bezier(.35,0,.15,1)" },
+            { transform: "none", opacity: 1 },
+          ],
+          { duration: 1050, delay, fill: "backwards" }
+        )
+      );
+      const app = APPS.find((a) => a.id === el.dataset.app);
+      const landAt = delay + 800;
+      last = Math.max(last, landAt);
       timeouts.current.push(
         window.setTimeout(() => {
-          setPhase("select");
-          setCoin(false);
-          goTo({ view: "select" });
-        }, reduce ? 140 : 1000)
+          if (!app) return;
+          setRevealed((prev) => new Set(prev).add(app.id));
+          Sound.flip();
+          if (app.id === firstBig?.id) fanfare(app);
+        }, landAt)
       );
-      return true;
     });
-  }, [goTo]);
+    timeouts.current.push(
+      window.setTimeout(() => {
+        setDealing(false);
+        setPhase("cards");
+      }, last + 500)
+    );
+  }, [dealing, fanfare]);
 
-  /* Closing the inspect modal is a back step: it has its own history entry, so
+  /* Closing the inspect view is a back step: it has its own history entry, so
      Esc and the backdrop pop it rather than editing state behind history's back. */
   const closeInspect = useCallback(() => {
     if (!inspectApp) return;
@@ -233,18 +304,13 @@ export default function Arcade() {
     goBack();
   }, [inspectApp, goBack]);
 
-  /* keyboard: any key starts; Esc closes inspect */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (phase === "title") {
-        start();
-        return;
-      }
       if (e.key === "Escape") closeInspect();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [phase, start, closeInspect]);
+  }, [closeInspect]);
 
   /* gyro availability (touch + sensor) */
   useEffect(() => {
@@ -253,96 +319,16 @@ export default function Arcade() {
     }
   }, []);
 
-  /* ---- open a pack ---- */
-  const openPack = (p: Pack) => {
-    clearTimers();
-    Sound.select();
-    // Claim the entry up front so back during the ~1s rip returns to the packs.
-    goTo({ view: "reveal", packId: p.id });
-    setPack(p);
-    setPhase("opening");
-    const opener = openerRef.current;
-    const pk = pkRef.current;
-    if (opener) {
-      opener.style.setProperty("--pa", p.a);
-      opener.style.setProperty("--pb", p.b);
-      opener.classList.remove("rip");
-    }
-    if (pk) {
-      const emoji = pk.querySelector(".pemoji");
-      if (emoji) emoji.textContent = p.icon;
-      void pk.offsetWidth; // reflow so the shake re-triggers
-      pk.classList.add("shake");
-    }
-    timeouts.current.push(
-      window.setTimeout(() => {
-        pk?.classList.remove("shake");
-        opener?.classList.add("rip");
-        Sound.rip();
-        if (opener) burst(opener, ["#ffd23f", p.a, p.b, "#fff", "#ef4444"], 26);
-      }, 260)
-    );
-    timeouts.current.push(window.setTimeout(() => revealStart(p), 1120));
-  };
-
-  /* ---- reveal sequence (deal-in, then flip left-to-right in source order) ---- */
-  const revealStart = (p: Pack) => {
-    const apps = APPS.filter((a) => a.pack === p.id);
-    setRevealApps(apps);
-    setRevealed(new Set());
-    setPhase("reveal");
-    setPacksOpened((n) => n + 1);
-    openerRef.current?.classList.remove("rip");
-
-    // celebrate the rarest card in the pack (holo+) whenever it flips
-    const rarest = apps.reduce((a, b) => (RARITY[b.rarity].rank > RARITY[a.rarity].rank ? b : a), apps[0]);
-
-    apps.forEach((app, idx) => {
-      timeouts.current.push(
-        window.setTimeout(() => {
-          setRevealed((prev) => new Set(prev).add(app.id));
-          Sound.flip();
-          setSeen((prev) => new Set(prev).add(app.id));
-          if (app.id === rarest.id && RARITY[app.rarity].rank >= 2) fanfare(app);
-        }, 700 + idx * 340)
-      );
-    });
-  };
-
-  const fanfare = (app: AppCard) => {
-    const isLeg = app.rarity === "legendary";
-    setPopId(app.id);
-    timeouts.current.push(window.setTimeout(() => setPopId(null), 600));
-
-    const el = document.querySelector<HTMLElement>(`.card[data-app="${app.id}"]`);
-    if (el) {
-      const rect = el.getBoundingClientRect();
-      const fx = document.createElement("div");
-      fx.style.cssText = `position:fixed;left:${rect.left + rect.width / 2}px;top:${
-        rect.top + rect.height / 2
-      }px;z-index:95;pointer-events:none;`;
-      document.body.appendChild(fx);
-      burst(
-        fx,
-        isLeg ? ["#fde047", "#fbbf24", "#fff", "#f59e0b"] : ["#67e8f9", "#a78bfa", "#f472b6", "#fff"],
-        34
-      );
-      setTimeout(() => fx.remove(), 1300);
-    }
-    setBanner({ variant: isLeg ? "leg" : "holo", text: isLeg ? "★ LEGENDARY! ★" : "✦ HOLO ✦" });
-    setBannerN((n) => n + 1);
-    Sound.rare();
-  };
-
-  const back = () => {
+  const reseal = () => {
     Sound.blip();
     goBack();
   };
 
-  const openInspect = (app: AppCard) => {
+  const openInspect = (app: AppCard, cardEl: HTMLElement) => {
     Sound.select();
+    origin.current = cardEl.querySelector(".art")?.getBoundingClientRect() ?? null;
     setInspectApp(app);
-    goTo({ view: "inspect", packId: app.pack, appId: app.id });
+    goTo({ view: "inspect", appId: app.id });
   };
 
   /* ---- tilt handlers ---- */
@@ -411,24 +397,6 @@ export default function Arcade() {
     card.style.setProperty("--glare", "0");
   };
 
-  /* pack foil tilt */
-  const tiltPack = (e: React.PointerEvent<HTMLButtonElement>) => {
-    const foil = e.currentTarget.querySelector<HTMLElement>(".foil");
-    if (!foil) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    foil.style.setProperty("--mx", px.toFixed(3));
-    foil.style.setProperty("--my", py.toFixed(3));
-    foil.style.setProperty("--ry", `${px * 14}deg`);
-    foil.style.setProperty("--rx", `${-py * 14}deg`);
-  };
-  const leavePack = (e: React.PointerEvent<HTMLButtonElement>) => {
-    const foil = e.currentTarget.querySelector<HTMLElement>(".foil");
-    foil?.style.setProperty("--rx", "0deg");
-    foil?.style.setProperty("--ry", "0deg");
-  };
-
   /* gyro */
   const enableGyro = async () => {
     try {
@@ -459,94 +427,49 @@ export default function Arcade() {
     }
   };
 
-  const subLabel = (id: Pack["id"]) => (id === "toolkit" ? "TOOL TIME" : "GAME TIME");
+  const showcase = inspectApp?.showcase ? inspectApp : null;
+  const plainInspect = inspectApp && !inspectApp.showcase ? inspectApp : null;
+  const legendaryCount = APPS.filter((a) => a.rarity === "legendary").length;
 
   return (
     <>
       <button className="sound" title="Toggle sound" onClick={() => setSoundOn(Sound.toggle())}>
         {soundOn ? "🔊" : "🔇"}
       </button>
-      <div className="hud" data-show={phase === "select" || phase === "reveal"}>
-        <span>
-          PACKS <span className="v">{packsOpened}</span>
-        </span>
-        <span>
-          CARDS <span className="v">{seen.size}</span>/{APPS.length}
-        </span>
-      </div>
-      {showGyro && (
+      {showGyro && phase === "cards" && (
         <button className="gyro-btn" style={{ display: "block" }} onClick={enableGyro}>
           📱 TILT FX
         </button>
       )}
 
-      <div className="stage" data-phase={phase}>
-        {/* TITLE */}
-        <section className="title" onClick={start}>
-          <div className="logo">
-            BRIAN
-            <br />
-            WONG&apos;S
-          </div>
-          <div className="sub">★ ARCADE EMPORIUM ★</div>
-          <div className={"press" + (coin ? "" : " blink")}>▸ INSERT COIN ◂</div>
-          {coin && <CoinInsert />}
-        </section>
+      <div className="stage" data-phase={phase} data-dealing={dealing}>
+        <h1 className="sr-only">Brian Wong — The App Arcade</h1>
 
-        <header>
-          <p className="kicker">INSERT COIN</p>
-          <h1>
-            RIP A <span className="pop">BOOSTER</span> PACK
-          </h1>
-        </header>
+        {/* THE PACK */}
+        {phase !== "cards" && <Booster key={packKey} ref={boosterRef} onRip={rip} />}
 
-        {/* PACK SELECT */}
-        <section className="select">
-          <div className="packs">
-            {PACKS.map((p) => {
-              const count = APPS.filter((a) => a.pack === p.id).length;
-              return (
-                <button
-                  key={p.id}
-                  className="pack"
-                  style={cssVars({ "--pa": p.a, "--pb": p.b })}
-                  onPointerMove={tiltPack}
-                  onPointerLeave={leavePack}
-                  onMouseEnter={() => Sound.blip()}
-                  onClick={() => openPack(p)}
-                >
-                  <div className="foil">
-                    <div className="tape">FOIL PACK</div>
-                    <span className="pemoji">{p.icon}</span>
-                    <div className="pname">{p.name}</div>
-                    <div className="psub">{subLabel(p.id)}</div>
-                    <div className="pcount">{count} cards inside</div>
-                    <div className="pill">TEAR OPEN ►</div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* REVEAL */}
-        <section className="reveal">
+        {/* THE CARDS */}
+        <section className="reveal" aria-label="Brian's apps">
           <div className="reveal-head">
-            <div className="pt">{pack ? pack.name.toUpperCase() : ""}</div>
-            <div className="ps">
-              {pack ? `${subLabel(pack.id)} · ${revealApps.length} CARDS` : ""}
+            <p className="kicker">YOUR PULL</p>
+            <div className="pt">
+              {APPS.length} APP CARDS
             </div>
+            <div className="ps">
+              {legendaryCount} legendary · tap any card for a closer look
+            </div>
+            <button className="back" onClick={reseal}>
+              ↺ RESEAL THE PACK
+            </button>
           </div>
-          <button className="back" onClick={back}>
-            ◄ OPEN THE OTHER PACK
-          </button>
           <div className="cards">
-            {revealApps.map((app, i) => {
+            {APPS.map((app, i) => {
               const baseShine = RARITY[app.rarity].baseShine;
+              const isUp = revealed.has(app.id);
               const cls =
                 `card r-${app.rarity}` +
-                (revealed.has(app.id) ? " revealed" : "") +
-                (seen.has(app.id) ? " seen" : "") +
+                (app.live ? " has-live" : "") +
+                (isUp ? " revealed seen" : "") +
                 (popId === app.id ? " pop" : "");
               return (
                 <div
@@ -557,15 +480,15 @@ export default function Arcade() {
                   onPointerMove={tiltCard}
                   onPointerEnter={enterCard}
                   onPointerLeave={(e) => leaveCard(e, baseShine)}
-                  onClick={() => {
-                    if (revealed.has(app.id)) openInspect(app);
+                  onClick={(e) => {
+                    if (isUp) openInspect(app, e.currentTarget);
                   }}
                 >
                   <div className="float">
                     <div className="tilt">
                       <div className="flipper">
                         <div className="face front">
-                          <CardFace app={app} />
+                          <CardFace app={app} playing={isUp && !inspectApp} />
                         </div>
                         <div className="face back-face">
                           <span className="bhalf" />
@@ -580,22 +503,6 @@ export default function Arcade() {
             })}
           </div>
         </section>
-
-        {/* OPENER */}
-        <div className="opener" ref={openerRef}>
-          <div className="flash" />
-          <div className="pk" ref={pkRef}>
-            <div className="pk-cards" aria-hidden="true">
-              <span className="pcard c1" />
-              <span className="pcard c2" />
-              <span className="pcard c3" />
-            </div>
-            <div className="half bot">
-              <span className="pemoji" />
-            </div>
-            <div className="half top" />
-          </div>
-        </div>
       </div>
 
       {/* fanfare banner */}
@@ -609,30 +516,35 @@ export default function Arcade() {
         </div>
       )}
 
-      {/* inspect modal */}
+      {/* a full-screen view built for this app */}
+      {showcase?.showcase === "window-seat" && (
+        <WindowSeatShowcase app={showcase} origin={origin.current} onClose={closeInspect} />
+      )}
+
+      {/* standard inspect modal */}
       <div
-        className={"inspect" + (inspectApp ? " on" : "")}
+        className={"inspect" + (plainInspect ? " on" : "")}
         onClick={(e) => {
           if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains("closex"))
             closeInspect();
         }}
       >
         <div className="closex">ESC ✕</div>
-        {inspectApp && (
+        {plainInspect && (
           <>
             <div className="big" onPointerMove={inspectTilt} onPointerLeave={inspectLeave}>
               <div
-                className={`card r-${inspectApp.rarity} revealed`}
+                className={`card r-${plainInspect.rarity} revealed`}
                 style={cssVars({
-                  "--accent": inspectApp.accent,
-                  "--shine": RARITY[inspectApp.rarity].baseShine,
+                  "--accent": plainInspect.accent,
+                  "--shine": RARITY[plainInspect.rarity].baseShine,
                 })}
               >
                 <div className="float" style={{ animation: "none" }}>
                   <div className="tilt">
                     <div className="flipper" style={{ transform: "rotateY(0deg)" }}>
                       <div className="face front">
-                        <CardFace app={inspectApp} />
+                        <CardFace app={plainInspect} />
                       </div>
                     </div>
                   </div>
@@ -640,46 +552,46 @@ export default function Arcade() {
               </div>
             </div>
             <div className="detail">
-              <div className={"dh" + (inspectApp.name.length > 11 ? " long" : "")}>{inspectApp.name}</div>
+              <div className={"dh" + (plainInspect.name.length > 11 ? " long" : "")}>{plainInspect.name}</div>
               <span
                 className="drar"
-                style={{ background: RAR_COLOR[inspectApp.rarity], color: "#0b1020" }}
+                style={{ background: RAR_COLOR[plainInspect.rarity], color: "#0b1020" }}
               >
-                {RARITY[inspectApp.rarity].gem} {RARITY[inspectApp.rarity].label}
+                {RARITY[plainInspect.rarity].gem} {RARITY[plainInspect.rarity].label}
               </span>
-              <p>{inspectApp.blurb}</p>
+              <p>{plainInspect.blurb}</p>
               <div className="row">
                 <span>Type</span>
-                <b>{inspectApp.type.toUpperCase()}</b>
+                <b>{plainInspect.type.toUpperCase()}</b>
               </div>
               <div className="row">
                 <span>Reach</span>
-                <b>{inspectApp.stats.users} USERS</b>
+                <b>{plainInspect.stats.users} USERS</b>
               </div>
               <div className="row">
                 <span>Rating</span>
-                <b>★ {inspectApp.stats.rating}</b>
+                <b>★ {plainInspect.stats.rating}</b>
               </div>
               <div className="row">
                 <span>Platform</span>
-                <b>{inspectApp.stats.platform.toUpperCase()}</b>
+                <b>{plainInspect.stats.platform.toUpperCase()}</b>
               </div>
               <div className="row">
                 <span>Launched</span>
-                <b>{inspectApp.year}</b>
+                <b>{plainInspect.year}</b>
               </div>
               <a
-                className={"launch" + (inspectApp.link === "#" ? " soon" : "")}
-                href={inspectApp.link}
-                target={inspectApp.link === "#" ? undefined : "_blank"}
-                rel={inspectApp.link === "#" ? undefined : "noopener noreferrer"}
+                className={"launch" + (plainInspect.link === "#" ? " soon" : "")}
+                href={plainInspect.link}
+                target={plainInspect.link === "#" ? undefined : "_blank"}
+                rel={plainInspect.link === "#" ? undefined : "noopener noreferrer"}
                 onClick={(e) => {
-                  if (inspectApp.link === "#") e.preventDefault();
+                  if (plainInspect.link === "#") e.preventDefault();
                 }}
               >
-                {inspectApp.link === "#"
+                {plainInspect.link === "#"
                   ? "🔒 COMING SOON"
-                  : `▶ LAUNCH ${inspectApp.name.toUpperCase()}`}
+                  : `▶ LAUNCH ${plainInspect.name.toUpperCase()}`}
               </a>
             </div>
           </>
