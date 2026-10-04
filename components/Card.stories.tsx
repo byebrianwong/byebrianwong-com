@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { expect } from 'storybook/test';
+import { expect, waitFor } from 'storybook/test';
 import { APPS, type AppCard } from '@/lib/apps';
 import { Card } from './Card';
 
@@ -10,7 +10,8 @@ import { Card } from './Card';
 // baselines.
 const sample = (rarity: AppCard['rarity']) =>
   APPS.find((a) => a.rarity === rarity && !a.live)!;
-const liveApp = APPS.find((a) => a.live)!;
+const liveApp = APPS.find((a) => a.live && (a.live.style ?? 'viewfinder') === 'viewfinder')!;
+const webApp = APPS.find((a) => a.live?.style === 'tags')!;
 
 /**
  * A single holographic trading card, rendered in isolation. Unlike the `Arcade`
@@ -70,6 +71,20 @@ export const LiveFootage: Story = {
     const video = canvasElement.querySelector<HTMLVideoElement>('.live video')!;
     await expect(video.getAttribute('poster')).toBe(args.app.live!.poster);
     await expect(canvas.getByText(args.app.move!.name)).toBeVisible();
+  },
+};
+
+/**
+ * A web app's card: a recording of the real app under a thin browser bar with
+ * its address, and a label for each step of the recording. Held on its poster
+ * frame so the snapshot is stable.
+ */
+export const WebAppFootage: Story = {
+  args: { app: webApp, playing: false },
+  play: async ({ canvas, args }) => {
+    await expect(canvas.getByText(args.app.live!.url!)).toBeVisible();
+    // The label pops in with a short animation.
+    await waitFor(() => expect(canvas.getByText(args.app.live!.moments[0].name)).toBeVisible());
   },
 };
 

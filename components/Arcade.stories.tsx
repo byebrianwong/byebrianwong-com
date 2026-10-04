@@ -8,7 +8,8 @@ import { Sound } from '@/lib/sound';
 // lib/apps.ts doesn't break these flow tests. A "plain" app opens the standard
 // inspect modal; a showcase app opens its own full-screen view.
 const plainApp = APPS.find((a) => !a.showcase)!;
-const showcaseApp = APPS.find((a) => a.showcase)!;
+const showcaseApp = APPS.find((a) => a.showcase === 'window-seat')!;
+const reelApp = APPS.find((a) => a.showcase === 'reel')!;
 
 const rip = (canvasElement: HTMLElement) =>
   canvasElement.querySelector<HTMLButtonElement>('.booster')!;
@@ -124,6 +125,23 @@ export const OpenShowcase: Story = {
     await expect(window.location.hash).toBe(`#/card/${showcaseApp.id}`);
     // The standard modal stays closed.
     await expect(canvasElement.querySelector('.inspect')).not.toHaveClass('on');
+  },
+};
+
+/** A card with a recorded walkthrough opens it full screen, in a browser window with chapters. */
+export const OpenReel: Story = {
+  beforeEach: () => {
+    window.location.hash = '#/cards';
+  },
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    await allRevealed(canvasElement);
+    await userEvent.click(
+      canvasElement.querySelector<HTMLElement>(`.cards .card[data-app="${reelApp.id}"]`)!,
+    );
+    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible(), { timeout: 4000 });
+    // The side panel slides in.
+    await waitFor(() => expect(canvas.getByRole('list', { name: 'Walkthrough' })).toBeVisible());
+    await expect(window.location.hash).toBe(`#/card/${reelApp.id}`);
   },
 };
 

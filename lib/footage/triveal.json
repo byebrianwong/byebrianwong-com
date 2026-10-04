@@ -1,0 +1,61 @@
+{
+  "card": {
+    "video": "/cards/triveal/card.mp4",
+    "poster": "/cards/triveal/card.jpg",
+    "duration": 14.82,
+    "marks": [
+      {
+        "t": 0.28,
+        "label": "CLUE 1",
+        "sub": "10 points"
+      },
+      {
+        "t": 2.93,
+        "label": "CLUE 2",
+        "sub": "8 points"
+      },
+      {
+        "t": 6.94,
+        "label": "WRONG GUESS",
+        "sub": "−1 point · clue 3 opens"
+      },
+      {
+        "t": 11.82,
+        "label": "CORRECT!",
+        "sub": "+5 points on clue 3"
+      }
+    ]
+  },
+  "reel": {
+    "video": "/cards/triveal/reel.mp4",
+    "poster": "/cards/triveal/reel.jpg",
+    "duration": 19.99,
+    "marks": [
+      {
+        "t": 0.28,
+        "label": "Clue 1, worth 10",
+        "sub": "The hardest clue comes first. Guess now for the most points."
+      },
+      {
+        "t": 3.43,
+        "label": "Ask for another clue",
+        "sub": "Each clue is easier than the last and worth 2 points less."
+      },
+      {
+        "t": 7.88,
+        "label": "A wrong guess",
+        "sub": "London Bridge costs a point and opens the next clue."
+      },
+      {
+        "t": 13.78,
+        "label": "Got it",
+        "sub": "Tower Bridge on clue 3: 6 points, minus 1 for the miss."
+      },
+      {
+        "t": 17.38,
+        "label": "The reveal",
+        "sub": "The answer with a photo and a short write-up, and your streak."
+      }
+    ]
+  }
+}

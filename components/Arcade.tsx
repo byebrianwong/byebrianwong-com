@@ -13,6 +13,7 @@ import {
 import { Sound } from "@/lib/sound";
 import { Booster, type BoosterHandle } from "./Booster";
 import { CardFace } from "./Card";
+import ReelShowcase from "./ReelShowcase";
 import WindowSeatShowcase from "./WindowSeatShowcase";
 
 /**
@@ -519,6 +520,9 @@ export default function Arcade() {
       {/* a full-screen view built for this app */}
       {showcase?.showcase === "window-seat" && (
         <WindowSeatShowcase app={showcase} origin={origin.current} onClose={closeInspect} />
+      )}
+      {showcase?.showcase === "reel" && showcase.reel && (
+        <ReelShowcase app={showcase} origin={origin.current} onClose={closeInspect} />
       )}
 
       {/* standard inspect modal */}
