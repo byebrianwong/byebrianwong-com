@@ -218,12 +218,18 @@ h1 .pop { color: #ffd23f; }
   background: #ffd23f; color: #0b1020; padding: 9px 18px; border-radius: 8px; box-shadow: 0 5px 0 rgba(0,0,0,.35); transition: transform .12s ease, box-shadow .12s ease; }
 .back:hover { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(0,0,0,.35); }
 .back:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.35); }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 250px)); gap: 40px 32px; justify-content: center; width: 100%; max-width: 1120px; padding: 30px 16px 90px; }
+/* A card is drawn at 250px wide. --cz scales the whole card from that size:
+   text, art, borders and all. 1.28 makes 320px cards, three to a row on desktop.
+   Flex instead of grid so a short last row sits in the middle. */
+.cards { --cz: 1.28; display: flex; flex-wrap: wrap; gap: 40px 32px; justify-content: center; width: 100%; max-width: 1120px; padding: 30px 16px 90px; }
+@media (max-width: 359px) { .cards { --cz: 1.1; } }
 
 /* ---- card shell (flip-capable) ---- */
 .card { --rx:0deg; --ry:0deg; --mx:0; --my:0; --lift:0px; --hx:50%; --hy:50%; --shine:0; --glare:0; --flip:180deg;
-  width: 250px; aspect-ratio: 5/7; perspective: 1100px; cursor: pointer; }
-.float { width: 100%; height: 100%; animation: cbob 5.5s ease-in-out infinite; animation-delay: calc(var(--i)*.3s); }
+  width: calc(250px * var(--cz, 1)); aspect-ratio: 5/7; perspective: 1100px; cursor: pointer; }
+/* zoom (not transform) so it doesn't fight the bob animation, and so the deal
+   animation, which moves .card itself, still moves in screen pixels */
+.float { zoom: var(--cz, 1); width: 100%; height: 100%; animation: cbob 5.5s ease-in-out infinite; animation-delay: calc(var(--i)*.3s); }
 @keyframes cbob { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-9px) } }
 .card:hover .float { animation-play-state: paused; }
 .tilt { width:100%; height:100%; transform-style: preserve-3d; transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--lift)); transition: transform .12s ease; }
@@ -391,7 +397,7 @@ h1 .pop { color: #ffd23f; }
   background:#ffd23f; border:3px solid #0b1020; border-radius:8px; padding:8px 12px; box-shadow:0 4px 0 rgba(0,0,0,.35); cursor:pointer; }
 
 /* ===================== SHOWCASE: a full-screen view built for one app =====================
-   Window Seat's: the card's art window opens into the game's viewfinder. */
+   Wonder Lens's: the card's art window opens into the game's viewfinder. */
 .showcase { position: fixed; inset: 0; z-index: 100; overflow-y: auto; padding: 64px 22px 28px;
   background: rgba(7,8,22,.88); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: scIn .35s ease both; }
 @keyframes scIn { from { background: rgba(7,8,22,0); } }

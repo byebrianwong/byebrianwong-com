@@ -5,7 +5,7 @@ Click it and it tears open, and every app card flies out into a grid, flipping
 face-up as it lands. Cards have holographic foil, an "on fire" hover, arcade
 sound, and a click-to-inspect view.
 
-Some cards show real footage of the app instead of an icon. Window Seat's card
+Some cards show real footage of the app instead of an icon. Wonder Lens's card
 plays recorded gameplay under a camera viewfinder, and its full-screen view is
 the game's viewfinder: you can switch worlds and take photos that are scored
 the way the game scores them.
@@ -33,15 +33,15 @@ npm run start
 - `components/Arcade.tsx` — the whole flow: sealed pack → opening → card grid → inspect
 - `components/Booster.tsx` — the 3D booster pack and its opening animation
 - `components/Card.tsx` — the card face; `components/LiveArt.tsx` plays footage in the art window
-- `components/WindowSeatShowcase.tsx` — Window Seat's full-screen viewfinder
+- `components/WindowSeatShowcase.tsx` — Wonder Lens's full-screen viewfinder
 - `lib/apps.ts` — the app data. Set each app's `rarity` (`common` | `rare` | `holo` |
   `legendary`) and point `link` at the real app URL so the LAUNCH button works.
   Optional fields make a card specific to its app: `live` (footage for the art
   window), `move` and `facts` (shown in place of the generic stat bars), and
   `showcase` (a full-screen view of its own).
-- `lib/showcases/windowSeat.ts` — Window Seat's card loop and score-timeline types
+- `lib/showcases/windowSeat.ts` — Wonder Lens's card loop and score-timeline types
 - `public/cards/<app>/` — each app's footage
-- `scripts/footage/window-seat/` — how Window Seat's footage was recorded (see its README)
+- `scripts/footage/window-seat/` — how Wonder Lens's footage was recorded (see its README)
 - `lib/arcadeRoute.ts` — the screen ↔ URL hash mapping (`#/cards`, `#/card/<app>`)
   that gives each screen its own history entry, so browser back walks the flow
   instead of leaving the site, and a card URL can be reloaded or shared. Links

@@ -60,7 +60,7 @@ export const Legendary: Story = {
 };
 
 /**
- * A card with real footage in its art window (Window Seat's gameplay), a
+ * A card with real footage in its art window (Wonder Lens's gameplay), a
  * viewfinder on top, and the app's own move and numbers in place of the stat
  * bars. Held on its poster frame so the snapshot is stable.
  */

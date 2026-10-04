@@ -1,4 +1,4 @@
-// Footage and photo scores for the Window Seat card.
+// Footage and photo scores for the Wonder Lens card.
 //
 // The video files in public/cards/window-seat/ are real gameplay. They were
 // recorded by running the game (github.com/byebrianwong/wonder-lens) in a

@@ -4,7 +4,7 @@ import edmAtlasFootage from "./footage/edm-atlas.json";
 import trivealFootage from "./footage/triveal.json";
 
 const edmAtlas = fromRecording(edmAtlasFootage as WebFootage, "edmatlas.byebrianwong.com");
-const triveal = fromRecording(trivealFootage as WebFootage, "triveal.vercel.app");
+const triveal = fromRecording(trivealFootage as WebFootage, "triveal.byebrianwong.com");
 
 // App data for the arcade. Every app is one card in the single booster pack.
 // Set each app's `rarity` to control its foil treatment and fanfare.
@@ -79,8 +79,8 @@ export interface AppCard {
 
 export const APPS: AppCard[] = [
   {
-    id: "window-seat",
-    name: "Window Seat",
+    id: "wonder-lens",
+    name: "Wonder Lens",
     tagline: "A 3D photo-safari ride",
     type: "3D Game",
     icon: "📷",
@@ -101,16 +101,7 @@ export const APPS: AppCard[] = [
     move: { name: "SNAP", text: "Frame it, centre it, catch the moment." },
     showcase: "window-seat",
   },
-  { id: "regibee", name: "Regibee", tagline: "Universal gift registry", type: "Registry", icon: "🐝", year: 2024, accent: "#f59e0b", hp: 150, rarity: "legendary", link: "https://regibee.com", stats: { users: "120K", rating: "4.9", platform: "Web" }, blurb: "One registry for weddings, baby showers, housewarmings, and more — pull gifts from any store into a single list." },
-  { id: "dodone", name: "Do Done", tagline: "AI-native to-do app", type: "Tasks", icon: "✅", year: 2025, accent: "#22d3ee", hp: 120, rarity: "holo", link: "https://dodone.byebrianwong.com", stats: { users: "70K", rating: "4.8", platform: "Web" }, blurb: "A tasks and to-do app built for speed — AI-native and designed to work right inside Claude and Codex." },
-  { id: "tapsearch", name: "Tap Search", tagline: "Click to learn anything", type: "Extension", icon: "🔎", year: 2024, accent: "#3b82f6", hp: 90, rarity: "rare", link: "https://github.com/byebrianwong/tap-search", stats: { users: "35K", rating: "4.7", platform: "Chrome" }, blurb: "A Chrome extension to instantly learn about any word or subject — click anywhere on a page, learn inline, or save it for later." },
-  { id: "byebrianwong", name: "byebrianwong.com", tagline: "This very portfolio", type: "Portfolio", icon: "🃏", year: 2025, accent: "#a78bfa", hp: 100, rarity: "rare", link: "https://github.com/byebrianwong/byebrianwong-com", stats: { users: "45K", rating: "5.0", platform: "Web" }, blurb: "The App Arcade — an interactive booster-pack portfolio. Rip open a pack and collect the app cards. You're looking at it." },
-  { id: "petjournal", name: "Pet Journal", tagline: "Shared pet care log", type: "Mobile", icon: "🐾", year: 2024, accent: "#34d399", hp: 80, rarity: "common", link: "https://github.com/byebrianwong/pet-journal", stats: { users: "18K", rating: "4.8", platform: "iOS · Android" }, blurb: "A React Native + Expo app for tracking a pet's life across multiple caregivers — feedings, meds, and milestones on one shared timeline." },
-  { id: "pantry", name: "Pantry App", tagline: "Kitchen inventory tracker", type: "Utility", icon: "🥫", year: 2025, accent: "#fb7185", hp: 70, rarity: "common", link: "#", stats: { users: "—", rating: "—", platform: "In dev" }, blurb: "Keep tabs on what's in your pantry — track staples, watch expiry dates, and know what to restock. Currently in private development." },
   { id: "mainstream-hipster", name: "Mainstream Hipster", tagline: "Mainstream or hipster?", type: "Party", icon: "📊", year: 2026, accent: "#ec4899", hp: 130, rarity: "legendary", link: "https://mainstream-hipster.vercel.app", stats: { users: "60K", rating: "4.8", platform: "Web" }, blurb: "Rank everything from mainstream to hipster — scored on real Wikipedia, stream, and view-count data. How niche is your taste?" },
-  { id: "second-guess", name: "Second Guess", tagline: "Be #2 to become #1", type: "Party", icon: "🥈", year: 2026, accent: "#8b5cf6", hp: 110, rarity: "holo", link: "https://secondguess.byebrianwong.com", stats: { users: "85K", rating: "4.9", platform: "Web" }, blurb: "A real-time party game where being popular loses. Match the crowd's second-favorite answer — take silver to win gold." },
-  { id: "piano-note", name: "Piano Note", tagline: "3D pitch-training game", type: "Music", icon: "🎹", year: 2026, accent: "#06b6d4", hp: 90, rarity: "rare", link: "https://github.com/byebrianwong/piano-note", stats: { users: "40K", rating: "4.7", platform: "Web" }, blurb: "A 3D interactive piano keyboard that trains your ear — play, listen, and sharpen your pitch one note at a time." },
-  { id: "dont-say-it", name: "Don't Say It", tagline: "Taboo-style word game", type: "Party", icon: "🤐", year: 2026, accent: "#f97316", hp: 75, rarity: "common", link: "https://github.com/byebrianwong/dont-say-it-word-game", stats: { users: "28K", rating: "4.7", platform: "Web" }, blurb: "Get your team to guess the word — without saying any of the forbidden ones. A fast, frantic take on the classic party word game." },
   {
     id: "edm-atlas",
     name: "EDM Atlas",
@@ -143,7 +134,7 @@ export const APPS: AppCard[] = [
     accent: "#14b8a6",
     hp: 95,
     rarity: "rare",
-    link: "https://triveal.vercel.app",
+    link: "https://triveal.byebrianwong.com",
     stats: { users: "—", rating: "—", platform: "Web" },
     blurb: "A daily trivia game of counting-down clues — guess early for glory, or hold out for the giveaway. The longer you wait, the less it's worth.",
     ...triveal,
@@ -156,6 +147,11 @@ export const APPS: AppCard[] = [
     showcase: "reel",
   },
   { id: "saturday-boring-cereal", name: "Saturday Boring Cereal", tagline: "Healthy cereal, ranked", type: "Reviews", icon: "🥣", year: 2026, accent: "#eab308", hp: 70, rarity: "common", link: "https://saturdayboringcereal.byebrianwong.com", stats: { users: "—", rating: "—", platform: "Web" }, blurb: "One reviewer walks the healthy-cereal aisle so you don't have to — every box tasted, weighed, and priced in cold, hard macros. The only aisle where boring is a brag." },
+  { id: "little-lexicon", name: "Little Lexicon", tagline: "Big words that stick", type: "Vocab", icon: "📖", year: 2026, accent: "#fb7185", hp: 100, rarity: "holo", link: "https://little-lexicon.vercel.app", stats: { users: "—", rating: "—", platform: "Web" }, blurb: "Learn the big words — GRE and beyond. Spaced repetition brings each word back just before you forget it, seven game modes keep practice from going stale, and every word comes with example sentences and audio." },
+  { id: "dodone", name: "Do Done", tagline: "AI-native to-do app", type: "Tasks", icon: "✅", year: 2025, accent: "#22d3ee", hp: 120, rarity: "holo", link: "https://dodone.byebrianwong.com", stats: { users: "70K", rating: "4.8", platform: "Web" }, blurb: "A tasks and to-do app built for speed — AI-native and designed to work right inside Claude and Codex." },
+  { id: "regibee", name: "Regibee", tagline: "Universal gift registry", type: "Registry", icon: "🐝", year: 2024, accent: "#f59e0b", hp: 150, rarity: "legendary", link: "https://regibee.com", stats: { users: "120K", rating: "4.9", platform: "Web" }, blurb: "One registry for weddings, baby showers, housewarmings, and more — pull gifts from any store into a single list." },
+  { id: "tapsearch", name: "Tap Search", tagline: "Click to learn anything", type: "Extension", icon: "🔎", year: 2024, accent: "#3b82f6", hp: 90, rarity: "rare", link: "https://github.com/byebrianwong/tap-search", stats: { users: "35K", rating: "4.7", platform: "Chrome" }, blurb: "A Chrome extension to instantly learn about any word or subject — click anywhere on a page, learn inline, or save it for later." },
+  { id: "second-guess", name: "Second Guess", tagline: "Be #2 to become #1", type: "Party", icon: "🥈", year: 2026, accent: "#8b5cf6", hp: 110, rarity: "holo", link: "https://secondguess.byebrianwong.com", stats: { users: "85K", rating: "4.9", platform: "Web" }, blurb: "A real-time party game where being popular loses. Match the crowd's second-favorite answer — take silver to win gold." },
 ];
 
 export const RARITY: Record<Rarity, { label: string; gem: string; baseShine: number; rank: number }> = {

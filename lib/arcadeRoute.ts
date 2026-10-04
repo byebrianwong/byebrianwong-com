@@ -31,8 +31,13 @@ export function routeToHash(route: ArcadeRoute): string {
   }
 }
 
-const appRoute = (id: string | undefined): ArcadeRoute =>
-  APPS.some((a) => a.id === id) ? { view: "inspect", appId: id! } : { view: "cards" };
+/** Old app ids that were renamed, mapped to their current id. */
+const RENAMED: Record<string, string> = { "window-seat": "wonder-lens" };
+
+const appRoute = (raw: string | undefined): ArcadeRoute => {
+  const id = raw && (RENAMED[raw] ?? raw);
+  return APPS.some((a) => a.id === id) ? { view: "inspect", appId: id! } : { view: "cards" };
+};
 
 /**
  * Read a route back out of a hash. Anything unrecognised (a stale link, a
@@ -41,6 +46,7 @@ const appRoute = (id: string | undefined): ArcadeRoute =>
  *
  * Links from the old two-pack layout still work: `#/packs` is the pack,
  * `#/pack/<pack>` is the cards, and `#/pack/<pack>/<app>` is that card.
+ * A card link that uses an app's old id opens the card under its new id.
  */
 export function parseHash(hash: string): ArcadeRoute {
   const parts = hash.replace(/^#\/?/, "").split("/").filter(Boolean);
