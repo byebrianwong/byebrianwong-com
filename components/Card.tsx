@@ -44,7 +44,7 @@ export function CardFace({ app, playing = true }: { app: AppCard; playing?: bool
           {r.gem} {r.label}
         </span>
       </div>
-      <span className="fire">🔥 ON FIRE</span>
+      {app.showcase && <span className="hint">▶ WATCH DEMO</span>}
       {app.move || app.traits ? (
         <div className="statbox movebox">
           {app.move && (

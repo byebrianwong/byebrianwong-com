@@ -357,10 +357,10 @@ export default function Arcade() {
     card.style.setProperty("--shine", "0.9");
     card.style.setProperty("--glare", "0.75");
     const now = Date.now();
-    const last = Number(card.dataset.lastfire || 0);
+    const last = Number(card.dataset.lasthover || 0);
     if (now - last > 600) {
-      Sound.fire();
-      card.dataset.lastfire = String(now);
+      Sound.hover();
+      card.dataset.lasthover = String(now);
     }
   };
 
