@@ -42,6 +42,7 @@ npm run start
 - `lib/showcases/windowSeat.ts` — Wonder Lens's card loop and score-timeline types
 - `public/cards/<app>/` — each app's footage
 - `scripts/footage/window-seat/` — how Wonder Lens's footage was recorded (see its README)
+- `scripts/footage/web/` — how the web apps' footage is recorded from the live sites (see its README)
 - `lib/arcadeRoute.ts` — the screen ↔ URL hash mapping (`#/cards`, `#/card/<app>`)
   that gives each screen its own history entry, so browser back walks the flow
   instead of leaving the site, and a card URL can be reloaded or shared. Links

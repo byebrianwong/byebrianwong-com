@@ -2,9 +2,15 @@ import { SUBJECT_COUNT, WINDOW_SEAT_CARD } from "./showcases/windowSeat";
 import { fromRecording, type WebFootage } from "./footage";
 import edmAtlasFootage from "./footage/edm-atlas.json";
 import trivealFootage from "./footage/triveal.json";
+import mainstreamHipsterFootage from "./footage/mainstream-hipster.json";
+import boringCerealFootage from "./footage/saturday-boring-cereal.json";
+import littleLexiconFootage from "./footage/little-lexicon.json";
 
 const edmAtlas = fromRecording(edmAtlasFootage as WebFootage, "edmatlas.byebrianwong.com");
 const triveal = fromRecording(trivealFootage as WebFootage, "triveal.byebrianwong.com");
+const mainstreamHipster = fromRecording(mainstreamHipsterFootage as WebFootage, "mainstream-hipster.vercel.app");
+const boringCereal = fromRecording(boringCerealFootage as WebFootage, "saturdayboringcereal.byebrianwong.com");
+const littleLexicon = fromRecording(littleLexiconFootage as WebFootage, "little-lexicon.vercel.app");
 
 // App data for the arcade. Every app is one card in the single booster pack.
 // Set each app's `rarity` to control its foil treatment and fanfare.
@@ -101,7 +107,28 @@ export const APPS: AppCard[] = [
     move: { name: "SNAP", text: "Frame it, centre it, catch the moment." },
     showcase: "window-seat",
   },
-  { id: "mainstream-hipster", name: "Mainstream Hipster", tagline: "Mainstream or hipster?", type: "Party", icon: "📊", year: 2026, accent: "#ec4899", hp: 130, rarity: "legendary", link: "https://mainstream-hipster.vercel.app", stats: { users: "60K", rating: "4.8", platform: "Web" }, blurb: "Rank everything from mainstream to hipster — scored on real Wikipedia, stream, and view-count data. How niche is your taste?" },
+  {
+    id: "mainstream-hipster",
+    name: "Mainstream Hipster",
+    tagline: "Mainstream or hipster?",
+    type: "Party",
+    icon: "📊",
+    year: 2026,
+    accent: "#ec4899",
+    hp: 130,
+    rarity: "legendary",
+    link: "https://mainstream-hipster.vercel.app",
+    stats: { users: "60K", rating: "4.8", platform: "Web" },
+    blurb: "Rank everything from mainstream to hipster — scored on real Wikipedia, stream, and view-count data. How niche is your taste?",
+    ...mainstreamHipster,
+    facts: [
+      { label: "DECKS", value: "12" },
+      { label: "THINGS", value: "1,976" },
+      { label: "SOURCES", value: "5" },
+    ],
+    move: { name: "RANK IT", text: "Drag from mainstream to hipster, then see the real data." },
+    showcase: "reel",
+  },
   {
     id: "edm-atlas",
     name: "EDM Atlas",
@@ -146,8 +173,50 @@ export const APPS: AppCard[] = [
     move: { name: "GUESS EARLY", text: "Fewer clues, more points. Wrong guesses cost one." },
     showcase: "reel",
   },
-  { id: "saturday-boring-cereal", name: "Saturday Boring Cereal", tagline: "Healthy cereal, ranked", type: "Reviews", icon: "🥣", year: 2026, accent: "#eab308", hp: 70, rarity: "common", link: "https://saturdayboringcereal.byebrianwong.com", stats: { users: "—", rating: "—", platform: "Web" }, blurb: "One reviewer walks the healthy-cereal aisle so you don't have to — every box tasted, weighed, and priced in cold, hard macros. The only aisle where boring is a brag." },
-  { id: "little-lexicon", name: "Little Lexicon", tagline: "Big words that stick", type: "Vocab", icon: "📖", year: 2026, accent: "#fb7185", hp: 100, rarity: "holo", link: "https://little-lexicon.vercel.app", stats: { users: "—", rating: "—", platform: "Web" }, blurb: "Learn the big words — GRE and beyond. Spaced repetition brings each word back just before you forget it, seven game modes keep practice from going stale, and every word comes with example sentences and audio." },
+  {
+    id: "saturday-boring-cereal",
+    name: "Saturday Boring Cereal",
+    tagline: "Healthy cereal, ranked",
+    type: "Reviews",
+    icon: "🥣",
+    year: 2026,
+    accent: "#eab308",
+    hp: 70,
+    rarity: "common",
+    link: "https://saturdayboringcereal.byebrianwong.com",
+    stats: { users: "—", rating: "—", platform: "Web" },
+    blurb: "One reviewer walks the healthy-cereal aisle so you don't have to — every box tasted, weighed, and priced in cold, hard macros. The only aisle where boring is a brag.",
+    ...boringCereal,
+    facts: [
+      { label: "BOXES", value: "25" },
+      { label: "BRANDS", value: "16" },
+      { label: "TOP SCORE", value: "8.5" },
+    ],
+    move: { name: "READ THE SIDE", text: "Every box re-weighed and scored out of ten." },
+    showcase: "reel",
+  },
+  {
+    id: "little-lexicon",
+    name: "Little Lexicon",
+    tagline: "Big words that stick",
+    type: "Vocab",
+    icon: "📖",
+    year: 2026,
+    accent: "#fb7185",
+    hp: 100,
+    rarity: "holo",
+    link: "https://little-lexicon.vercel.app",
+    stats: { users: "—", rating: "—", platform: "Web" },
+    blurb: "Learn the big words — GRE and beyond. Spaced repetition brings each word back just before you forget it, seven game modes keep practice from going stale, and every word comes with example sentences and audio.",
+    ...littleLexicon,
+    facts: [
+      { label: "WORDS", value: "317" },
+      { label: "MODES", value: "7" },
+      { label: "EXAMPLES", value: "2,451" },
+    ],
+    move: { name: "RECALL", text: "Each word comes back just before you'd forget it." },
+    showcase: "reel",
+  },
   { id: "dodone", name: "Do Done", tagline: "AI-native to-do app", type: "Tasks", icon: "✅", year: 2025, accent: "#22d3ee", hp: 120, rarity: "holo", link: "https://dodone.byebrianwong.com", stats: { users: "70K", rating: "4.8", platform: "Web" }, blurb: "A tasks and to-do app built for speed — AI-native and designed to work right inside Claude and Codex." },
   { id: "regibee", name: "Regibee", tagline: "Universal gift registry", type: "Registry", icon: "🐝", year: 2024, accent: "#f59e0b", hp: 150, rarity: "legendary", link: "https://regibee.com", stats: { users: "120K", rating: "4.9", platform: "Web" }, blurb: "One registry for weddings, baby showers, housewarmings, and more — pull gifts from any store into a single list." },
   { id: "tapsearch", name: "Tap Search", tagline: "Click to learn anything", type: "Extension", icon: "🔎", year: 2024, accent: "#3b82f6", hp: 90, rarity: "rare", link: "https://github.com/byebrianwong/tap-search", stats: { users: "35K", rating: "4.7", platform: "Chrome" }, blurb: "A Chrome extension to instantly learn about any word or subject — click anywhere on a page, learn inline, or save it for later." },

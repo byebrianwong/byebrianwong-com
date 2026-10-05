@@ -1,0 +1,61 @@
+{
+  "card": {
+    "video": "/cards/little-lexicon/card.mp4",
+    "poster": "/cards/little-lexicon/card.jpg",
+    "duration": 12.19,
+    "marks": [
+      {
+        "t": 0.28,
+        "label": "SPEED ROUND",
+        "sub": "60 seconds on the clock"
+      },
+      {
+        "t": 5.16,
+        "label": "MISSED ONE",
+        "sub": "It comes back for review"
+      },
+      {
+        "t": 6.77,
+        "label": "317 WORDS",
+        "sub": "GRE and beyond"
+      }
+    ]
+  },
+  "reel": {
+    "video": "/cards/little-lexicon/reel.mp4",
+    "poster": "/cards/little-lexicon/reel.jpg",
+    "duration": 26.72,
+    "marks": [
+      {
+        "t": 0.29,
+        "label": "Today",
+        "sub": "A daily goal of 15 reviews, and a streak to keep."
+      },
+      {
+        "t": 3.12,
+        "label": "A new word",
+        "sub": "Its meaning, an example sentence, and a memory hook to make it stick."
+      },
+      {
+        "t": 7.57,
+        "label": "Quiz",
+        "sub": "Then straight away, a question on it."
+      },
+      {
+        "t": 9.71,
+        "label": "Scheduled",
+        "sub": "Spaced repetition sets when the word comes back: just before you would forget it."
+      },
+      {
+        "t": 14.82,
+        "label": "Speed round",
+        "sub": "Sixty seconds to match as many words to their meanings as you can."
+      },
+      {
+        "t": 19.66,
+        "label": "A miss",
+        "sub": "The right answer is ticked, and the word is due again sooner."
+      }
+    ]
+  }
+}

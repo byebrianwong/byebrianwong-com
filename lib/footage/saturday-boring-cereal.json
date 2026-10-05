@@ -1,0 +1,66 @@
+{
+  "card": {
+    "video": "/cards/saturday-boring-cereal/card.mp4",
+    "poster": "/cards/saturday-boring-cereal/card.jpg",
+    "duration": 10.53,
+    "marks": [
+      {
+        "t": 0.3,
+        "label": "THE AISLE",
+        "sub": "25 boxes on the shelf"
+      },
+      {
+        "t": 2.23,
+        "label": "LOW-SUGAR",
+        "sub": "6 boxes left"
+      },
+      {
+        "t": 4.67,
+        "label": "GRADE S",
+        "sub": "The only one on the site"
+      },
+      {
+        "t": 7.71,
+        "label": "THE SIDE PANEL",
+        "sub": "Weighed and re-typed by hand"
+      }
+    ]
+  },
+  "reel": {
+    "video": "/cards/saturday-boring-cereal/reel.mp4",
+    "poster": "/cards/saturday-boring-cereal/reel.jpg",
+    "duration": 19.45,
+    "marks": [
+      {
+        "t": 0.27,
+        "label": "The review-a-thon",
+        "sub": "One reviewer walks the healthy-cereal aisle and scores every box out of ten."
+      },
+      {
+        "t": 2.88,
+        "label": "The scoreboard",
+        "sub": "The top nine, with protein, sugar and serving size taken off the side panel."
+      },
+      {
+        "t": 7.04,
+        "label": "The aisle",
+        "sub": "Every box on one shelf, filed under everything it honestly is."
+      },
+      {
+        "t": 10.25,
+        "label": "Filter by aisle",
+        "sub": "Low-sugar leaves six boxes."
+      },
+      {
+        "t": 13,
+        "label": "A review",
+        "sub": "The taste score, an overall grade, and bars for protein, sugar and fiber."
+      },
+      {
+        "t": 16.24,
+        "label": "The label",
+        "sub": "The full nutrition panel, copied from the side of the box."
+      }
+    ]
+  }
+}

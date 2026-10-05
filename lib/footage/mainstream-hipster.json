@@ -1,0 +1,61 @@
+{
+  "card": {
+    "video": "/cards/mainstream-hipster/card.mp4",
+    "poster": "/cards/mainstream-hipster/card.jpg",
+    "duration": 12.1,
+    "marks": [
+      {
+        "t": 0.28,
+        "label": "RANK 4 SHOWS",
+        "sub": "Mainstream ← → hipster"
+      },
+      {
+        "t": 7.04,
+        "label": "THE REVEAL",
+        "sub": "IMDb + Wikipedia data"
+      },
+      {
+        "t": 8.34,
+        "label": "5/6 PAIRS",
+        "sub": "Sharp instincts · 83%"
+      }
+    ]
+  },
+  "reel": {
+    "video": "/cards/mainstream-hipster/reel.mp4",
+    "poster": "/cards/mainstream-hipster/reel.jpg",
+    "duration": 19.4,
+    "marks": [
+      {
+        "t": 0.29,
+        "label": "Pick a deck",
+        "sub": "Music, movies, TV, books, food and more. Each deck is a pool of real things."
+      },
+      {
+        "t": 4.16,
+        "label": "Four shows, shuffled",
+        "sub": "Every round deals a handful of things from the deck in a random order."
+      },
+      {
+        "t": 5.97,
+        "label": "Drag to rank",
+        "sub": "Most mainstream on the left, most hipster on the right. Cards restyle as they move."
+      },
+      {
+        "t": 12.54,
+        "label": "Lock in",
+        "sub": "Your order is checked against real popularity data."
+      },
+      {
+        "t": 13.84,
+        "label": "The real ranking",
+        "sub": "The list reorders by IMDb ratings and Wikipedia pageviews."
+      },
+      {
+        "t": 16.2,
+        "label": "Your score",
+        "sub": "One point per pair in the right order: 5 of 6 here."
+      }
+    ]
+  }
+}
