@@ -94,7 +94,7 @@ export const APPS: AppCard[] = [
     accent: "#7fc7a4",
     hp: 160,
     rarity: "legendary",
-    link: "https://github.com/byebrianwong/wonder-lens",
+    link: "https://wonderlens.byebrianwong.com",
     stats: { users: "—", rating: "—", platform: "Web · three.js" },
     blurb:
       "Ride through hand-built 3D worlds from Ghibli, Wes Anderson and Amélie, Pokémon Snap style. Look anywhere, zoom in, throw acorns, and photograph the moments that make each world come alive. Every model, texture and sound is made in code.",

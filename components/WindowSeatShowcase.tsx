@@ -388,7 +388,7 @@ export default function WindowSeatShowcase({
           </div>
 
           <a className="launch" href={app.link} target="_blank" rel="noopener noreferrer">
-            ▶ VIEW ON GITHUB
+            ▶ LAUNCH {app.name.toUpperCase()}
           </a>
         </aside>
       </div>
