@@ -96,7 +96,7 @@ export const Sound = {
   whoosh() { tone({ freq: 180, slideTo: 620, type: "sawtooth", dur: 0.16, vol: 0.12 }); },
   blip() { tone({ freq: 600, dur: 0.05, vol: 0.12 }); },
   flip() { tone({ freq: 320, slideTo: 520, dur: 0.07, vol: 0.12 }); },
-  fire() { tone({ freq: 784, type: "triangle", dur: 0.06, vol: 0.06 }); tone({ freq: 1175, type: "triangle", dur: 0.07, vol: 0.04, delay: 0.018 }); },
+  hover() { tone({ freq: 784, type: "triangle", dur: 0.06, vol: 0.06 }); tone({ freq: 1175, type: "triangle", dur: 0.07, vol: 0.04, delay: 0.018 }); },
   rare() { [523, 659, 784, 1046, 1318].forEach((f, i) => tone({ freq: f, dur: 0.14, vol: 0.2, delay: i * 0.1 })); },
   select() { tone({ freq: 440, dur: 0.06, vol: 0.15 }); tone({ freq: 660, dur: 0.1, vol: 0.15, delay: 0.05 }); },
   toggle() { on = !on; if (on) Sound.blip(); return on; },
