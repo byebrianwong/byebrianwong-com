@@ -13,6 +13,7 @@ import {
 import { Sound } from "@/lib/sound";
 import { Booster, type BoosterHandle } from "./Booster";
 import { CardFace } from "./Card";
+import Inspect from "./Inspect";
 import ReelShowcase from "./ReelShowcase";
 import WindowSeatShowcase from "./WindowSeatShowcase";
 
@@ -46,13 +47,6 @@ const cssVars = (vars: Record<string, string | number>) => vars as React.CSSProp
 
 const reducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-const RAR_COLOR: Record<string, string> = {
-  common: "#94a3b8",
-  rare: "#e2e8f0",
-  holo: "#67e8f9",
-  legendary: "#fde047",
-};
 
 const ALL_IDS = () => new Set(APPS.map((a) => a.id));
 
@@ -373,31 +367,6 @@ export default function Arcade() {
     s.setProperty("--glare", "0");
   };
 
-  const inspectTilt = (e: React.PointerEvent<HTMLDivElement>) => {
-    const card = e.currentTarget.querySelector<HTMLElement>(".card");
-    if (!card) return;
-    const b = card.getBoundingClientRect();
-    const fx = (e.clientX - b.left) / b.width;
-    const fy = (e.clientY - b.top) / b.height;
-    card.style.setProperty("--ry", `${(fx - 0.5) * 18}deg`);
-    card.style.setProperty("--rx", `${-(fy - 0.5) * 18}deg`);
-    card.style.setProperty("--hx", `${(fx * 100).toFixed(1)}%`);
-    card.style.setProperty("--hy", `${(fy * 100).toFixed(1)}%`);
-    card.style.setProperty("--shine", "0.9");
-    card.style.setProperty("--glare", "0.7");
-    card.style.setProperty("--lift", "14px");
-  };
-
-  const inspectLeave = (e: React.PointerEvent<HTMLDivElement>) => {
-    const card = e.currentTarget.querySelector<HTMLElement>(".card");
-    if (!card || !inspectApp) return;
-    card.style.setProperty("--rx", "0deg");
-    card.style.setProperty("--ry", "0deg");
-    card.style.setProperty("--lift", "0px");
-    card.style.setProperty("--shine", String(RARITY[inspectApp.rarity].baseShine));
-    card.style.setProperty("--glare", "0");
-  };
-
   /* gyro */
   const enableGyro = async () => {
     try {
@@ -525,82 +494,8 @@ export default function Arcade() {
         <ReelShowcase app={showcase} origin={origin.current} onClose={closeInspect} />
       )}
 
-      {/* standard inspect modal */}
-      <div
-        className={"inspect" + (plainInspect ? " on" : "")}
-        onClick={(e) => {
-          if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains("closex"))
-            closeInspect();
-        }}
-      >
-        <div className="closex">ESC ✕</div>
-        {plainInspect && (
-          <>
-            <div className="big" onPointerMove={inspectTilt} onPointerLeave={inspectLeave}>
-              <div
-                className={`card r-${plainInspect.rarity} revealed`}
-                style={cssVars({
-                  "--accent": plainInspect.accent,
-                  "--shine": RARITY[plainInspect.rarity].baseShine,
-                })}
-              >
-                <div className="float" style={{ animation: "none" }}>
-                  <div className="tilt">
-                    <div className="flipper" style={{ transform: "rotateY(0deg)" }}>
-                      <div className="face front">
-                        <CardFace app={plainInspect} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="detail">
-              <div className={"dh" + (plainInspect.name.length > 11 ? " long" : "")}>{plainInspect.name}</div>
-              <span
-                className="drar"
-                style={{ background: RAR_COLOR[plainInspect.rarity], color: "#0b1020" }}
-              >
-                {RARITY[plainInspect.rarity].gem} {RARITY[plainInspect.rarity].label}
-              </span>
-              <p>{plainInspect.blurb}</p>
-              <div className="row">
-                <span>Type</span>
-                <b>{plainInspect.type.toUpperCase()}</b>
-              </div>
-              <div className="row">
-                <span>Reach</span>
-                <b>{plainInspect.stats.users} USERS</b>
-              </div>
-              <div className="row">
-                <span>Rating</span>
-                <b>★ {plainInspect.stats.rating}</b>
-              </div>
-              <div className="row">
-                <span>Platform</span>
-                <b>{plainInspect.stats.platform.toUpperCase()}</b>
-              </div>
-              <div className="row">
-                <span>Launched</span>
-                <b>{plainInspect.year}</b>
-              </div>
-              <a
-                className={"launch" + (plainInspect.link === "#" ? " soon" : "")}
-                href={plainInspect.link}
-                target={plainInspect.link === "#" ? undefined : "_blank"}
-                rel={plainInspect.link === "#" ? undefined : "noopener noreferrer"}
-                onClick={(e) => {
-                  if (plainInspect.link === "#") e.preventDefault();
-                }}
-              >
-                {plainInspect.link === "#"
-                  ? "🔒 COMING SOON"
-                  : `▶ LAUNCH ${plainInspect.name.toUpperCase()}`}
-              </a>
-            </div>
-          </>
-        )}
-      </div>
+      {/* standard detail screen */}
+      <Inspect app={plainInspect} onClose={closeInspect} />
     </>
   );
 }

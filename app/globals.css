@@ -384,14 +384,33 @@ h1 .pop { color: #ffd23f; }
 .inspect .detail p { color:#dbe3ff; line-height:1.6; font-size:14px; font-weight:500; }
 .inspect .detail .row { display:flex; justify-content:space-between; padding:9px 0; border-top:1px solid rgba(255,255,255,.15); font-size:13px; }
 .inspect .detail .row b { font-family:"Bungee"; font-size:11px; }
-.inspect .launch { display:inline-block; margin-top:18px; font-family:"Bungee"; font-size:14px; color:#0b1020; background:#ffd23f;
-  padding:12px 22px; border-radius:10px; border:3px solid #0b1020; box-shadow:0 5px 0 rgba(0,0,0,.4); text-decoration:none; transition: transform .1s ease, box-shadow .1s ease; }
-.inspect .launch:hover { transform: translateY(-2px); box-shadow:0 7px 0 rgba(0,0,0,.4); }
-.inspect .launch:active { transform: translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.4); }
-.inspect .launch.soon { background:#5b6079; color:#dbe3ff; cursor:default; box-shadow:0 5px 0 rgba(0,0,0,.4); }
-.inspect .launch.soon:hover { transform:none; box-shadow:0 5px 0 rgba(0,0,0,.4); }
-.inspect .launch.soon:active { transform:none; box-shadow:0 5px 0 rgba(0,0,0,.4); }
 .inspect .closex { position:absolute; top:18px; right:22px; font-family:"Bungee"; font-size:13px; color:#ffd23f; opacity:.85; z-index:3; cursor: pointer; }
+
+/* The big PLAY / LAUNCH button on every detail screen (components/LaunchButton.tsx).
+   It sits right under the app's name so it's the first thing you can press.
+   It glows, and a shine sweeps across it every few seconds. */
+.launch { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; box-sizing: border-box;
+  margin: 10px 0 14px; padding: 14px 16px 11px; border-radius: 14px; border: 4px solid #0b1020; color: #0b1020; text-decoration: none;
+  background: linear-gradient(#ffe680, #ffd23f 48%, #f5b400);
+  box-shadow: 0 7px 0 #0b1020, 0 0 0 3px rgba(255,210,63,.3), 0 10px 32px rgba(255,210,63,.4);
+  transition: transform .1s ease, box-shadow .1s ease; animation: launchGlow 2.4s ease-in-out infinite; }
+.launch .verb { display: flex; align-items: center; gap: 12px; font-family: "Bungee"; font-size: 30px; line-height: 1; letter-spacing: .04em; }
+.launch .tri { width: 0; height: 0; border-style: solid; border-width: 11px 0 11px 18px; border-color: transparent transparent transparent currentColor; }
+.launch .where { max-width: 100%; font-size: 12px; font-weight: 700; color: rgba(11,16,32,.68); text-align: center; overflow-wrap: anywhere; }
+.launch::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.75) 50%, transparent 65%);
+  transform: translateX(-110%); animation: launchShine 3.6s ease-in-out infinite; }
+.launch:hover { animation: none; transform: translateY(-2px);
+  box-shadow: 0 9px 0 #0b1020, 0 0 0 5px rgba(255,210,63,.35), 0 12px 44px rgba(255,210,63,.7); }
+.launch:active { animation: none; transform: translateY(5px);
+  box-shadow: 0 2px 0 #0b1020, 0 0 0 3px rgba(255,210,63,.3), 0 6px 24px rgba(255,210,63,.4); }
+.launch:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+@keyframes launchGlow { 50% { box-shadow: 0 7px 0 #0b1020, 0 0 0 6px rgba(255,210,63,.22), 0 10px 46px rgba(255,210,63,.75); } }
+@keyframes launchShine { 0%, 55% { transform: translateX(-110%); } 85%, 100% { transform: translateX(110%); } }
+.launch.soon { background: #5b6079; color: #dbe3ff; cursor: default; animation: none; box-shadow: 0 7px 0 #0b1020; }
+.launch.soon .verb { font-size: 20px; }
+.launch.soon::after { display: none; }
+.launch.soon:hover, .launch.soon:active { transform: none; box-shadow: 0 7px 0 #0b1020; }
 
 .gyro-btn { display:none; position:fixed; bottom:16px; right:16px; z-index:80; font-family:"Bungee"; font-size:11px; color:#0b1020;
   background:#ffd23f; border:3px solid #0b1020; border-radius:8px; padding:8px 12px; box-shadow:0 4px 0 rgba(0,0,0,.35); cursor:pointer; }
@@ -518,9 +537,6 @@ h1 .pop { color: #ffd23f; }
 .sc-empty { margin: 8px 0 0; font-size: 13px !important; color: #aab4e8; }
 .sc-guide { margin-top: 10px; font-family: "Bungee"; font-size: 10px; letter-spacing: .06em; color: #c7d2fe; }
 .sc-guide b { font-weight: 400; color: #fff; }
-.sc-side .launch { display: inline-block; margin-top: 18px; font-family: "Bungee"; font-size: 14px; color: #0b1020; background: #ffd23f; padding: 12px 22px;
-  border-radius: 10px; border: 3px solid #0b1020; box-shadow: 0 5px 0 rgba(0,0,0,.4); text-decoration: none; transition: transform .1s ease, box-shadow .1s ease; }
-.sc-side .launch:hover { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(0,0,0,.4); }
 
 /* reel showcase: the card's art window grows into a browser window playing a walkthrough of the app */
 .rs-window { position: relative; width: min(100%, calc((100vh - 140px) * 1.6)); justify-self: center; border-radius: 14px; overflow: hidden;
@@ -601,5 +617,5 @@ h1 .pop { color: #ffd23f; }
 @media (prefers-reduced-motion: reduce) {
   .float, .ring, .r-legendary .front::before, .about-avatar,
   .bp-float, .bp-shadow, .bs-rays, .bs-glow, .bs-hint, .bp-ring, .bp-orb i, .bp-gloss, .bp-sticker, .bp-fan .m3,
-  .sc-reticle, .sc-shutter, .lt-tag, .rs-caption { animation: none !important; }
+  .sc-reticle, .sc-shutter, .lt-tag, .rs-caption, .launch, .launch::after { animation: none !important; }
 }

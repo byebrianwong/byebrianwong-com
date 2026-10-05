@@ -86,6 +86,8 @@ export interface AppCard {
   reel?: AppReel;
   /** A full-screen view opened in place of the standard detail panel. */
   showcase?: "window-seat" | "reel";
+  /** True for games. Their detail screen says PLAY instead of LAUNCH. */
+  game?: boolean;
 }
 
 export const APPS: AppCard[] = [
@@ -110,6 +112,7 @@ export const APPS: AppCard[] = [
       { icon: "⭐", text: "Every photo gets a star rating" },
     ],
     showcase: "window-seat",
+    game: true,
   },
   {
     id: "mainstream-hipster",
@@ -136,6 +139,7 @@ export const APPS: AppCard[] = [
       { icon: "📈", text: "Scored on real popularity data" },
     ],
     showcase: "reel",
+    game: true,
   },
   {
     id: "edm-atlas",
@@ -188,6 +192,7 @@ export const APPS: AppCard[] = [
       { icon: "📅", text: "A new puzzle every day" },
     ],
     showcase: "reel",
+    game: true,
   },
   {
     id: "saturday-boring-cereal",
@@ -316,6 +321,7 @@ export const APPS: AppCard[] = [
       { icon: "🎉", text: "A real-time party game" },
       { icon: "🥇", text: "The most popular answer loses" },
     ],
+    game: true,
   },
 ];
 
