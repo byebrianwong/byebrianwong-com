@@ -62,8 +62,8 @@ export const Legendary: Story = {
 
 /**
  * A card with real footage in its art window (Wonder Lens's gameplay), a
- * viewfinder on top, and the app's own move and numbers in place of the stat
- * bars. Held on its poster frame so the snapshot is stable.
+ * viewfinder on top, and the app's move and traits in the text box. Held on
+ * its poster frame so the snapshot is stable.
  */
 export const LiveFootage: Story = {
   args: { app: liveApp, playing: false },
@@ -72,6 +72,7 @@ export const LiveFootage: Story = {
     const video = canvasElement.querySelector<HTMLVideoElement>('.live video')!;
     await expect(video.getAttribute('poster')).toBe(args.app.live!.poster);
     await expect(canvas.getByText(args.app.move!.name)).toBeVisible();
+    for (const t of args.app.traits!) await expect(canvas.getByText(t.text)).toBeVisible();
   },
 };
 
@@ -135,13 +136,15 @@ interface PlaygroundArgs {
   hp: number;
   tagline: string;
   accent: string;
-  rating: string;
-  users: string;
+  moveName: string;
+  moveText: string;
+  trait1: string;
+  trait2: string;
   revealed: boolean;
 }
 
 /**
- * Tweak rarity, HP, accent color, icon, and copy live from the Controls panel
+ * Tweak rarity, HP, accent color, icon, move, and traits live from the Controls panel
  * to see how a card responds — the discrete knobs the monolithic flow couldn't
  * expose.
  */
@@ -154,8 +157,10 @@ export const Playground: StoryObj<PlaygroundArgs> = {
     hp: 150,
     tagline: 'Universal gift registry',
     accent: '#f59e0b',
-    rating: '4.9',
-    users: '120K',
+    moveName: 'POLLINATE',
+    moveText: 'Pull gifts from any store into one list.',
+    trait1: 'Weddings, baby showers and more',
+    trait2: 'One registry for every occasion',
     revealed: true,
   },
   argTypes: {
@@ -169,8 +174,10 @@ export const Playground: StoryObj<PlaygroundArgs> = {
     type: { control: 'text' },
     icon: { control: 'text' },
     tagline: { control: 'text' },
-    rating: { control: 'text' },
-    users: { control: 'text' },
+    moveName: { control: 'text' },
+    moveText: { control: 'text' },
+    trait1: { control: 'text' },
+    trait2: { control: 'text' },
     revealed: { control: 'boolean' },
   },
   render: (a) => (
@@ -187,8 +194,13 @@ export const Playground: StoryObj<PlaygroundArgs> = {
         hp: a.hp,
         rarity: a.rarity,
         link: '#',
-        stats: { users: a.users, rating: a.rating, platform: 'macOS' },
+        stats: { users: '—', rating: '—', platform: 'Web' },
         blurb: '',
+        move: { name: a.moveName, text: a.moveText },
+        traits: [
+          { icon: '💍', text: a.trait1 },
+          { icon: '🎁', text: a.trait2 },
+        ],
       }}
     />
   ),

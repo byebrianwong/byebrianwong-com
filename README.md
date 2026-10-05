@@ -2,8 +2,8 @@
 
 A booster-pack arcade portfolio. The site opens on one sealed 3D booster pack.
 Click it and it tears open, and every app card flies out into a grid, flipping
-face-up as it lands. Cards have holographic foil, an "on fire" hover, arcade
-sound, and a click-to-inspect view.
+face-up as it lands. Cards have holographic foil, a "watch demo" label on
+hover, arcade sound, and a click-to-inspect view.
 
 Some cards show real footage of the app instead of an icon. Wonder Lens's card
 plays recorded gameplay under a camera viewfinder, and its full-screen view is
@@ -37,8 +37,9 @@ npm run start
 - `lib/apps.ts` — the app data. Set each app's `rarity` (`common` | `rare` | `holo` |
   `legendary`) and point `link` at the real app URL so the LAUNCH button works.
   Optional fields make a card specific to its app: `live` (footage for the art
-  window), `move` and `facts` (shown in place of the generic stat bars), and
-  `showcase` (a full-screen view of its own).
+  window), `move` and `traits` (the card's text box: an attack line and two
+  short lines, each with a symbol), `facts` (counts shown in the full-screen
+  reel view), and `showcase` (a full-screen view of its own).
 - `lib/showcases/windowSeat.ts` — Wonder Lens's card loop and score-timeline types
 - `public/cards/<app>/` — each app's footage
 - `scripts/footage/window-seat/` — how Wonder Lens's footage was recorded (see its README)
