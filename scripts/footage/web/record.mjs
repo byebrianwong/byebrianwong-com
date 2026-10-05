@@ -34,13 +34,16 @@ for (const [name, take] of takes) {
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
 
+  // Playwright's own headless Chromium, not installed Chrome: Chrome's
+  // headless screencast leaves off the bottom 87 px of the viewport, so a
+  // 960x720 page came out as 960x633 frames, cropped and then stretched to 4:3.
   const browser = await chromium.launch({
-    channel: 'chrome',
     headless: true,
     args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'],
   });
   const ctx = await browser.newContext({ viewport: take.viewport, deviceScaleFactor: 1 });
   const page = await ctx.newPage();
+  await take.setup?.(page);
   await page.goto(plan.url, { waitUntil: 'networkidle' });
   if (take.css) await page.addStyleTag({ content: take.css });
   await take.prepare?.(page);
@@ -51,7 +54,7 @@ for (const [name, take] of takes) {
   cdp.on('Page.screencastFrame', async ({ data, metadata, sessionId }) => {
     const file = path.join(dir, `${String(frames.length).padStart(5, '0')}.jpg`);
     fs.writeFileSync(file, Buffer.from(data, 'base64'));
-    frames.push({ ts: metadata.timestamp, file });
+    frames.push({ ts: metadata.timestamp, file, size: [metadata.deviceWidth, metadata.deviceHeight] });
     await cdp.send('Page.screencastFrameAck', { sessionId }).catch(() => {});
   });
   await cdp.send('Page.startScreencast', {
@@ -64,6 +67,12 @@ for (const [name, take] of takes) {
   const end = Date.now() / 1000;
   await cdp.send('Page.stopScreencast');
   await browser.close();
+
+  // a frame smaller than the viewport would be cropped, then stretched to fit
+  const [w, h] = frames[0].size;
+  if (w !== take.viewport.width || h !== take.viewport.height) {
+    throw new Error(`${app}/${name}: frames are ${w}x${h}, but the viewport is ${take.viewport.width}x${take.viewport.height}`);
+  }
 
   // lay the frames out on the timeline by their paint times
   const t0 = frames[0].ts;
