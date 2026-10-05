@@ -3,10 +3,16 @@ name: Chromatic
 # Publishes Storybook to Chromatic so every component's visual history is
 # tracked across commits. Requires a CHROMATIC_PROJECT_TOKEN repo secret
 # (Settings → Secrets and variables → Actions).
+#
+# Runs on every push to any branch, not on `pull_request`, as Chromatic's
+# docs recommend. A `pull_request` run builds GitHub's temporary merge of
+# the branch into the latest main. Its snapshots then include changes from
+# main that the PR did not make, and those show up as changes to accept.
+# That matters because "UI Tests" is a required check on main: pending
+# changes block the merge.
 on:
   push:
-    branches: [main]
-  pull_request:
+    branches: ["**"]
 
 jobs:
   chromatic:
