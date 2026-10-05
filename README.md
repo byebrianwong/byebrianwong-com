@@ -2,8 +2,8 @@
 
 A booster-pack arcade portfolio. The site opens on one sealed 3D booster pack.
 Click it and it tears open, and every app card flies out into a grid, flipping
-face-up as it lands. Cards have holographic foil, an "on fire" hover, arcade
-sound, and a click-to-inspect view.
+face-up as it lands. Cards have holographic foil, a "watch demo" label on
+hover, arcade sound, and a click-to-inspect view.
 
 Some cards show real footage of the app instead of an icon. Wonder Lens's card
 plays recorded gameplay under a camera viewfinder, and its full-screen view is
