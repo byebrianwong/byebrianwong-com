@@ -1,4 +1,4 @@
-import { SUBJECT_COUNT, WINDOW_SEAT_CARD } from "./showcases/windowSeat";
+import { WINDOW_SEAT_CARD } from "./showcases/windowSeat";
 import { fromRecording, type WebFootage } from "./footage";
 import edmAtlasFootage from "./footage/edm-atlas.json";
 import trivealFootage from "./footage/triveal.json";
@@ -73,10 +73,15 @@ export interface AppCard {
   blurb: string;
   /** Gameplay footage for the art window. Cards without it show their icon. */
   live?: LiveMedia;
-  /** App-specific numbers shown on the card in place of the generic stat bars. */
+  /** Counts shown in the full-screen reel view, next to the blurb that explains them. */
   facts?: { label: string; value: string }[];
-  /** What you actually do in the app, written like a trading-card move. */
+  /** What you actually do in the app, written like a trading-card attack. */
   move?: { name: string; text: string };
+  /**
+   * Two short lines under the move, each a symbol and a plain description.
+   * Write words, not bare numbers: a card has no room to explain a number.
+   */
+  traits?: { icon: string; text: string }[];
   /** A walkthrough of the real app, shown full screen by the "reel" showcase. */
   reel?: AppReel;
   /** A full-screen view opened in place of the standard detail panel. */
@@ -99,12 +104,11 @@ export const APPS: AppCard[] = [
     blurb:
       "Ride through hand-built 3D worlds from Ghibli, Wes Anderson and Amélie, Pokémon Snap style. Look anywhere, zoom in, throw acorns, and photograph the moments that make each world come alive. Every model, texture and sound is made in code.",
     live: WINDOW_SEAT_CARD,
-    facts: [
-      { label: "WORLDS", value: "3" },
-      { label: "SUBJECTS", value: String(SUBJECT_COUNT) },
-      { label: "FILM", value: "24" },
-    ],
     move: { name: "SNAP", text: "Frame it, centre it, catch the moment." },
+    traits: [
+      { icon: "🎬", text: "Ghibli, Wes Anderson and Amélie worlds" },
+      { icon: "⭐", text: "Every photo gets a star rating" },
+    ],
     showcase: "window-seat",
   },
   {
@@ -127,6 +131,10 @@ export const APPS: AppCard[] = [
       { label: "SOURCES", value: "5" },
     ],
     move: { name: "RANK IT", text: "Drag from mainstream to hipster, then see the real data." },
+    traits: [
+      { icon: "🎞️", text: "Music, movies, TV, food and more" },
+      { icon: "📈", text: "Scored on real popularity data" },
+    ],
     showcase: "reel",
   },
   {
@@ -149,6 +157,10 @@ export const APPS: AppCard[] = [
       { label: "SYNTHS", value: "31" },
     ],
     move: { name: "FLY TO", text: "Pick a genre and the camera flies to its star." },
+    traits: [
+      { icon: "✨", text: "Every genre is a star on a 3D map" },
+      { icon: "🎹", text: "Hear a synth demo of each sound" },
+    ],
     showcase: "reel",
   },
   {
@@ -171,6 +183,10 @@ export const APPS: AppCard[] = [
       { label: "MODES", value: "2" },
     ],
     move: { name: "GUESS EARLY", text: "Fewer clues, more points. Wrong guesses cost one." },
+    traits: [
+      { icon: "🔍", text: "Each clue is easier, and worth less" },
+      { icon: "📅", text: "A new puzzle every day" },
+    ],
     showcase: "reel",
   },
   {
@@ -193,6 +209,10 @@ export const APPS: AppCard[] = [
       { label: "TOP SCORE", value: "8.5" },
     ],
     move: { name: "READ THE SIDE", text: "Every box re-weighed and scored out of ten." },
+    traits: [
+      { icon: "🥣", text: "Healthy cereals, tasted and ranked" },
+      { icon: "📋", text: "Protein, sugar and fiber for each box" },
+    ],
     showcase: "reel",
   },
   {
@@ -215,12 +235,88 @@ export const APPS: AppCard[] = [
       { label: "EXAMPLES", value: "2,451" },
     ],
     move: { name: "RECALL", text: "Each word comes back just before you'd forget it." },
+    traits: [
+      { icon: "🎮", text: "Quizzes, speed rounds and more" },
+      { icon: "🔊", text: "Example sentences and audio" },
+    ],
     showcase: "reel",
   },
-  { id: "dodone", name: "Do Done", tagline: "AI-native to-do app", type: "Tasks", icon: "✅", year: 2025, accent: "#22d3ee", hp: 120, rarity: "holo", link: "https://dodone.byebrianwong.com", stats: { users: "70K", rating: "4.8", platform: "Web" }, blurb: "A tasks and to-do app built for speed — AI-native and designed to work right inside Claude and Codex." },
-  { id: "regibee", name: "Regibee", tagline: "Universal gift registry", type: "Registry", icon: "🐝", year: 2024, accent: "#f59e0b", hp: 150, rarity: "legendary", link: "https://regibee.com", stats: { users: "120K", rating: "4.9", platform: "Web" }, blurb: "One registry for weddings, baby showers, housewarmings, and more — pull gifts from any store into a single list." },
-  { id: "tapsearch", name: "Tap Search", tagline: "Click to learn anything", type: "Extension", icon: "🔎", year: 2024, accent: "#3b82f6", hp: 90, rarity: "rare", link: "https://github.com/byebrianwong/tap-search", stats: { users: "35K", rating: "4.7", platform: "Chrome" }, blurb: "A Chrome extension to instantly learn about any word or subject — click anywhere on a page, learn inline, or save it for later." },
-  { id: "second-guess", name: "Second Guess", tagline: "Be #2 to become #1", type: "Party", icon: "🥈", year: 2026, accent: "#8b5cf6", hp: 110, rarity: "holo", link: "https://secondguess.byebrianwong.com", stats: { users: "85K", rating: "4.9", platform: "Web" }, blurb: "A real-time party game where being popular loses. Match the crowd's second-favorite answer — take silver to win gold." },
+  {
+    id: "dodone",
+    name: "Do Done",
+    tagline: "AI-native to-do app",
+    type: "Tasks",
+    icon: "✅",
+    year: 2025,
+    accent: "#22d3ee",
+    hp: 120,
+    rarity: "holo",
+    link: "https://dodone.byebrianwong.com",
+    stats: { users: "70K", rating: "4.8", platform: "Web" },
+    blurb: "A tasks and to-do app built for speed — AI-native and designed to work right inside Claude and Codex.",
+    move: { name: "CHECK OFF", text: "Add a task, get it done, tick it off." },
+    traits: [
+      { icon: "🤖", text: "Works right inside Claude and Codex" },
+      { icon: "⚡", text: "Built for speed" },
+    ],
+  },
+  {
+    id: "regibee",
+    name: "Regibee",
+    tagline: "Universal gift registry",
+    type: "Registry",
+    icon: "🐝",
+    year: 2024,
+    accent: "#f59e0b",
+    hp: 150,
+    rarity: "legendary",
+    link: "https://regibee.com",
+    stats: { users: "120K", rating: "4.9", platform: "Web" },
+    blurb: "One registry for weddings, baby showers, housewarmings, and more — pull gifts from any store into a single list.",
+    move: { name: "POLLINATE", text: "Pull gifts from any store into one list." },
+    traits: [
+      { icon: "💍", text: "Weddings, baby showers and more" },
+      { icon: "🎁", text: "One registry for every occasion" },
+    ],
+  },
+  {
+    id: "tapsearch",
+    name: "Tap Search",
+    tagline: "Click to learn anything",
+    type: "Extension",
+    icon: "🔎",
+    year: 2024,
+    accent: "#3b82f6",
+    hp: 90,
+    rarity: "rare",
+    link: "https://github.com/byebrianwong/tap-search",
+    stats: { users: "35K", rating: "4.7", platform: "Chrome" },
+    blurb: "A Chrome extension to instantly learn about any word or subject — click anywhere on a page, learn inline, or save it for later.",
+    move: { name: "TAP", text: "Click any word on a page to learn about it." },
+    traits: [
+      { icon: "🧩", text: "A Chrome extension for any page" },
+      { icon: "🔖", text: "Save anything to read later" },
+    ],
+  },
+  {
+    id: "second-guess",
+    name: "Second Guess",
+    tagline: "Be #2 to become #1",
+    type: "Party",
+    icon: "🥈",
+    year: 2026,
+    accent: "#8b5cf6",
+    hp: 110,
+    rarity: "holo",
+    link: "https://secondguess.byebrianwong.com",
+    stats: { users: "85K", rating: "4.9", platform: "Web" },
+    blurb: "A real-time party game where being popular loses. Match the crowd's second-favorite answer — take silver to win gold.",
+    move: { name: "TAKE SILVER", text: "Match the crowd's second-favorite answer." },
+    traits: [
+      { icon: "🎉", text: "A real-time party game" },
+      { icon: "🥇", text: "The most popular answer loses" },
+    ],
+  },
 ];
 
 export const RARITY: Record<Rarity, { label: string; gem: string; baseShine: number; rank: number }> = {
@@ -230,5 +326,3 @@ export const RARITY: Record<Rarity, { label: string; gem: string; baseShine: num
   legendary: { label: "LEGENDARY", gem: "★", baseShine: 0.42, rank: 3 },
 };
 
-export const usersPct = (u: string) => Math.min(100, Math.round((parseFloat(u) / 320) * 100));
-export const ratingPct = (r: string) => Math.round((parseFloat(r) / 5) * 100);

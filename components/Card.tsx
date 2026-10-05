@@ -1,31 +1,18 @@
 import type { CSSProperties } from "react";
-import { RARITY, ratingPct, usersPct, type AppCard } from "@/lib/apps";
+import { RARITY, type AppCard } from "@/lib/apps";
 import { LiveArt } from "./LiveArt";
 
 const cssVars = (vars: Record<string, string | number>) => vars as CSSProperties;
 
-/* ---------------- small presentational helpers ---------------- */
-
-/** Twelve-segment meter used for the REACH and rating rows on a card. */
-export function Segs({ pct }: { pct: number }) {
-  const N = 12;
-  const lit = Math.round((pct / 100) * N);
-  return (
-    <span className="segs">
-      {Array.from({ length: N }, (_, k) => (
-        <span key={k} className={"seg" + (k < lit ? " on" : "")} />
-      ))}
-    </span>
-  );
-}
-
 /**
- * The front-face contents of a card: name, HP, art, type/rarity badges, stats.
+ * The front-face contents of a card: name, HP, art, type/rarity badges, and
+ * a text box at the bottom.
  *
- * Apps with footage (`app.live`) get a bigger art window that plays it, and
- * apps with a `move` or `facts` show those in place of the generic stat bars,
- * so the card says something true about that particular app. `playing` lets
- * the footage run; it should be on only while the card is face-up.
+ * Apps with footage (`app.live`) play it in the art window. The text box
+ * reads like a trading-card attack: an energy symbol with the app's icon, the
+ * `move`, then each of the app's `traits` as a symbol and a short line. An
+ * app with neither shows its tagline instead. `playing` lets the footage run;
+ * it should be on only while the card is face-up.
  */
 export function CardFace({ app, playing = true }: { app: AppCard; playing?: boolean }) {
   const r = RARITY[app.rarity];
@@ -58,35 +45,32 @@ export function CardFace({ app, playing = true }: { app: AppCard; playing?: bool
         </span>
       </div>
       <span className="fire">🔥 ON FIRE</span>
-      {app.move || app.facts ? (
+      {app.move || app.traits ? (
         <div className="statbox movebox">
           {app.move && (
-            <p className="mv">
-              <b>{app.move.name}</b> {app.move.text}
-            </p>
-          )}
-          {app.facts && (
-            <div className="facts">
-              {app.facts.map((f) => (
-                <span key={f.label}>
-                  <b>{f.value}</b>
-                  {f.label}
-                </span>
-              ))}
+            <div className="atk">
+              <span className="cost" aria-hidden="true">
+                {app.icon}
+              </span>
+              <p className="mv">
+                <b>{app.move.name}</b> {app.move.text}
+              </p>
             </div>
+          )}
+          {app.traits && (
+            <ul className="traits">
+              {app.traits.map((t) => (
+                <li key={t.text}>
+                  <i aria-hidden="true">{t.icon}</i>
+                  {t.text}
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       ) : (
         <div className="statbox">
           <p className="tgl">{app.tagline}</p>
-          <div className="statrow">
-            <span className="lbl">REACH</span>
-            <Segs pct={usersPct(app.stats.users)} />
-          </div>
-          <div className="statrow">
-            <span className="lbl">★ {app.stats.rating}</span>
-            <Segs pct={ratingPct(app.stats.rating)} />
-          </div>
         </div>
       )}
     </>

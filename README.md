@@ -37,8 +37,9 @@ npm run start
 - `lib/apps.ts` — the app data. Set each app's `rarity` (`common` | `rare` | `holo` |
   `legendary`) and point `link` at the real app URL so the LAUNCH button works.
   Optional fields make a card specific to its app: `live` (footage for the art
-  window), `move` and `facts` (shown in place of the generic stat bars), and
-  `showcase` (a full-screen view of its own).
+  window), `move` and `traits` (the card's text box: an attack line and two
+  short lines, each with a symbol), `facts` (counts shown in the full-screen
+  reel view), and `showcase` (a full-screen view of its own).
 - `lib/showcases/windowSeat.ts` — Wonder Lens's card loop and score-timeline types
 - `public/cards/<app>/` — each app's footage
 - `scripts/footage/window-seat/` — how Wonder Lens's footage was recorded (see its README)

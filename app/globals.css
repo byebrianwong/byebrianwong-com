@@ -258,7 +258,7 @@ h1 .pop { color: #ffd23f; }
 .card:hover .nm { color: #ffd23f; }
 .hp { font-family: "Bungee"; font-size: 15px; color: #ffd23f; text-shadow: 1.5px 1.5px 0 #7a1212; white-space: nowrap; }
 .hp small { font-size: 8px; color: #fff; }
-.art { position: absolute; top: 38px; left: 11px; right: 11px; height: 42%; border-radius: 8px; overflow: hidden;
+.art { position: absolute; top: 38px; left: 11px; right: 11px; height: 52%; border-radius: 8px; overflow: hidden;
   background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 80%, #000), #0b0c1c); border: 3px solid #0b1020; }
 .art .halftone { position: absolute; inset: 0; opacity: .35; mix-blend-mode: screen; background-image: radial-gradient(rgba(255,255,255,.8) 1.3px, transparent 1.4px); background-size: 10px 10px; }
 .layer { position: absolute; transition: transform .12s ease; will-change: transform; }
@@ -276,26 +276,20 @@ h1 .pop { color: #ffd23f; }
   background-position: 0 var(--hy), var(--hx) var(--hy), var(--hx) var(--hy);
   mix-blend-mode: color-dodge; filter: brightness(.9) contrast(2.1) saturate(1.2); opacity: var(--shine); }
 .glare { background: radial-gradient(farthest-corner circle at var(--hx) var(--hy), rgba(255,255,255,.8) 8%, rgba(255,255,255,.45) 24%, rgba(10,10,30,.6) 90%); mix-blend-mode: overlay; opacity: var(--glare); }
-.badges { position: absolute; top: calc(38px + 42% + 8px); left: 11px; right: 11px; z-index: 6; display: flex; justify-content: space-between; align-items: center; }
+.badges { position: absolute; top: calc(38px + 52% + 7px); left: 11px; right: 11px; z-index: 6; display: flex; justify-content: space-between; align-items: center; }
 .typebadge { font-family: "Bungee"; font-size: 9px; background: var(--accent); color: #0b1020; padding: 3px 8px; border-radius: 4px; border: 2px solid #0b1020; }
 .gem { font-family: "Bungee"; font-size: 9px; padding: 3px 8px; border-radius: 4px; border: 2px solid #0b1020; }
 .r-common .gem { background:#94a3b8; color:#0b1020; } .r-rare .gem { background:#e2e8f0; color:#0b1020; }
 .r-holo .gem { background: linear-gradient(90deg,#67e8f9,#a78bfa,#f472b6); color:#0b1020; }
 .r-legendary .gem { background: linear-gradient(90deg,#fde047,#fbbf24); color:#7a1212; }
-.fire { position: absolute; top: calc(38px + 42% + 8px); left: 50%; transform: translateX(-50%) scale(.6); z-index: 7; font-family:"Bungee"; font-size: 9px; color:#fff; background:#ef4444; padding:3px 8px; border-radius:4px; border:2px solid #0b1020; opacity:0; transition:.2s ease; white-space:nowrap; }
+.fire { position: absolute; top: calc(38px + 52% + 7px); left: 50%; transform: translateX(-50%) scale(.6); z-index: 7; font-family:"Bungee"; font-size: 9px; color:#fff; background:#ef4444; padding:3px 8px; border-radius:4px; border:2px solid #0b1020; opacity:0; transition:.2s ease; white-space:nowrap; }
 .card:hover .fire { opacity:1; transform: translateX(-50%) scale(1) rotate(-4deg); animation: firepulse .5s ease-in-out infinite alternate; }
 @keyframes firepulse { to { transform: translateX(-50%) scale(1.08) rotate(-4deg); } }
 .statbox { position: absolute; left: 11px; right: 11px; bottom: 11px; z-index: 6; background: #f5ecd2; color: #2a2350; border: 3px solid #0b1020; border-radius: 8px; padding: 9px 10px; }
-.tgl { font-size: 11px; font-weight: 600; color: #4b3f6b; margin: 0 0 8px; line-height: 1.15; }
-.statrow { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
-.statrow .lbl { font-family: "Bungee"; font-size: 7.5px; color: #7a1212; width: 42px; }
-.segs { display: flex; gap: 2px; flex: 1; }
-.seg { flex: 1; height: 8px; background: #d8c9a3; border: 1px solid #b6a577; border-radius: 1px; transition: background .25s ease; }
-.card:hover .seg.on, .card.revealed.seen .seg.on { background: var(--accent); border-color: color-mix(in srgb, var(--accent) 60%, #000); }
+.tgl { font-size: 11px; font-weight: 600; color: #4b3f6b; margin: 0; line-height: 1.15; }
 
 /* ---- LIVE ART: real footage in the art window, under a camera viewfinder ---- */
-.has-live .art { height: 52%; background: #0b0c1c; }
-.has-live .badges, .has-live .fire { top: calc(38px + 52% + 7px); }
+.has-live .art { background: #0b0c1c; }
 .art.is-live .shine { opacity: calc(var(--shine) * .35); }
 .live { position: absolute; inset: 0; z-index: 1; overflow: hidden; }
 .live video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -338,15 +332,21 @@ h1 .pop { color: #ffd23f; }
 .live .lt-tag b { display: block; font-family: "Bungee"; font-weight: 400; font-size: 9px; line-height: 1.1; color: #fff; }
 .live .lt-tag em { display: block; font-style: normal; font-size: 8px; font-weight: 600; line-height: 1.2; color: #c7d2fe; }
 @keyframes ltTag { from { opacity: 0; transform: translateY(8px) scale(.85); } }
-/* the move + facts box that replaces the generic stat bars on app-specific cards */
-.movebox { padding: 8px 10px 9px; }
-.movebox .mv { margin: 0 0 7px; font-size: 10.5px; font-weight: 600; line-height: 1.25; color: #4b3f6b; }
-.movebox .mv b { font-family: "Bungee"; font-weight: 400; font-size: 9px; color: #fff; background: #7a1212; padding: 2px 6px; border-radius: 3px; margin-right: 3px; }
-.movebox .facts { display: flex; gap: 5px; }
-.movebox .facts span { flex: 1; text-align: center; font-family: "Bungee"; font-size: 6.5px; letter-spacing: .04em; color: #7a1212;
-  background: #ece0bd; border: 1px solid #b6a577; border-radius: 4px; padding: 3px 2px 2px; }
-.movebox .facts b { display: block; font-size: 14px; line-height: 1; font-weight: 400; color: #2a2350; }
-.card:hover .movebox .facts b, .card.revealed.seen .movebox .facts b { color: color-mix(in srgb, var(--accent) 55%, #0b1020); }
+/* the text box: an attack line (energy symbol + move), then the app's traits.
+   It must fit between the badges and the card's bottom edge. */
+.movebox { padding: 5px 9px 6px; }
+.movebox .atk { display: flex; align-items: flex-start; gap: 6px; }
+.movebox .cost { flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 10.5px; line-height: 1;
+  background: radial-gradient(circle at 36% 30%, #fff 0 25%, color-mix(in srgb, var(--accent) 30%, #fff) 60%, color-mix(in srgb, var(--accent) 55%, #fff));
+  border: 2px solid #0b1020; box-shadow: inset 0 0 0 2px var(--accent), 0 1.5px 0 rgba(0,0,0,.35); }
+.movebox .mv { margin: 0; font-size: 10px; font-weight: 600; line-height: 1.22; color: #4b3f6b; }
+.movebox .mv b { font-family: "Bungee"; font-weight: 400; font-size: 9px; color: #fff; background: #7a1212; padding: 1px 6px; border-radius: 3px; margin-right: 3px; }
+.movebox .traits { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.movebox .atk + .traits { margin-top: 5px; padding-top: 4px; border-top: 1px dashed #b6a577; }
+.movebox .traits li { display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 600; line-height: 14px; color: #4b3f6b; }
+.movebox .traits i { flex: none; width: 14px; height: 14px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 8.5px; line-height: 1;
+  background: #ece0bd; border: 1px solid #b6a577; transition: background .25s ease, border-color .25s ease; }
+.card:hover .movebox .traits i, .card.revealed.seen .movebox .traits i { background: color-mix(in srgb, var(--accent) 30%, #f5ecd2); border-color: color-mix(in srgb, var(--accent) 60%, #0b1020); }
 
 /* ---- BACK (face-down) ---- */
 .back-face { transform: rotateY(180deg);
