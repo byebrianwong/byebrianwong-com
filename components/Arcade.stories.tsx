@@ -7,7 +7,8 @@ import { Sound } from '@/lib/sound';
 // Pick apps from data rather than hard-coding names, so a future change to
 // lib/apps.ts doesn't break these flow tests. A "plain" app opens the standard
 // inspect modal; a showcase app opens its own full-screen view.
-const plainApp = APPS.find((a) => !a.showcase)!;
+const plainApp = APPS.find((a) => !a.showcase && !a.game)!;
+const plainGame = APPS.find((a) => !a.showcase && a.game)!;
 const showcaseApp = APPS.find((a) => a.showcase === 'window-seat')!;
 const reelApp = APPS.find((a) => a.showcase === 'reel')!;
 
@@ -102,8 +103,32 @@ export const InspectCard: Story = {
       () => expect(canvasElement.querySelector('.inspect')).toHaveClass('on'),
       { timeout: 4000 },
     );
-    await expect(canvasElement.querySelector('.inspect .launch')!).toBeVisible();
+    const launch = canvasElement.querySelector('.inspect .launch')!;
+    await expect(launch).toBeVisible();
+    await expect(launch).toHaveTextContent('LAUNCH');
     await expect(window.location.hash).toBe(`#/card/${plainApp.id}`);
+  },
+};
+
+/** A game's inspect modal says PLAY instead of LAUNCH. */
+export const InspectGame: Story = {
+  beforeEach: () => {
+    window.location.hash = '#/cards';
+  },
+  play: async ({ canvasElement, userEvent }) => {
+    await allRevealed(canvasElement);
+    await userEvent.click(
+      canvasElement.querySelector<HTMLElement>(`.cards .card[data-app="${plainGame.id}"]`)!,
+    );
+    await waitFor(
+      () => expect(canvasElement.querySelector('.inspect')).toHaveClass('on'),
+      { timeout: 4000 },
+    );
+    const play = canvasElement.querySelector('.inspect .launch')!;
+    await expect(play).toBeVisible();
+    await expect(play).toHaveTextContent('PLAY');
+    await expect(play).not.toHaveTextContent('LAUNCH');
+    await expect(play).toHaveAttribute('href', plainGame.link);
   },
 };
 
@@ -155,9 +180,12 @@ export const BackButtonNavigation: Story = {
     await allRevealed(canvasElement);
     await expect(window.location.hash).toBe('#/cards');
 
+    // Wait for the URL first. The pack from the opening can still be on screen
+    // for a moment after the deal, so "the pack is visible" alone can pass
+    // before back has happened.
     window.history.back();
+    await waitFor(() => expect(window.location.hash).toBe(''), { timeout: 5000 });
     await waitFor(() => expect(rip(canvasElement)).toBeVisible(), { timeout: 5000 });
-    await expect(window.location.hash).toBe('');
   },
 };
 

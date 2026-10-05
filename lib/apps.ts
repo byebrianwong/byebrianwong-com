@@ -81,6 +81,8 @@ export interface AppCard {
   reel?: AppReel;
   /** A full-screen view opened in place of the standard detail panel. */
   showcase?: "window-seat" | "reel";
+  /** True for games. Their detail screen says PLAY instead of LAUNCH. */
+  game?: boolean;
 }
 
 export const APPS: AppCard[] = [
@@ -106,6 +108,7 @@ export const APPS: AppCard[] = [
     ],
     move: { name: "SNAP", text: "Frame it, centre it, catch the moment." },
     showcase: "window-seat",
+    game: true,
   },
   {
     id: "mainstream-hipster",
@@ -128,6 +131,7 @@ export const APPS: AppCard[] = [
     ],
     move: { name: "RANK IT", text: "Drag from mainstream to hipster, then see the real data." },
     showcase: "reel",
+    game: true,
   },
   {
     id: "edm-atlas",
@@ -172,6 +176,7 @@ export const APPS: AppCard[] = [
     ],
     move: { name: "GUESS EARLY", text: "Fewer clues, more points. Wrong guesses cost one." },
     showcase: "reel",
+    game: true,
   },
   {
     id: "saturday-boring-cereal",
@@ -220,7 +225,7 @@ export const APPS: AppCard[] = [
   { id: "dodone", name: "Do Done", tagline: "AI-native to-do app", type: "Tasks", icon: "✅", year: 2025, accent: "#22d3ee", hp: 120, rarity: "holo", link: "https://dodone.byebrianwong.com", stats: { users: "70K", rating: "4.8", platform: "Web" }, blurb: "A tasks and to-do app built for speed — AI-native and designed to work right inside Claude and Codex." },
   { id: "regibee", name: "Regibee", tagline: "Universal gift registry", type: "Registry", icon: "🐝", year: 2024, accent: "#f59e0b", hp: 150, rarity: "legendary", link: "https://regibee.com", stats: { users: "120K", rating: "4.9", platform: "Web" }, blurb: "One registry for weddings, baby showers, housewarmings, and more — pull gifts from any store into a single list." },
   { id: "tapsearch", name: "Tap Search", tagline: "Click to learn anything", type: "Extension", icon: "🔎", year: 2024, accent: "#3b82f6", hp: 90, rarity: "rare", link: "https://github.com/byebrianwong/tap-search", stats: { users: "35K", rating: "4.7", platform: "Chrome" }, blurb: "A Chrome extension to instantly learn about any word or subject — click anywhere on a page, learn inline, or save it for later." },
-  { id: "second-guess", name: "Second Guess", tagline: "Be #2 to become #1", type: "Party", icon: "🥈", year: 2026, accent: "#8b5cf6", hp: 110, rarity: "holo", link: "https://secondguess.byebrianwong.com", stats: { users: "85K", rating: "4.9", platform: "Web" }, blurb: "A real-time party game where being popular loses. Match the crowd's second-favorite answer — take silver to win gold." },
+  { id: "second-guess", name: "Second Guess", tagline: "Be #2 to become #1", type: "Party", icon: "🥈", year: 2026, accent: "#8b5cf6", hp: 110, rarity: "holo", link: "https://secondguess.byebrianwong.com", stats: { users: "85K", rating: "4.9", platform: "Web" }, blurb: "A real-time party game where being popular loses. Match the crowd's second-favorite answer — take silver to win gold.", game: true },
 ];
 
 export const RARITY: Record<Rarity, { label: string; gem: string; baseShine: number; rank: number }> = {

@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { RARITY, type AppCard } from "@/lib/apps";
 import { Sound } from "@/lib/sound";
+import LaunchButton from "./LaunchButton";
 
 /**
  * The full-screen view for an app with a recorded walkthrough (`app.reel`).
@@ -142,6 +143,7 @@ export default function ReelShowcase({
             {rarity.gem} {rarity.label}
           </span>
           <p className="sc-tagline">{app.tagline}</p>
+          <LaunchButton app={app} />
           <p>{app.blurb}</p>
           {app.facts && (
             <div className="sc-facts">
@@ -167,10 +169,6 @@ export default function ReelShowcase({
               </li>
             ))}
           </ol>
-
-          <a className="launch" href={app.link} target="_blank" rel="noopener noreferrer">
-            ▶ LAUNCH {app.name.toUpperCase()}
-          </a>
         </aside>
       </div>
     </div>

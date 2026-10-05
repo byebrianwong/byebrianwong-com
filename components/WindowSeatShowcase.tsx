@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { RARITY, type AppCard } from "@/lib/apps";
 import { Sound } from "@/lib/sound";
+import LaunchButton from "./LaunchButton";
 import {
   REELS_URL,
   SUBJECT_COUNT,
@@ -343,6 +344,7 @@ export default function WindowSeatShowcase({
             {rarity.gem} {rarity.label}
           </span>
           <p className="sc-tagline">{app.tagline}</p>
+          <LaunchButton app={app} />
           <p>{app.blurb}</p>
           <div className="sc-facts">
             <span>
@@ -386,10 +388,6 @@ export default function WindowSeatShowcase({
               </b>
             </div>
           </div>
-
-          <a className="launch" href={app.link} target="_blank" rel="noopener noreferrer">
-            ▶ LAUNCH {app.name.toUpperCase()}
-          </a>
         </aside>
       </div>
     </div>

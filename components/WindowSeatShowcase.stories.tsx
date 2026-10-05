@@ -9,8 +9,9 @@ const app = APPS.find((a) => a.showcase === 'window-seat')!;
  * Wonder Lens's full-screen view: the card's art window opened up into the
  * game's viewfinder. It plays real gameplay from public/cards/window-seat/,
  * names whoever is under the reticle, and scores each photo you take with the
- * points the game gave that frame. Video makes it a poor visual baseline, so
- * it stays out of Chromatic.
+ * points the game gave that frame. A playing video changes every frame, so
+ * most stories stay out of Chromatic. `Opened` pauses it on its first frame
+ * first, so Chromatic snapshots it.
  */
 const meta = {
   component: WindowSeatShowcase,
@@ -21,6 +22,41 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+/**
+ * What you see when you open the Wonder Lens card: the viewfinder, and beside
+ * it the PLAY button that opens the real game. The footage is paused on its
+ * first frame, and the story waits until the view has caught up (an empty
+ * progress bar) and every CSS transition has finished. After that it looks the
+ * same on every run, so Chromatic snapshots it.
+ */
+export const Opened: Story = {
+  parameters: { chromatic: { disableSnapshot: false } },
+  play: async ({ canvas, canvasElement, args }) => {
+    // The reels load from public/; the viewfinder shows the first world once they do.
+    const video = await waitFor(
+      () => {
+        const v = canvasElement.querySelector<HTMLVideoElement>('.sc-vf video');
+        expect(v).not.toBeNull();
+        return v!;
+      },
+      { timeout: 5000 },
+    );
+    video.pause();
+    video.currentTime = 0;
+    await waitFor(() =>
+      expect(canvasElement.querySelector<HTMLElement>('.sc-progress span')!.style.transform).toBe('scaleX(0)'),
+    );
+    await waitFor(() =>
+      expect(document.getAnimations().filter((a) => a instanceof CSSTransition && a.playState === 'running')).toHaveLength(0),
+    );
+
+    const play = canvas.getByRole('link', { name: new RegExp(`^play ${args.app.name}`, 'i') });
+    // The side panel fades in.
+    await waitFor(() => expect(play).toBeVisible());
+    await expect(play).toHaveAttribute('href', args.app.link);
+  },
+};
 
 /** Taking a photo uses a frame of film, and the scored photo pops up as a polaroid. */
 export const TakeAPhoto: Story = {
