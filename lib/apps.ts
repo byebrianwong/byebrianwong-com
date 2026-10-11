@@ -5,12 +5,21 @@ import trivealFootage from "./footage/triveal.json";
 import mainstreamHipsterFootage from "./footage/mainstream-hipster.json";
 import boringCerealFootage from "./footage/saturday-boring-cereal.json";
 import littleLexiconFootage from "./footage/little-lexicon.json";
+import doDoneFootage from "./footage/dodone.json";
+import regibeeFootage from "./footage/regibee.json";
+import tapSearchFootage from "./footage/tapsearch.json";
+import secondGuessFootage from "./footage/second-guess.json";
 
 const edmAtlas = fromRecording(edmAtlasFootage as WebFootage, "edmatlas.byebrianwong.com");
 const triveal = fromRecording(trivealFootage as WebFootage, "triveal.byebrianwong.com");
 const mainstreamHipster = fromRecording(mainstreamHipsterFootage as WebFootage, "mainstream-hipster.vercel.app");
 const boringCereal = fromRecording(boringCerealFootage as WebFootage, "saturdayboringcereal.byebrianwong.com");
 const littleLexicon = fromRecording(littleLexiconFootage as WebFootage, "little-lexicon.vercel.app");
+const doDone = fromRecording(doDoneFootage as WebFootage, "dodone.byebrianwong.com");
+const regibee = fromRecording(regibeeFootage as WebFootage, "regibee.com");
+// Tap Search is a browser extension, so its bar shows the page it is used on.
+const tapSearch = fromRecording(tapSearchFootage as WebFootage, "en.wikipedia.org");
+const secondGuess = fromRecording(secondGuessFootage as WebFootage, "secondguess.byebrianwong.com");
 
 // App data for the arcade. Every app is one card in the single booster pack.
 // Set each app's `rarity` to control its foil treatment and fanfare.
@@ -259,11 +268,17 @@ export const APPS: AppCard[] = [
     link: "https://dodone.byebrianwong.com",
     stats: { users: "70K", rating: "4.8", platform: "Web" },
     blurb: "A tasks and to-do app built for speed — AI-native and designed to work right inside Claude and Codex.",
+    ...doDone,
+    facts: [
+      { label: "VIEWS", value: "8" },
+      { label: "MCP TOOLS", value: "17" },
+    ],
     move: { name: "CHECK OFF", text: "Add a task, get it done, tick it off." },
     traits: [
       { icon: "🤖", text: "Works right inside Claude and Codex" },
       { icon: "⚡", text: "Built for speed" },
     ],
+    showcase: "reel",
   },
   {
     id: "regibee",
@@ -278,11 +293,18 @@ export const APPS: AppCard[] = [
     link: "https://regibee.com",
     stats: { users: "120K", rating: "4.9", platform: "Web" },
     blurb: "One registry for weddings, baby showers, housewarmings, and more — pull gifts from any store into a single list.",
+    ...regibee,
+    facts: [
+      { label: "CHECKLIST", value: "100" },
+      { label: "CATEGORIES", value: "10" },
+      { label: "GUEST SIGN-UPS", value: "0" },
+    ],
     move: { name: "POLLINATE", text: "Pull gifts from any store into one list." },
     traits: [
       { icon: "💍", text: "Weddings, baby showers and more" },
       { icon: "🎁", text: "One registry for every occasion" },
     ],
+    showcase: "reel",
   },
   {
     id: "tapsearch",
@@ -297,11 +319,17 @@ export const APPS: AppCard[] = [
     link: "https://github.com/byebrianwong/tap-search",
     stats: { users: "35K", rating: "4.7", platform: "Chrome" },
     blurb: "A Chrome extension to instantly learn about any word or subject — click anywhere on a page, learn inline, or save it for later.",
+    ...tapSearch,
+    facts: [
+      { label: "SOURCES", value: "3" },
+      { label: "SEARCHES", value: "2" },
+    ],
     move: { name: "TAP", text: "Click any word on a page to learn about it." },
     traits: [
       { icon: "🧩", text: "A Chrome extension for any page" },
       { icon: "🔖", text: "Save anything to read later" },
     ],
+    showcase: "reel",
   },
   {
     id: "second-guess",
@@ -316,11 +344,18 @@ export const APPS: AppCard[] = [
     link: "https://secondguess.byebrianwong.com",
     stats: { users: "85K", rating: "4.9", platform: "Web" },
     blurb: "A real-time party game where being popular loses. Match the crowd's second-favorite answer — take silver to win gold.",
+    ...secondGuess,
+    facts: [
+      { label: "#1 SCORES", value: "0" },
+      { label: "#2 SCORES", value: "3" },
+      { label: "SOLO BOTS", value: "15" },
+    ],
     move: { name: "TAKE SILVER", text: "Match the crowd's second-favorite answer." },
     traits: [
       { icon: "🎉", text: "A real-time party game" },
       { icon: "🥇", text: "The most popular answer loses" },
     ],
+    showcase: "reel",
     game: true,
   },
 ];

@@ -1,13 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, fn } from 'storybook/test';
-import { APPS } from '@/lib/apps';
+import { APPS, type AppCard } from '@/lib/apps';
 import Inspect from './Inspect';
 
 // The standard detail screen is for cards without a full-screen view of their
-// own. Pick one game and one non-game from the data, so these stories survive
-// changes to lib/apps.ts.
-const game = APPS.find((a) => !a.showcase && a.game)!;
-const notGame = APPS.find((a) => !a.showcase && !a.game)!;
+// own. Every card has one today, so these stories take one game and one
+// non-game from the data and drop their full-screen view and footage. That
+// keeps the screen tested for the next card that has neither.
+const plain = (app: AppCard): AppCard => ({ ...app, showcase: undefined, reel: undefined, live: undefined });
+const game = plain(APPS.find((a) => a.game)!);
+const notGame = plain(APPS.find((a) => !a.game)!);
 
 /**
  * The detail screen you reach by clicking a card that has no full-screen view

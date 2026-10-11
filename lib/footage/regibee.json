@@ -1,0 +1,81 @@
+{
+  "reel": {
+    "video": "/cards/regibee/reel.mp4",
+    "poster": "/cards/regibee/reel.jpg",
+    "duration": 36.5,
+    "marks": [
+      {
+        "t": 0.29,
+        "label": "One registry, every store",
+        "sub": "Parents add gifts from any shop and share a single link."
+      },
+      {
+        "t": 3.52,
+        "label": "My registries",
+        "sub": "Each registry shows how many gifts are covered and who just gave."
+      },
+      {
+        "t": 6.83,
+        "label": "Manage",
+        "sub": "Items, gifts fulfilled, and the total value at a glance."
+      },
+      {
+        "t": 9.86,
+        "label": "Gift activity",
+        "sub": "Who gave what, with their note, so thank-yous are easy."
+      },
+      {
+        "t": 15.38,
+        "label": "Expert checklist",
+        "sub": "About a hundred items new parents need, in ten categories."
+      },
+      {
+        "t": 22.61,
+        "label": "What guests see",
+        "sub": "The registry by category, with gift funds at the top."
+      },
+      {
+        "t": 25.72,
+        "label": "Browse by room",
+        "sub": "The sidebar jumps to each category."
+      },
+      {
+        "t": 27.88,
+        "label": "Gift it",
+        "sub": "Guests reserve a gift with just a name and email. No account."
+      },
+      {
+        "t": 31.33,
+        "label": "Thank you",
+        "sub": "The guest gets the shipping address, and the count drops so nobody overbuys."
+      }
+    ]
+  },
+  "card": {
+    "video": "/cards/regibee/card.mp4",
+    "poster": "/cards/regibee/card.jpg",
+    "duration": 11.55,
+    "marks": [
+      {
+        "t": 0.29,
+        "label": "THE REGISTRY",
+        "sub": "Gifts from any store, one link"
+      },
+      {
+        "t": 2.75,
+        "label": "NURSERY & SLEEP",
+        "sub": "Six things on the list"
+      },
+      {
+        "t": 4.92,
+        "label": "GIFT THIS",
+        "sub": "No account needed"
+      },
+      {
+        "t": 8.35,
+        "label": "THANK YOU!",
+        "sub": "Plus where to ship it"
+      }
+    ]
+  }
+}

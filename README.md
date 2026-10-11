@@ -5,10 +5,11 @@ Click it and it tears open, and every app card flies out into a grid, flipping
 face-up as it lands. Cards have holographic foil, a "watch demo" label on
 hover, arcade sound, and a click-to-inspect view.
 
-Some cards show real footage of the app instead of an icon. Wonder Lens's card
+Every card shows real footage of its app instead of an icon. Wonder Lens's card
 plays recorded gameplay under a camera viewfinder, and its full-screen view is
 the game's viewfinder: you can switch worlds and take photos that are scored
-the way the game scores them.
+the way the game scores them. The other cards play a recording of the app under
+a small browser bar, and open a longer walkthrough in chapters.
 
 Built with **Next.js (App Router) + React + TypeScript**. The whole experience is one
 client component; there's no backend.
@@ -43,7 +44,7 @@ npm run start
 - `lib/showcases/windowSeat.ts` — Wonder Lens's card loop and score-timeline types
 - `public/cards/<app>/` — each app's footage
 - `scripts/footage/window-seat/` — how Wonder Lens's footage was recorded (see its README)
-- `scripts/footage/web/` — how the web apps' footage is recorded from the live sites (see its README)
+- `scripts/footage/web/` — how the other apps' footage is recorded from the live sites (see its README)
 - `lib/arcadeRoute.ts` — the screen ↔ URL hash mapping (`#/cards`, `#/card/<app>`)
   that gives each screen its own history entry, so browser back walks the flow
   instead of leaving the site, and a card URL can be reloaded or shared. Links

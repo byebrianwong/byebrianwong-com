@@ -5,10 +5,9 @@ import { APPS } from '@/lib/apps';
 import { Sound } from '@/lib/sound';
 
 // Pick apps from data rather than hard-coding names, so a future change to
-// lib/apps.ts doesn't break these flow tests. A "plain" app opens the standard
-// inspect modal; a showcase app opens its own full-screen view.
-const plainApp = APPS.find((a) => !a.showcase && !a.game)!;
-const plainGame = APPS.find((a) => !a.showcase && a.game)!;
+// lib/apps.ts doesn't break these flow tests. Every card now opens a
+// full-screen view of its own: Wonder Lens's viewfinder, or a recorded
+// walkthrough. The standard inspect modal is tested in Inspect.stories.tsx.
 const showcaseApp = APPS.find((a) => a.showcase === 'window-seat')!;
 const reelApp = APPS.find((a) => a.showcase === 'reel')!;
 
@@ -89,52 +88,8 @@ export const RipThePack: Story = {
 };
 
 /**
- * Clicking a card without a showcase opens the standard inspect modal, with the
- * app's blurb, stat rows and launch button.
- */
-export const InspectCard: Story = {
-  play: async ({ canvasElement, userEvent }) => {
-    await userEvent.click(rip(canvasElement));
-    await allRevealed(canvasElement);
-    await userEvent.click(
-      canvasElement.querySelector<HTMLElement>(`.cards .card[data-app="${plainApp.id}"]`)!,
-    );
-    await waitFor(
-      () => expect(canvasElement.querySelector('.inspect')).toHaveClass('on'),
-      { timeout: 4000 },
-    );
-    const launch = canvasElement.querySelector('.inspect .launch')!;
-    await expect(launch).toBeVisible();
-    await expect(launch).toHaveTextContent('LAUNCH');
-    await expect(window.location.hash).toBe(`#/card/${plainApp.id}`);
-  },
-};
-
-/** A game's inspect modal says PLAY instead of LAUNCH. */
-export const InspectGame: Story = {
-  beforeEach: () => {
-    window.location.hash = '#/cards';
-  },
-  play: async ({ canvasElement, userEvent }) => {
-    await allRevealed(canvasElement);
-    await userEvent.click(
-      canvasElement.querySelector<HTMLElement>(`.cards .card[data-app="${plainGame.id}"]`)!,
-    );
-    await waitFor(
-      () => expect(canvasElement.querySelector('.inspect')).toHaveClass('on'),
-      { timeout: 4000 },
-    );
-    const play = canvasElement.querySelector('.inspect .launch')!;
-    await expect(play).toBeVisible();
-    await expect(play).toHaveTextContent('PLAY');
-    await expect(play).not.toHaveTextContent('LAUNCH');
-    await expect(play).toHaveAttribute('href', plainGame.link);
-  },
-};
-
-/**
- * A card with a showcase opens its own full-screen view instead: for Window
- * Seat, the game's viewfinder with a working shutter.
+ * Wonder Lens's card opens the game's viewfinder full screen, with a working
+ * shutter.
  */
 export const OpenShowcase: Story = {
   beforeEach: () => {
@@ -148,8 +103,6 @@ export const OpenShowcase: Story = {
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible(), { timeout: 4000 });
     await expect(canvas.getByRole('button', { name: 'Take a photo' })).toBeVisible();
     await expect(window.location.hash).toBe(`#/card/${showcaseApp.id}`);
-    // The standard modal stays closed.
-    await expect(canvasElement.querySelector('.inspect')).not.toHaveClass('on');
   },
 };
 
@@ -190,26 +143,20 @@ export const BackButtonNavigation: Story = {
 };
 
 /**
- * The inspect view is a screen of its own, so back closes it and leaves you on
- * the cards rather than resealing the pack.
+ * A card's full-screen view is a screen of its own, so back closes it and
+ * leaves you on the cards rather than resealing the pack.
  */
-export const BackClosesInspect: Story = {
-  play: async ({ canvasElement, userEvent }) => {
+export const BackClosesShowcase: Story = {
+  play: async ({ canvas, canvasElement, userEvent }) => {
     await userEvent.click(rip(canvasElement));
     await allRevealed(canvasElement);
     await userEvent.click(
-      canvasElement.querySelector<HTMLElement>(`.cards .card[data-app="${plainApp.id}"]`)!,
+      canvasElement.querySelector<HTMLElement>(`.cards .card[data-app="${reelApp.id}"]`)!,
     );
-    await waitFor(
-      () => expect(canvasElement.querySelector('.inspect')).toHaveClass('on'),
-      { timeout: 4000 },
-    );
+    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible(), { timeout: 4000 });
 
     window.history.back();
-    await waitFor(
-      () => expect(canvasElement.querySelector('.inspect')).not.toHaveClass('on'),
-      { timeout: 4000 },
-    );
+    await waitFor(() => expect(canvas.queryByRole('dialog')).toBeNull(), { timeout: 4000 });
     await expect(window.location.hash).toBe('#/cards');
   },
 };
@@ -240,14 +187,11 @@ export const DeepLinkToCards: Story = {
  */
 export const OldPackLink: Story = {
   beforeEach: () => {
-    window.location.hash = `#/pack/arcade/${plainApp.id}`;
+    window.location.hash = `#/pack/arcade/${reelApp.id}`;
   },
-  play: async ({ canvasElement }) => {
-    await waitFor(
-      () => expect(canvasElement.querySelector('.inspect')).toHaveClass('on'),
-      { timeout: 4000 },
-    );
-    await expect(window.location.hash).toBe(`#/card/${plainApp.id}`);
+  play: async ({ canvas }) => {
+    await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible(), { timeout: 4000 });
+    await expect(window.location.hash).toBe(`#/card/${reelApp.id}`);
   },
 };
 

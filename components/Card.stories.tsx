@@ -5,12 +5,13 @@ import { Card } from './Card';
 
 // Pick a representative app per rarity, so these stories survive app-data
 // churn: the specific apps (ids/names) change often, but the four rarities are
-// fixed by the `Rarity` type and always present in the set. Cards with footage
-// are left out here and get their own story, so video never lands in these
-// baselines. When every app of a rarity has footage, a card without footage
-// is shown with that rarity instead.
-const sample = (rarity: AppCard['rarity']): AppCard =>
-  APPS.find((a) => a.rarity === rarity && !a.live) ?? { ...APPS.find((a) => !a.live)!, rarity };
+// fixed by the `Rarity` type and always present in the set. Every app now has
+// footage, so these stories drop it and show the card's icon art instead. That
+// keeps video out of these baselines; footage has its own stories below.
+const sample = (rarity: AppCard['rarity']): AppCard => ({
+  ...(APPS.find((a) => a.rarity === rarity) ?? { ...APPS[0], rarity }),
+  live: undefined,
+});
 const liveApp = APPS.find((a) => a.live && (a.live.style ?? 'viewfinder') === 'viewfinder')!;
 const webApp = APPS.find((a) => a.live?.style === 'tags')!;
 
