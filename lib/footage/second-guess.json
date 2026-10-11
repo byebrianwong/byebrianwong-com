@@ -1,0 +1,71 @@
+{
+  "card": {
+    "video": "/cards/second-guess/card.mp4",
+    "poster": "/cards/second-guess/card.jpg",
+    "duration": 16.36,
+    "marks": [
+      {
+        "t": 0.3,
+        "label": "QUESTION 1",
+        "sub": "15 bots answer too"
+      },
+      {
+        "t": 5.13,
+        "label": "AIM FOR #2",
+        "sub": "The crowd’s second favourite"
+      },
+      {
+        "t": 8.82,
+        "label": "THE REVEAL",
+        "sub": "#1 is too popular: 0 points"
+      },
+      {
+        "t": 12.9,
+        "label": "JUST RIGHT",
+        "sub": "#2 scores 3 points"
+      }
+    ]
+  },
+  "reel": {
+    "video": "/cards/second-guess/reel.mp4",
+    "poster": "/cards/second-guess/reel.jpg",
+    "duration": 28.19,
+    "marks": [
+      {
+        "t": 0.3,
+        "label": "Be #2 to become #1",
+        "sub": "A party game where the most popular answer scores nothing."
+      },
+      {
+        "t": 3.6,
+        "label": "Solo game",
+        "sub": "Five questions against 15 computer players. With friends, everyone joins by code on their phone."
+      },
+      {
+        "t": 7.82,
+        "label": "The question",
+        "sub": "Everyone answers in a word or two."
+      },
+      {
+        "t": 12.85,
+        "label": "Aim for #2",
+        "sub": "Guess what the crowd’s second favourite answer will be."
+      },
+      {
+        "t": 16.04,
+        "label": "The reveal",
+        "sub": "Answers are tallied and revealed from the bottom up."
+      },
+      {
+        "t": 21.13,
+        "label": "Just right",
+        "sub": "The #1 answer is too popular and scores 0. #2 scores 3, #3 scores 2."
+      },
+      {
+        "t": 25.19,
+        "label": "Leaderboard",
+        "sub": "Scores add up over the five questions."
+      }
+    ]
+  }
+}

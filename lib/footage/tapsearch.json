@@ -1,0 +1,71 @@
+{
+  "card": {
+    "video": "/cards/tapsearch/card.mp4",
+    "poster": "/cards/tapsearch/card.jpg",
+    "duration": 10.66,
+    "marks": [
+      {
+        "t": 0.3,
+        "label": "ANY PAGE",
+        "sub": "Double-click a word you don’t know"
+      },
+      {
+        "t": 2.13,
+        "label": "A QUICK SUMMARY",
+        "sub": "Plus the dictionary definition"
+      },
+      {
+        "t": 5.62,
+        "label": "LOOK IT UP",
+        "sub": "Wikipedia or Google, one click"
+      },
+      {
+        "t": 8.06,
+        "label": "SAVED",
+        "sub": "Kept for later"
+      }
+    ]
+  },
+  "reel": {
+    "video": "/cards/tapsearch/reel.mp4",
+    "poster": "/cards/tapsearch/reel.jpg",
+    "duration": 19.87,
+    "marks": [
+      {
+        "t": 0.29,
+        "label": "Any page",
+        "sub": "Tap Search works on any website, here a Wikipedia article."
+      },
+      {
+        "t": 3.02,
+        "label": "Double-click a word",
+        "sub": "A tooltip opens right there with a short summary and the dictionary entry."
+      },
+      {
+        "t": 6.32,
+        "label": "Go deeper",
+        "sub": "One click searches the word on Wikipedia or Google."
+      },
+      {
+        "t": 8.75,
+        "label": "Save it",
+        "sub": "The bookmark keeps the word, its summary and its definitions."
+      },
+      {
+        "t": 11.21,
+        "label": "Saved words",
+        "sub": "Everything you saved, newest first, on one page."
+      },
+      {
+        "t": 13.84,
+        "label": "Read it again",
+        "sub": "Each word opens to the summary and definitions you saw on the page."
+      },
+      {
+        "t": 17.47,
+        "label": "Search",
+        "sub": "Filter the list as you type."
+      }
+    ]
+  }
+}

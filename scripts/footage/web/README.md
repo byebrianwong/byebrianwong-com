@@ -72,3 +72,18 @@ Notes for the existing plans:
 - **Little Lexicon** knows the right meaning for the first dozen words a new
   visitor sees. If its word list changes, the plan stops at the first word it
   doesn't know; add that word's first definition from `words.json`.
+- **DoDone** and **Regibee** are recorded on each app's public demo
+  (`/demo`), which runs the real pages on sample data kept in the browser.
+  Nothing reaches either app's database. DoDone's typed task says "today"
+  rather than a time, because "5pm" after 5 pm moves it to tomorrow. Regibee
+  gifts the crib sheets, not the crib: on the demo, gifting the last one of an
+  item skips the thank-you dialog.
+- **Tap Search** is a Chrome extension, which headless Chromium can't load. The
+  plan runs the extension's real content script and saved-words page, fetched
+  from its public GitHub repo, on a Wikipedia article, with a stand-in for
+  `chrome.runtime`. The tooltip's summary and definitions are the samples from
+  the repo's `stories.html`, not a live AI call.
+- **Second Guess** plays the live solo mode, so each take saves a real game to
+  its database and leaves it unfinished. Don't re-record it without a reason.
+  The plan reads the bots' answers as they are saved, then answers with the
+  one that will land at #2.

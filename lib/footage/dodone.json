@@ -1,0 +1,76 @@
+{
+  "card": {
+    "video": "/cards/dodone/card.mp4",
+    "poster": "/cards/dodone/card.jpg",
+    "duration": 11.78,
+    "marks": [
+      {
+        "t": 1.73,
+        "label": "QUICK ADD",
+        "sub": "Type it the way you say it"
+      },
+      {
+        "t": 4.7,
+        "label": "PARSED",
+        "sub": "Today · P1 · #party"
+      },
+      {
+        "t": 6.84,
+        "label": "ADDED",
+        "sub": "Straight onto Today"
+      },
+      {
+        "t": 9.18,
+        "label": "DONE",
+        "sub": "One tap to tick it off"
+      }
+    ]
+  },
+  "reel": {
+    "video": "/cards/dodone/reel.mp4",
+    "poster": "/cards/dodone/reel.jpg",
+    "duration": 29.6,
+    "marks": [
+      {
+        "t": 0.3,
+        "label": "Today",
+        "sub": "Today's meetings, anything overdue, and the tasks to focus on first."
+      },
+      {
+        "t": 3.83,
+        "label": "Quick add",
+        "sub": "Type a task the way you would say it."
+      },
+      {
+        "t": 6.83,
+        "label": "Parsed as you type",
+        "sub": "The date, priority and tag become chips before you press Enter."
+      },
+      {
+        "t": 10.89,
+        "label": "Done",
+        "sub": "Ticking a task off plays a small burst, with an undo in case."
+      },
+      {
+        "t": 14.7,
+        "label": "Upcoming",
+        "sub": "The week ahead, day by day."
+      },
+      {
+        "t": 18.37,
+        "label": "Projects",
+        "sub": "Tasks grouped by project, with subtasks and estimates."
+      },
+      {
+        "t": 22.08,
+        "label": "Calendar",
+        "sub": "Tasks and meetings side by side on one calendar."
+      },
+      {
+        "t": 25.32,
+        "label": "Command palette",
+        "sub": "Jump anywhere or run any action from the keyboard."
+      }
+    ]
+  }
+}
