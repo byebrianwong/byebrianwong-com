@@ -11,6 +11,7 @@
     "chromatic": "chromatic"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "next": "^16.2.6",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"

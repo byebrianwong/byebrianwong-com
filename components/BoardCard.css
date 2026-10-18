@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif&family=Inter+Tight:wght@400..800&family=JetBrains+Mono:wght@400..700&family=Space+Grotesk:wght@400..700&display=swap');
+
+/* Four board-game card designs (see BoardCard.tsx). Every rule is scoped
+   under .bc so nothing here touches the live card. A card is 320 x 448. */
+
+.bc { --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --deep: color-mix(in oklab, var(--accent) 62%, #15130e);
+  position: relative; width: 320px; height: 448px; flex: none; overflow: hidden; text-align: left;
+  transition: transform .25s cubic-bezier(.2,.8,.3,1), box-shadow .25s ease; }
+.bc:hover { transform: translateY(-4px); }
+.bc h3, .bc p, .bc ul { margin: 0; padding: 0; }
+.bc ul { list-style: none; }
+.bc svg { flex: none; display: block; }
+
+/* ---- the art window and its color treatment ----
+   The footage plays as-is; blend layers on top (.bc-grade i) give it the
+   design's shared look. Besides a shared hue, each design pulls whites down
+   and lifts blacks, so apps with white interfaces and apps with dark ones
+   land in the same range of tones. Each design sets what the layers are. On hover they
+   fade out and the footage shows in its real colors. */
+.bc-art { position: relative; overflow: hidden; isolation: isolate; background: #222; }
+.bc-art video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.bc-noart { position: absolute; inset: 0; display: grid; place-items: center; background: var(--accent); color: #fff; }
+.bc-noart svg { width: 40%; height: 40%; }
+.bc-grade { position: absolute; inset: 0; pointer-events: none; transition: opacity .45s ease; }
+.bc-grade i { position: absolute; inset: 0; }
+.bc:hover .bc-grade { opacity: 0; }
+
+/* ===================== 1. TABLETOP ===================== */
+.bc-tabletop { padding: 9px; border-radius: 18px; background: var(--grain), #efe7d6; background-blend-mode: multiply;
+  box-shadow: 0 0 0 1px rgba(60,45,20,.18), 0 18px 32px -18px rgba(25,18,6,.65); }
+.tt-inner { height: 100%; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 11px 11px 8px; border-radius: 12px;
+  font-family: "Bricolage Grotesque", system-ui, sans-serif; color: #241f16;
+  background: color-mix(in oklab, var(--accent) 12%, #f7f1e4); box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--accent) 45%, #5a4c34); }
+.tt-window { position: relative; align-self: stretch; flex: 1; min-height: 0; }
+.tt-art { position: absolute; inset: 0; border-radius: 150px 150px 10px 10px; }
+.tt-art::after { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 2;
+  box-shadow: inset 0 0 0 3px #fbf6ea, inset 0 0 0 4.5px color-mix(in oklab, var(--accent) 50%, #3a3122); }
+/* tinted in the app's own color: its hue over the footage's light and dark */
+.tt-art .bc-grade i:nth-child(1) { background: color-mix(in oklab, var(--accent) 80%, #8c8270); mix-blend-mode: color; }
+.tt-art .bc-grade i:nth-child(2) { background: color-mix(in oklab, var(--accent) 45%, #1f1a12); mix-blend-mode: lighten; }
+.tt-art .bc-grade i:nth-child(3) { background: color-mix(in oklab, var(--accent) 38%, #f3ead6); mix-blend-mode: multiply; }
+.tt-hp, .tt-type { position: absolute; z-index: 3; bottom: -12px; display: flex; align-items: center; justify-content: center;
+  border: 2px solid #2b2418; box-shadow: 0 2px 0 rgba(30,22,8,.35); }
+.tt-hp { left: -3px; gap: 3px; height: 32px; padding: 0 10px 0 8px; border-radius: 999px; background: #fffaf0; }
+.tt-hp svg { width: 15px; height: 15px; color: #d0432f; }
+.tt-hp b { font-size: 16px; font-weight: 800; }
+.tt-type { right: -3px; width: 38px; height: 38px; border-radius: 50%; background: var(--deep); color: #fff; }
+.tt-type svg { width: 19px; height: 19px; }
+.tt-name { margin-top: 12px !important; font-size: 23px; font-weight: 800; letter-spacing: -.02em; line-height: 1; text-align: center; white-space: nowrap; }
+.bc-tabletop.is-long .tt-name { font-size: 18px; }
+.tt-move { display: flex; align-items: flex-start; justify-content: center; gap: 4px; max-width: 260px; text-align: center;
+  font-family: "Inter Tight", system-ui, sans-serif; font-size: 11.5px; line-height: 1.3; color: #5b5242; }
+.tt-move svg { width: 12px; height: 12px; margin-top: 1px; color: var(--deep); }
+.tt-chips { display: flex; justify-content: center; gap: 5px; }
+.tt-chips li { display: flex; align-items: center; gap: 4px; padding: 3px 8px 3px 6px; border-radius: 999px; white-space: nowrap;
+  font-size: 10px; font-weight: 700; letter-spacing: .02em; color: #3d3527; background: #fffaf0;
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--accent) 40%, #6b5d43); }
+.tt-chips svg { width: 12px; height: 12px; color: var(--deep); }
+.tt-foot { align-self: stretch; display: flex; justify-content: space-between; font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px; color: #8a7e66; }
+.tt-foot span { display: flex; align-items: center; gap: 3px; }
+.tt-foot svg { width: 9px; height: 9px; }
+
+/* ===================== 2. ARENA ===================== */
+.bc-arena { border-radius: 18px; background: #0b0d16; font-family: "Archivo", system-ui, sans-serif; color: #fff;
+  box-shadow: 0 18px 36px -16px rgba(0,0,0,.85); }
+.bc-arena::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 5;
+  box-shadow: inset 0 0 0 3px var(--accent), inset 0 0 0 4px rgba(0,0,0,.6), inset 0 0 0 5px rgba(255,255,255,.12); }
+.ar-art { position: absolute; inset: 0; }
+/* one cool blue grade for every app; the app's own color is only in the rim */
+.ar-art .bc-grade i:nth-child(1) { background: #5b77d9; mix-blend-mode: color; }
+.ar-art .bc-grade i:nth-child(2) { background: #111a3a; mix-blend-mode: lighten; }
+.ar-art .bc-grade i:nth-child(4) { background: #8ea2e4; mix-blend-mode: multiply; }
+.ar-art .bc-grade i:nth-child(3) { background: radial-gradient(120% 90% at 50% 35%, transparent 55%, rgba(5,7,16,.75)); }
+.ar-hex, .ar-shield { position: absolute; top: 12px; z-index: 3; display: grid; place-items: center; width: 46px; height: 52px;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,.55)); }
+.ar-hex::before, .ar-shield::before, .ar-hex::after, .ar-shield::after { content: ""; position: absolute; inset: 0; clip-path: var(--shape); }
+.ar-hex::before, .ar-shield::before { background: #f4f1e8; }
+.ar-hex::after, .ar-shield::after { inset: 3px; }
+.ar-hex { left: 12px; --shape: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+.ar-hex::after { background: linear-gradient(160deg, color-mix(in oklab, var(--accent) 85%, #fff), var(--deep)); }
+.ar-hex svg { position: relative; z-index: 1; width: 22px; height: 22px; color: #fff; filter: drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
+.ar-shield { right: 12px; --shape: polygon(0 0, 100% 0, 100% 64%, 50% 100%, 0 64%); place-content: start center; padding-top: 7px; }
+.ar-shield::after { background: linear-gradient(180deg, #ff8b52, #d9441f); }
+.ar-shield b, .ar-shield small { position: relative; z-index: 1; display: block; text-align: center; line-height: 1; }
+.ar-shield b { font-size: 20px; font-weight: 900; font-stretch: 72%; text-shadow: 0 1px 0 rgba(0,0,0,.35); }
+.ar-shield small { font-size: 7px; font-weight: 800; letter-spacing: .12em; margin-top: 1px; }
+.ar-bottom { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-direction: column; align-items: center;
+  padding: 70px 20px 18px; text-align: center;
+  background: linear-gradient(to top, rgba(8,10,20,.97) 0%, rgba(8,10,20,.92) 48%, rgba(8,10,20,0)); }
+.ar-rar svg { width: 14px; height: 14px; color: #9aa3bf; }
+.r-legendary .ar-rar svg { color: #f2c94c; }
+.r-holo .ar-rar svg { color: #8fe3f2; }
+.r-rare .ar-rar svg { color: #dfe4ee; }
+.ar-name { margin-top: 5px !important; font-size: 29px; font-weight: 900; font-stretch: 74%; text-transform: uppercase; letter-spacing: .01em; line-height: .95;
+  text-shadow: 0 2px 0 rgba(0,0,0,.5); white-space: nowrap; }
+.bc-arena.is-long .ar-name { font-size: 23px; }
+.ar-line { margin-top: 5px !important; font-family: "Inter Tight", system-ui, sans-serif; font-size: 12.5px; color: #c4c9da; }
+.ar-icons { display: flex; gap: 10px; margin-top: 10px; }
+.ar-icons svg { width: 15px; height: 15px; color: #7d86a3; }
+
+/* ===================== 3. EURO ===================== */
+.bc-euro { border-radius: 14px; background: #fbfaf7; display: flex; flex-direction: column; font-family: "Space Grotesk", system-ui, sans-serif; color: #1d1b16;
+  box-shadow: 0 0 0 1px #dcd8ce, 0 14px 30px -18px rgba(30,25,10,.45); }
+.eu-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 11px; background: var(--accent); }
+.eu-name { font-size: 20px; font-weight: 700; letter-spacing: -.02em; line-height: 1.05; white-space: nowrap; }
+.bc-euro.is-long .eu-name { font-size: 16px; }
+.eu-hp { display: flex; align-items: center; gap: 4px; font-size: 15px; font-weight: 700; }
+.eu-hp svg { width: 15px; height: 15px; }
+.eu-art { flex: 1; min-height: 0; margin: 12px 12px 0; border-radius: 10px; }
+/* black and white for every app; the color lives in the header */
+.eu-art .bc-grade i:nth-child(1) { background: #808080; mix-blend-mode: saturation; }
+.eu-art .bc-grade i:nth-child(2) { background: #d9d5cb; mix-blend-mode: multiply; }
+.eu-art .bc-grade i:nth-child(3) { background: #3b3934; mix-blend-mode: lighten; }
+.eu-tag { padding: 9px 14px 0 !important; font-size: 12.5px; font-weight: 500; color: #3c3931; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eu-stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: 9px 12px 0 !important; border-top: 1px solid #e6e2d8; border-bottom: 1px solid #e6e2d8; }
+.eu-stats li { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px 7px; min-width: 0; }
+.eu-stats li + li { border-left: 1px solid #ece8df; }
+.eu-stats svg { width: 22px; height: 22px; color: color-mix(in oklab, var(--accent) 70%, #1c1a15); }
+.eu-stats span { font-size: 8.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #6f6a5e; white-space: nowrap; }
+.eu-foot { display: flex; justify-content: space-between; padding: 7px 14px 10px; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9px; color: #9a958a; }
+
+/* ===================== 4. FILM ===================== */
+.bc-film { padding: 12px 12px 13px; border-radius: 16px; background: #f8f5ef; display: flex; flex-direction: column; gap: 9px;
+  font-family: "Inter Tight", system-ui, sans-serif; color: #1f1c17;
+  box-shadow: 0 0 0 1px rgba(60,50,30,.1), 0 16px 32px -18px rgba(30,22,8,.55); }
+.fm-photo { position: relative; flex: 1; min-height: 0; border-radius: 10px; overflow: hidden; }
+.fm-art { position: absolute; inset: 0; }
+/* one soft film grade for every app: some color kept, muted, warm, faded blacks, grain */
+.fm-art .bc-grade i:nth-child(1) { background: #8c8c8c; mix-blend-mode: saturation; opacity: .55; }
+.fm-art .bc-grade i:nth-child(2) { background: #f0b56e; mix-blend-mode: soft-light; opacity: .55; }
+.fm-art .bc-grade i:nth-child(3) { background: #3d3128; mix-blend-mode: lighten; }
+.fm-art .bc-grade i:nth-child(4) { background: #e8d8bd; mix-blend-mode: multiply; }
+.fm-art .bc-grade::after { content: ""; position: absolute; inset: 0; background: var(--grain), radial-gradient(130% 100% at 50% 40%, transparent 60%, rgba(40,28,12,.35));
+  mix-blend-mode: multiply; }
+.fm-chip, .fm-rar { position: absolute; z-index: 2; display: flex; align-items: center; background: rgba(250,247,240,.82);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+.fm-chip { left: 10px; bottom: 10px; gap: 5px; padding: 5px 10px 5px 7px; border-radius: 999px; font-size: 11px; font-weight: 600; color: #2a261f; }
+.fm-chip svg { width: 14px; height: 14px; color: var(--deep); }
+.fm-rar { top: 10px; right: 10px; width: 28px; height: 28px; border-radius: 50%; justify-content: center; }
+.fm-rar svg { width: 14px; height: 14px; color: #9a948a; }
+.r-legendary .fm-rar svg { color: #c08a1e; }
+.r-holo .fm-rar svg { color: #5ba3c4; }
+.r-rare .fm-rar svg { color: #6d7484; }
+.fm-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 0 2px; }
+.fm-name { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; font-size: 31px; line-height: 1; letter-spacing: -.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bc-film.is-long .fm-name { font-size: 25px; }
+.fm-hp { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: #3a352c; }
+.fm-hp svg { width: 13px; height: 13px; color: #d2543a; }
+.fm-sub { margin-top: -5px; align-items: center; }
+.fm-tag { font-size: 12.5px; color: #6d665a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fm-icons { display: flex; gap: 7px; }
+.fm-icons svg { width: 16px; height: 16px; color: #8b8476; }

@@ -43,7 +43,7 @@ function Row({ variant, apps = samples, playing = false }: { variant: CardVarian
  * snapshots are stable.
  */
 const meta = {
-  title: 'Card variations',
+  title: 'Card variations/Round 1',
   component: CardVariant,
   tags: ['ai-generated'],
   parameters: { layout: 'fullscreen' },

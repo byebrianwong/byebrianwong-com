@@ -35,6 +35,7 @@ npm run start
 - `components/Booster.tsx` — the 3D booster pack and its opening animation
 - `components/Card.tsx` — the card face; `components/LiveArt.tsx` plays footage in the art window
 - `components/CardVariants.tsx` — six alternative card designs to compare in Storybook ("Card variations"); not used by the arcade yet
+- `components/BoardCard.tsx` — four more card designs in a board-game style, with one shared color treatment for all footage (Storybook, "Card variations/Round 2"); not used by the arcade yet
 - `components/WindowSeatShowcase.tsx` — Wonder Lens's full-screen viewfinder
 - `lib/apps.ts` — the app data. Set each app's `rarity` (`common` | `rare` | `holo` |
   `legendary`) and point `link` at the real app URL so the LAUNCH button works.
