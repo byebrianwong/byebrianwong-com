@@ -87,3 +87,8 @@ Notes for the existing plans:
   its database and leaves it unfinished. Don't re-record it without a reason.
   The plan reads the bots' answers as they are saved, then answers with the
   one that will land at #2.
+- **Little One Percentile** keeps measurements in the browser's local storage,
+  so recording it saves nothing anywhere. The plan opens the site with
+  `?units=imperial`, because headless Chromium's language makes the app pick
+  kg and cm. In the reel, the pinned point is dragged to near the median, so
+  the measurement added at 5 months (the 51st percentile) follows on from it.
