@@ -80,15 +80,19 @@ export interface AppCard {
   link: string;
   stats: { users: string; rating: string; platform: string };
   blurb: string;
-  /** Gameplay footage for the art window. Cards without it show their icon. */
+  /** Footage for the card's art window. Cards without it show their type's symbol. */
   live?: LiveMedia;
   /** Counts shown in the full-screen reel view, next to the blurb that explains them. */
   facts?: { label: string; value: string }[];
-  /** What you actually do in the app, written like a trading-card attack. */
+  /**
+   * What you actually do in the app, written like a trading-card attack. The
+   * card shows `text` as its one line under the name.
+   */
   move?: { name: string; text: string };
   /**
-   * Two short lines under the move, each a symbol and a plain description.
-   * Write words, not bare numbers: a card has no room to explain a number.
+   * Two short lines about the app, each a symbol and a plain description.
+   * Not shown on the card face right now (it keeps text to one line).
+   * Write words, not bare numbers: there's no room to explain a number.
    */
   traits?: { icon: string; text: string }[];
   /** A walkthrough of the real app, shown full screen by the "reel" showcase. */

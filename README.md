@@ -2,14 +2,18 @@
 
 A booster-pack arcade portfolio. The site opens on one sealed 3D booster pack.
 Click it and it tears open, and every app card flies out into a grid, flipping
-face-up as it lands. Cards have holographic foil, a "watch demo" label on
-hover, arcade sound, and a click-to-inspect view.
+face-up as it lands. The cards are styled like a modern board game: cream
+card stock, an arched art window, icon tokens and chips, and a foil border on
+rare, holo and legendary cards. They tilt under the pointer, show a "watch
+demo" label on hover, and open a full-screen view on click. There's arcade
+sound too.
 
-Every card shows real footage of its app instead of an icon. Wonder Lens's card
-plays recorded gameplay under a camera viewfinder, and its full-screen view is
-the game's viewfinder: you can switch worlds and take photos that are scored
-the way the game scores them. The other cards play a recording of the app under
-a small browser bar, and open a longer walkthrough in chapters.
+Every card shows real footage of its app instead of an icon. So that very
+different apps still look like one set, every card's footage is tinted in its
+app's color, with whites pulled down and blacks lifted; hovering a card shows
+the real colors. Wonder Lens's full-screen view is the game's viewfinder: you
+can switch worlds and take photos that are scored the way the game scores
+them. The other cards open a longer walkthrough of the app in chapters.
 
 Built with **Next.js (App Router) + React + TypeScript**. The whole experience is one
 client component; there's no backend.
@@ -33,15 +37,13 @@ npm run start
 - `app/` — Next.js App Router (`layout.tsx`, `page.tsx`, `globals.css`, `icon.svg`)
 - `components/Arcade.tsx` — the whole flow: sealed pack → opening → card grid → inspect
 - `components/Booster.tsx` — the 3D booster pack and its opening animation
-- `components/Card.tsx` — the card face; `components/LiveArt.tsx` plays footage in the art window
-- `components/CardVariants.tsx` — six alternative card designs to compare in Storybook ("Card variations"); not used by the arcade yet
-- `components/BoardCard.tsx` — four more card designs in a board-game style, with one shared color treatment for all footage (Storybook, "Card variations/Round 2"); not used by the arcade yet
+- `components/Card.tsx` — the card's front and back faces, including the footage in the art window
 - `components/WindowSeatShowcase.tsx` — Wonder Lens's full-screen viewfinder
 - `lib/apps.ts` — the app data. Set each app's `rarity` (`common` | `rare` | `holo` |
   `legendary`) and point `link` at the real app URL so the LAUNCH button works.
   Optional fields make a card specific to its app: `live` (footage for the art
-  window), `move` and `traits` (the card's text box: an attack line and two
-  short lines, each with a symbol), `facts` (counts shown in the full-screen
+  window), `move` (its `text` is the one line under the card's name), `traits`
+  (two short lines about the app; not shown on the card right now), `facts` (counts shown in the full-screen
   reel view), and `showcase` (a full-screen view of its own).
 - `lib/showcases/windowSeat.ts` — Wonder Lens's card loop and score-timeline types
 - `public/cards/<app>/` — each app's footage

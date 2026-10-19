@@ -12,7 +12,7 @@ import {
 } from "@/lib/arcadeRoute";
 import { Sound } from "@/lib/sound";
 import { Booster, type BoosterHandle } from "./Booster";
-import { CardFace } from "./Card";
+import { CardBack, CardFace } from "./Card";
 import Inspect from "./Inspect";
 import ReelShowcase from "./ReelShowcase";
 import WindowSeatShowcase from "./WindowSeatShowcase";
@@ -438,8 +438,7 @@ export default function Arcade() {
               const isUp = revealed.has(app.id);
               const cls =
                 `card r-${app.rarity}` +
-                (app.live ? " has-live" : "") +
-                (isUp ? " revealed seen" : "") +
+                (isUp ? " revealed" : "") +
                 (popId === app.id ? " pop" : "");
               return (
                 <div
@@ -461,9 +460,7 @@ export default function Arcade() {
                           <CardFace app={app} playing={isUp && !inspectApp} />
                         </div>
                         <div className="face back-face">
-                          <span className="bhalf" />
-                          <span className="bstar">★</span>
-                          <span className="bwm">BYEBRIANWONG · ARCADE</span>
+                          <CardBack />
                         </div>
                       </div>
                     </div>
