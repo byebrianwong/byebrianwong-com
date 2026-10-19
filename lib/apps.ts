@@ -9,6 +9,7 @@ import doDoneFootage from "./footage/dodone.json";
 import regibeeFootage from "./footage/regibee.json";
 import tapSearchFootage from "./footage/tapsearch.json";
 import secondGuessFootage from "./footage/second-guess.json";
+import littleOnePercentileFootage from "./footage/little-one-percentile.json";
 
 const edmAtlas = fromRecording(edmAtlasFootage as WebFootage, "edmatlas.byebrianwong.com");
 const triveal = fromRecording(trivealFootage as WebFootage, "triveal.byebrianwong.com");
@@ -20,6 +21,7 @@ const regibee = fromRecording(regibeeFootage as WebFootage, "regibee.com");
 // Tap Search is a browser extension, so its bar shows the page it is used on.
 const tapSearch = fromRecording(tapSearchFootage as WebFootage, "en.wikipedia.org");
 const secondGuess = fromRecording(secondGuessFootage as WebFootage, "secondguess.byebrianwong.com");
+const littleOnePercentile = fromRecording(littleOnePercentileFootage as WebFootage, "little-one-percentile.vercel.app");
 
 // App data for the arcade. Every app is one card in the single booster pack.
 // Set each app's `rarity` to control its foil treatment and fanfare.
@@ -357,6 +359,32 @@ export const APPS: AppCard[] = [
     ],
     showcase: "reel",
     game: true,
+  },
+  {
+    id: "little-one-percentile",
+    name: "Little One Percentile",
+    tagline: "Interactive baby growth chart",
+    type: "Parenting",
+    icon: "👶",
+    year: 2026,
+    accent: "#eb6834",
+    hp: 90,
+    rarity: "rare",
+    link: "https://little-one-percentile.vercel.app",
+    stats: { users: "—", rating: "—", platform: "Web" },
+    blurb: "See where a baby's weight, length or head size falls on the WHO growth charts, worked out for every day from birth to 2 years. Point anywhere on the chart to read it, look up any age and percentile without entering anything, or add your baby's measurements. They stay in your browser.",
+    ...littleOnePercentile,
+    facts: [
+      { label: "MEASURES", value: "3" },
+      { label: "DAYS", value: "731" },
+      { label: "UPLOADS", value: "0" },
+    ],
+    move: { name: "PIN IT", text: "Tap where your baby is, then drag to adjust." },
+    traits: [
+      { icon: "📏", text: "Weight, length and head size" },
+      { icon: "🔒", text: "Measurements stay in your browser" },
+    ],
+    showcase: "reel",
   },
 ];
 

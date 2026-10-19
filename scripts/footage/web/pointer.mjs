@@ -10,8 +10,12 @@ export async function showPointer(page) {
         '<svg width="22" height="22" viewBox="0 0 22 22"><path d="M3 2l14 8.5-6.2 1.4L8 18z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
       Object.assign(cur.style, {
         position: 'fixed', left: '0', top: '0', zIndex: '2147483647', pointerEvents: 'none',
-        transform: 'translate(-100px,-100px)', transition: 'scale .12s', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.4))',
+        transform: 'translate(-100px,-100px)', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.4))',
       });
+      // A press shrinks the arrow around its tip. Scaling the outer box instead
+      // would scale its translate too, pulling the arrow towards the corner.
+      const arrow = cur.firstChild;
+      Object.assign(arrow.style, { display: 'block', transformOrigin: '3px 2px', transition: 'scale .12s' });
       document.documentElement.appendChild(cur);
       const at = (x, y) => (cur.style.transform = `translate(${x - 3}px,${y - 2}px)`);
       // A new page starts with the pointer where the last one left it.
@@ -21,8 +25,8 @@ export async function showPointer(page) {
         at(e.clientX, e.clientY);
         sessionStorage.setItem('__pointer', JSON.stringify([e.clientX, e.clientY]));
       }, true);
-      addEventListener('mousedown', () => (cur.style.scale = '0.85'), true);
-      addEventListener('mouseup', () => (cur.style.scale = '1'), true);
+      addEventListener('mousedown', () => (arrow.style.scale = '0.85'), true);
+      addEventListener('mouseup', () => (arrow.style.scale = '1'), true);
     });
   });
 }

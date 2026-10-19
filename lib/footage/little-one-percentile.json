@@ -1,0 +1,66 @@
+{
+  "card": {
+    "video": "/cards/little-one-percentile/card.mp4",
+    "poster": "/cards/little-one-percentile/card.jpg",
+    "duration": 11.05,
+    "marks": [
+      {
+        "t": 1.2,
+        "label": "POINT TO READ",
+        "sub": "Age, weight and percentile"
+      },
+      {
+        "t": 5.66,
+        "label": "PIN A POINT",
+        "sub": "Tap where your baby is"
+      },
+      {
+        "t": 6.58,
+        "label": "DRAG TO ADJUST",
+        "sub": "The percentile follows"
+      }
+    ]
+  },
+  "reel": {
+    "video": "/cards/little-one-percentile/reel.mp4",
+    "poster": "/cards/little-one-percentile/reel.jpg",
+    "duration": 32.08,
+    "marks": [
+      {
+        "t": 0.29,
+        "label": "The growth chart",
+        "sub": "The WHO growth charts for weight, length and head size, from birth to 2 years."
+      },
+      {
+        "t": 3.63,
+        "label": "Look up any age",
+        "sub": "Pick an age and a percentile to see the value. No measurements needed."
+      },
+      {
+        "t": 7.85,
+        "label": "Point at the chart",
+        "sub": "Read the age, value and percentile anywhere, with the lines just above and below it."
+      },
+      {
+        "t": 12.15,
+        "label": "Pin a point",
+        "sub": "Click where your baby might be, then drag it to adjust."
+      },
+      {
+        "t": 14.41,
+        "label": "Same percentile",
+        "sub": "The dashed line shows where they would be if they stayed on the same percentile."
+      },
+      {
+        "t": 19.89,
+        "label": "Saved",
+        "sub": "It becomes your baby’s measurement, kept only in this browser."
+      },
+      {
+        "t": 23.3,
+        "label": "Add measurements",
+        "sub": "Enter the numbers from a checkup. Each one gets its percentile."
+      }
+    ]
+  }
+}
