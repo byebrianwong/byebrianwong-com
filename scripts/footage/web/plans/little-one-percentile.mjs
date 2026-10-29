@@ -9,7 +9,7 @@
 
 import { clickOn, showPointer } from '../pointer.mjs';
 
-const SITE = 'https://little-one-percentile.vercel.app';
+const SITE = 'https://lopercentile.byebrianwong.com';
 const CHART = 'section[aria-label="Growth chart"]';
 const PLOT = `${CHART} svg rect[fill="transparent"]`;
 

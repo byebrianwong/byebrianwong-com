@@ -11,7 +11,7 @@
 
 import { clickOn, showPointer } from '../pointer.mjs';
 
-const SITE = 'https://little-lexicon.vercel.app';
+const SITE = 'https://littlelexicon.byebrianwong.com';
 
 const MEANINGS = {
   empirical: 'Derived from experiment and observation rather than theory.',
