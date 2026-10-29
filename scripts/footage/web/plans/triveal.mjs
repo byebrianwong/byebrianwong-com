@@ -56,7 +56,7 @@ async function play(page, mark, labels, { wait = 1 } = {}) {
 }
 
 export default {
-  url: 'https://triveal.vercel.app',
+  url: 'https://triveal.byebrianwong.com',
   takes: {
     card: {
       viewport: { width: 720, height: 540 },
