@@ -15,13 +15,13 @@ const edmAtlas = fromRecording(edmAtlasFootage as WebFootage, "edmatlas.byebrian
 const triveal = fromRecording(trivealFootage as WebFootage, "triveal.byebrianwong.com");
 const mainstreamHipster = fromRecording(mainstreamHipsterFootage as WebFootage, "mainstream-hipster.vercel.app");
 const boringCereal = fromRecording(boringCerealFootage as WebFootage, "saturdayboringcereal.byebrianwong.com");
-const littleLexicon = fromRecording(littleLexiconFootage as WebFootage, "little-lexicon.vercel.app");
+const littleLexicon = fromRecording(littleLexiconFootage as WebFootage, "littlelexicon.byebrianwong.com");
 const doDone = fromRecording(doDoneFootage as WebFootage, "dodone.byebrianwong.com");
 const regibee = fromRecording(regibeeFootage as WebFootage, "regibee.com");
 // Tap Search is a browser extension, so its bar shows the page it is used on.
 const tapSearch = fromRecording(tapSearchFootage as WebFootage, "en.wikipedia.org");
 const secondGuess = fromRecording(secondGuessFootage as WebFootage, "secondguess.byebrianwong.com");
-const littleOnePercentile = fromRecording(littleOnePercentileFootage as WebFootage, "little-one-percentile.vercel.app");
+const littleOnePercentile = fromRecording(littleOnePercentileFootage as WebFootage, "lopercentile.byebrianwong.com");
 
 // App data for the arcade. Every app is one card in the single booster pack.
 // Set each app's `rarity` to control its foil treatment and fanfare.
@@ -245,7 +245,7 @@ export const APPS: AppCard[] = [
     accent: "#fb7185",
     hp: 100,
     rarity: "holo",
-    link: "https://little-lexicon.vercel.app",
+    link: "https://littlelexicon.byebrianwong.com",
     stats: { users: "—", rating: "—", platform: "Web" },
     blurb: "Learn the big words — GRE and beyond. Spaced repetition brings each word back just before you forget it, seven game modes keep practice from going stale, and every word comes with example sentences and audio.",
     ...littleLexicon,
@@ -374,7 +374,7 @@ export const APPS: AppCard[] = [
     accent: "#eb6834",
     hp: 90,
     rarity: "rare",
-    link: "https://little-one-percentile.vercel.app",
+    link: "https://lopercentile.byebrianwong.com",
     stats: { users: "—", rating: "—", platform: "Web" },
     blurb: "See where a baby's weight, length or head size falls on the WHO growth charts, worked out for every day from birth to 2 years. Point anywhere on the chart to read it, look up any age and percentile without entering anything, or add your baby's measurements. They stay in your browser.",
     ...littleOnePercentile,
