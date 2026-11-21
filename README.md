@@ -121,13 +121,14 @@ menu automatically. To give the nav buttons its look, style
 
 ## Deploy (Vercel)
 
-This is a zero-config Next.js app — Vercel auto-detects it.
+The Vercel project `byebrianwong-com` builds this repo, and `byebrianwong.com`
+(and `www.byebrianwong.com`) point at it. Every push to `main` goes live there,
+and every pull request gets its own preview deploy, linked in a comment by the
+Vercel bot. Nothing needs to be run by hand.
+
+It's a zero-config Next.js app, so the Vercel CLI works too:
 
 ```bash
 npx vercel          # preview deploy
 npx vercel --prod   # production deploy
 ```
-
-Then point `byebrianwong.com` at this project in the Vercel dashboard
-(Project → Settings → Domains). The domain currently serves a different project,
-so you'll move it over there.
