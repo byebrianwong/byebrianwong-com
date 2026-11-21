@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SiteNav from "@/components/SiteNav";
+import { STYLE_BOOT_SCRIPT } from "@/lib/siteStyle";
 
 export const metadata: Metadata = {
   title: "Brian Wong — The App Arcade",
@@ -20,6 +21,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* Sends a visitor who last used another style there before "/" paints. */}
+        <script dangerouslySetInnerHTML={{ __html: STYLE_BOOT_SCRIPT }} />
+      </head>
       <body>
         <SiteNav />
         {children}

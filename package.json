@@ -14,7 +14,8 @@
     "@phosphor-icons/react": "^2.1.10",
     "next": "^16.2.6",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.2.1",
@@ -26,6 +27,7 @@
     "@types/node": "^22.10.7",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
+    "@types/three": "^0.187.0",
     "@vitest/browser-playwright": "^4.1.8",
     "@vitest/coverage-v8": "^4.1.8",
     "chromatic": "^17.2.0",
