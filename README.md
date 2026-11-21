@@ -1,4 +1,12 @@
-# byebrianwong.com — The App Arcade
+# byebrianwong.com
+
+Brian's portfolio: a bit about him, and every app and game he's built. The site
+comes in more than one style. Each style is its own page that shows the same
+things in a different world. The palette button in the nav switches between
+them, and the home page (`/`) opens whichever style the visitor used last
+(remembered in their browser's localStorage).
+
+## The App Arcade (`/`)
 
 A booster-pack arcade portfolio. The site opens on one sealed 3D booster pack.
 Click it and it tears open, and every app card flies out into a grid, flipping
@@ -15,8 +23,31 @@ the real colors. Wonder Lens's full-screen view is the game's viewfinder: you
 can switch worlds and take photos that are scored the way the game scores
 them. The other cards open a longer walkthrough of the app in chapters.
 
-Built with **Next.js (App Router) + React + TypeScript**. The whole experience is one
-client component; there's no backend.
+## Winter Village (`/winter`)
+
+A papier-mâché winter village seen from far above. Buildings, hills and the ice
+rink are lumpy papier-mâché shapes with real 3D light and shadow (three.js);
+the villagers and trees are flat paper cutouts standing in the scene. People
+skate on the rink, sled down a hill, throw snowballs and sing carols, and
+smoke rises from the chimneys. Moving the mouse pans the camera across the
+village (dragging on touch screens, arrow keys on a keyboard).
+
+Every app has a building that hints at what it does: a camera kiosk for Wonder
+Lens, a cereal-box shop, a beehive gift shop for Regibee, an observatory for
+EDM Atlas, a library of stacked books, a podium with someone proudly on the #2
+spot, a clock tower, a record shop, a lighthouse with a magnifying-glass lamp,
+and a nursery with a growth chart. The log cabin by the rink is About.
+Hovering a building tags it with its name; clicking opens a paper card with
+the app's footage, what it is, and a PLAY or LAUNCH button. An open card has
+its own URL (`/winter#/card/<app>`, `/winter#/about`), the same card links the
+arcade uses. Keyboard and screen reader visitors get a list of every building
+that appears when it gets focus; browsers without WebGL see that list instead
+of the village.
+
+## Built with
+
+**Next.js (App Router) + React + TypeScript**, plus **three.js** for the
+winter village. Each style is one client component; there's no backend.
 
 ## Develop
 
@@ -54,7 +85,39 @@ npm run start
   instead of leaving the site, and a card URL can be reloaded or shared. Links
   from the old two-pack layout (`#/pack/...`) still resolve.
 - `lib/sound.ts` — synthesized arcade SFX (Web Audio, no asset files)
-- `prototypes/` — the original standalone HTML explorations (reference only; not part of the build)
+- `lib/siteStyle.ts`: the list of styles, the visitor's remembered choice, and the
+  script in `<head>` that sends "/" to it before the page paints
+- `components/StyleSwitcher.tsx`: the palette button and style menu in the nav
+- `components/AboutBio.tsx`: Brian's bio, shared by the About page and the village's cabin
+- `app/winter/page.tsx` and `components/winter/`: the winter village
+  - `WinterVillage.tsx`: the page; owns everything you read (title, hover tag,
+    cards, keyboard directory) and the card URLs
+  - `WinterCard.tsx`: the paper card for an app or the cabin
+  - `spots.ts`: every place you can step into (each app, plus the cabin)
+  - `scene/village.ts`: the 3D village: layout, camera, villagers, hover and click
+  - `scene/builders.ts`: houses, paper people, props, and one building per app
+  - `scene/mache.ts`: lumpy papier-mâché shapes, and merging each building into a few meshes
+  - `scene/paper.ts`: paper textures and every cut-paper drawing (people, trees, signs)
+- `prototypes/` — the original standalone HTML explorations (reference only; not part of the build).
+  `winter-village-studies.html` compares the three looks and three app placements
+  that were considered for the winter village.
+
+## Adding an app
+
+Add it to `APPS` in `lib/apps.ts`. The arcade deals it as a card. The winter
+village puts it in a cottage painted in its accent colour, at the next spare
+spot (`SPARE_SPOTS` in `components/winter/scene/village.ts`), with its name on
+a sign. To give it a building of its own, add a builder for its id to
+`BUILDERS` in `components/winter/scene/builders.ts` and a spot for it in
+`APP_SPOTS`. Back-row spots should sit in the gaps between front-row buildings:
+the camera only slides, so a building hidden behind another stays hidden.
+
+## Adding a style
+
+Add an entry to `SITE_STYLES` in `lib/siteStyle.ts`, make its page, and render
+`<StyleMemory id="..." />` on it so "/" remembers it. It appears in the style
+menu automatically. To give the nav buttons its look, style
+`.site-nav[data-skin="<id>"]` in `app/globals.css`.
 
 ## Deploy (Vercel)
 

@@ -1,20 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { styleForPath } from "@/lib/siteStyle";
 import { Sound } from "@/lib/sound";
+import StyleSwitcher from "./StyleSwitcher";
 
 /**
  * Persistent site chrome shown on every page (rendered from the root layout):
- * an "About Brian" link and a GitHub link. Styled to match the arcade's other
- * fixed corner controls (the sound toggle, HUD). The arcade's sound button is
- * positioned just to the left of this cluster so they read as one group.
+ * a style switcher, an "About Brian" link and a GitHub link. On the arcade
+ * (and pages that aren't a style, like /about) the buttons match the arcade's
+ * other fixed corner controls; the arcade's sound button sits just to the left
+ * of this cluster so they read as one group. In another style the buttons take
+ * on that style's look (`data-skin`).
  *
- * Both buttons borrow the arcade's pack-button SFX so the chrome speaks the
+ * All the buttons borrow the arcade's pack-button SFX so the chrome speaks the
  * same sound language: a short blip on hover, a two-note select on click.
  */
 export default function SiteNav() {
+  const skin = styleForPath(usePathname())?.id ?? "arcade";
   return (
-    <nav className="site-nav" aria-label="Site">
+    <nav className="site-nav" aria-label="Site" data-skin={skin}>
+      <StyleSwitcher />
       <Link
         href="/about"
         className="snav"
