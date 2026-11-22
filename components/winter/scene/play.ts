@@ -412,8 +412,9 @@ export class Play {
 
 /** A snowball splat on the screen: a lumpy blob with a few droplets around it. */
 function splatSvg(R: () => number) {
-  const n = 12, c = 60, pts = Array.from({ length: n }, (_, i) => {
-    const a = (i / n) * TAU, r = 30 + R() * 12 + (i % 3 === 0 ? 9 : 0);
+  // Long and short lobes take turns, so the edge looks thrown rather than round.
+  const n = 14, c = 60, pts = Array.from({ length: n }, (_, i) => {
+    const a = ((i + R() * 0.4) / n) * TAU, r = i % 2 ? 22 + R() * 10 : 33 + R() * 20;
     return [c + Math.cos(a) * r, c + Math.sin(a) * r];
   });
   // A smooth closed curve: from the midpoint of each edge to the next, bending through the point between them.
