@@ -4,9 +4,9 @@
 
 import * as THREE from "three";
 import type { AppCard } from "@/lib/apps";
-import { Bake, type Kit, type Shapes } from "./mache";
+import { Bake, lumpy, type Kit, type Shapes } from "./mache";
 import {
-  C, OUTFITS, TAU, clockCanvas, cerealLabelCanvas, dogCanvas, hatCanvas, mix, numberCanvas, personCanvas,
+  C, OUTFITS, TAU, clamp, clockCanvas, cerealLabelCanvas, dogCanvas, hatCanvas, mix, numberCanvas, personCanvas,
   rulerCanvas, signCanvas, snowmanCanvas, starCanvas, todoCanvas, vinylCanvas, type Pose,
 } from "./paper";
 
@@ -183,6 +183,48 @@ function picture(c: Ctx, canvas: HTMLCanvasElement, w: number, h: number) {
   return m;
 }
 
+/* ---------------- the beehive ---------------- */
+
+/** How square the skep's dome is: 2 is a half ellipse, higher has straighter sides and a flatter top. */
+const SKEP_P = 2.4;
+
+/** The skep's radius at height `y`, before its coils. */
+const skepR = (R: number, H: number, y: number) => R * Math.pow(Math.max(0, 1 - Math.pow(Math.max(0, y) / H, SKEP_P)), 1 / SKEP_P);
+
+/**
+ * A straw skep, the old woven beehive: a rounded dome wound from `coils` thin
+ * rolls of straw. Stands on y = 0 and is open underneath.
+ */
+function skepGeo(k: Kit, R: number, H: number, coils: number, ridge = 0.1) {
+  return k.geo(`skep${R}|${H}|${coils}|${ridge}`, () => {
+    // Trace the dome's outline finely, then walk along it in even steps so the coils come out evenly spaced.
+    const fine: THREE.Vector2[] = [];
+    for (let i = 0; i <= 400; i++) {
+      const th = (i / 400) * (Math.PI / 2);
+      fine.push(new THREE.Vector2(R * Math.pow(Math.cos(th), 2 / SKEP_P), H * Math.pow(Math.sin(th), 2 / SKEP_P)));
+    }
+    const len = [0];
+    for (let i = 1; i < fine.length; i++) len.push(len[i - 1] + fine[i].distanceTo(fine[i - 1]));
+    const total = len[len.length - 1], steps = coils * 10, pts: THREE.Vector2[] = [];
+    for (let j = 0, i = 1; j <= steps; j++) {
+      const s = (j / steps) * total;
+      while (i < fine.length - 1 && len[i] < s) i++;
+      const p0 = fine[i - 1], p1 = fine[i], f = (s - len[i - 1]) / (len[i] - len[i - 1] || 1);
+      const tx = p1.x - p0.x, ty = p1.y - p0.y, tl = Math.hypot(tx, ty) || 1;
+      // Each coil bulges out along the dome's normal, with a tight groove between coils. They flatten out at the very top.
+      const u = (s / total) * coils, top = clamp(((1 - s / total) * coils) / 0.6, 0, 1);
+      const out = ridge * Math.pow(Math.sin(Math.PI * (u % 1)), 0.6) * top;
+      pts.push(new THREE.Vector2(Math.max(0, p0.x + (p1.x - p0.x) * f + (ty / tl) * out), p0.y + (p1.y - p0.y) * f - (tx / tl) * out));
+    }
+    pts[pts.length - 1].x = 0;
+    return lumpy(new THREE.LatheGeometry(pts, 44), 0.02, 2.2, coils);
+  });
+}
+
+/** A hexagon tile facing +z, with flat edges top and bottom: a honeycomb cell. */
+const hexGeo = (k: Kit, r: number, d: number) =>
+  k.geo(`hex${r}|${d}`, () => lumpy(new THREE.CylinderGeometry(r, r, d, 6).rotateY(Math.PI / 6).rotateX(Math.PI / 2), 0.01, 3));
+
 /* ---------------- one building per app ---------------- */
 
 type Builder = (c: Ctx, a: AppCard) => Built;
@@ -212,21 +254,48 @@ export const BUILDERS: Record<string, Builder> = {
     label.position.set(0.15, 2.25, 0.67); g.add(label);
     return { g, top: 4.2, sign: [-1.7, 1.4] };
   },
-  /** A beehive gift shop with a bow on top and a bee doing laps. */
+  /** A straw skep beehive on a wooden stand: a gift shop with a hexagon door, honeycomb windows, a bow on top and bees doing laps. */
   regibee(c, a) {
     const { S, k } = c, b = new Bake(k);
-    for (let i = 0; i < 5; i++) b.add(S.tor(1.42 - i * 0.24, 0.34, 0.03, i), i % 2 ? mix(a.accent, "#000000", 0.12) : a.accent, { y: 0.34 + i * 0.5, rx: Math.PI / 2 });
-    b.add(S.sph(0.5, 0.03), a.accent, { y: 2.75 }); b.add(S.sph(0.42, 0.05, 5, true), C.snow, { y: 2.88 });
-    b.add(S.rb(0.7, 1, 0.3, 0.3, 0.01), "#5a3a22", { y: 0.5, z: 1.4 });
-    b.add(S.tor(0.24, 0.07, 0.01), C.red, { x: -0.25, y: 3.45, rz: 0.7 }); b.add(S.tor(0.24, 0.07, 0.01), C.red, { x: 0.25, y: 3.45, rz: -0.7 }); b.add(S.sph(0.1, 0), C.red, { y: 3.35 });
-    b.add(S.rb(0.42, 0.3, 0.1, 0.05, 0), C.glow, { x: 0.75, y: 1.4, z: 1.05, ry: 0.6, glow: true });
+    const R = 1.5, H = 3, lift = 0.3, straw = mix(a.accent, "#fbe7b0", 0.22), wax = mix(a.accent, "#6b3a10", 0.3);
+    b.add(S.cyl(R + 0.3, R + 0.38, lift, 30, 0.02, 7), C.woodD, { y: lift / 2 });
+    b.add(skepGeo(k, R, H, 9), straw, { y: lift });
+    b.add(S.sph(1.12, 0.06, 5, true), C.snow, { y: lift + H * 0.83, sy: 0.55 });
+
+    // Parts stuck flat onto the dome: `ang` round from the front, `y` up from the stand, `out` off the straw.
+    const M = new THREE.Matrix4(), T = new THREE.Matrix4();
+    const onHive = (geo: THREE.BufferGeometry, color: string, ang: number, y: number, out: number, sy = 1, glow = false) => {
+      const r = skepR(R, H, y) + out, tilt = Math.atan((skepR(R, H, y + 0.01) - skepR(R, H, y - 0.01)) / 0.02);
+      M.makeTranslation(Math.sin(ang) * r, lift + y, Math.cos(ang) * r).multiply(T.makeRotationY(ang)).multiply(T.makeRotationX(tilt)).multiply(T.makeScale(1, sy, 1));
+      const g = geo.clone().applyMatrix4(M);
+      b.add(g, color, { glow }); g.dispose();
+    };
+    onHive(hexGeo(k, 0.58, 0.14), wax, 0, 0.6, 0.04, 1.15);
+    onHive(hexGeo(k, 0.47, 0.14), "#5a3a22", 0, 0.6, 0.1, 1.15);
+    onHive(S.sph(0.06, 0), C.mustard, 0.17, 0.55, 0.2);
+    // Honeycomb windows: three cells either side of the door, packed the way a comb is.
+    const cell = 0.25, rw = skepR(R, H, 1.6);
+    for (const [a0, flip] of [[0.72, 1], [-0.72, -1]] as const) {
+      for (const [dx, dy] of [[0, 0.5], [0, -0.5], [1.5, 0]] as const) {
+        const ang = a0 + (flip * (dx - 0.5) * cell) / rw, y = 1.6 + dy * Math.sqrt(3) * cell;
+        onHive(hexGeo(k, cell, 0.12), wax, ang, y, 0.06);
+        onHive(hexGeo(k, cell * 0.74, 0.12), C.glow, ang, y, 0.1, 1, true);
+      }
+    }
+
+    const top = lift + H + 0.2;
+    b.add(S.tor(0.24, 0.07, 0.01), C.red, { x: -0.25, y: top + 0.1, rz: 0.7 }); b.add(S.tor(0.24, 0.07, 0.01), C.red, { x: 0.25, y: top + 0.1, rz: -0.7 }); b.add(S.sph(0.1, 0), C.red, { y: top });
     const g = b.group();
     const bee = new Bake(k);
     bee.add(S.sph(0.17, 0), "#f2c14e", { sx: 1.3 }); bee.add(S.tor(0.15, 0.035, 0), C.ink, { ry: Math.PI / 2 });
     bee.add(S.sph(0.12, 0), "#ffffff", { y: 0.17, x: -0.05, sx: 0.6, sz: 1.2 }); bee.add(S.sph(0.12, 0), "#ffffff", { y: 0.17, x: 0.1, sx: 0.6, sz: 1.2 });
-    const bg = bee.group(); g.add(bg);
-    c.movers.push((t) => { const an = t * 1.6; bg.position.set(Math.cos(an) * 1.9, 2.4 + Math.sin(t * 3) * 0.25, Math.sin(an) * 1.9); bg.rotation.y = -an; });
-    return { g, top: 3.7, sign: [-1.9, 1.7] };
+    const b1 = bee.group(), b2 = b1.clone(); g.add(b1, b2);
+    c.movers.push((t) => {
+      const a1 = t * 1.6, a2 = -t * 1.1 + 2;
+      b1.position.set(Math.cos(a1) * 2.1, 2.7 + Math.sin(t * 3) * 0.25, Math.sin(a1) * 2.1); b1.rotation.y = -a1;
+      b2.position.set(Math.cos(a2) * 2.3, 1.9 + Math.sin(t * 2.4 + 1) * 0.2, Math.sin(a2) * 2.3); b2.rotation.y = -a2;
+    });
+    return { g, top: top + 0.6, sign: [-2.1, 1.9] };
   },
   /** An observatory with a telescope and stars hanging over it. */
   "edm-atlas"(c, a) {
