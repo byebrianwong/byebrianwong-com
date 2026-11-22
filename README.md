@@ -18,7 +18,9 @@ smoke rises from the chimneys. Moving the mouse pans the camera across the
 village (dragging on touch screens, arrow keys on a keyboard). The scroll
 wheel zooms in and out a little (pinching on touch screens, + and - on a
 keyboard). Ctrl + scroll is left alone so the browser's own page zoom still
-works.
+works. On a phone the camera stays close enough that the village isn't tiny,
+and the name signs grow so they can be read; dragging moves the village with
+the finger.
 
 Every app has a building that hints at what it does: a camera kiosk for Wonder
 Lens, a cereal-box shop, a beehive gift shop for Regibee, an observatory for

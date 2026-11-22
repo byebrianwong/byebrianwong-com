@@ -625,7 +625,7 @@ h1 .pop { color: #ffd23f; }
 .wv-loading { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; font: 400 34px/1 "Caveat Brush", cursive; color: #4c5670; pointer-events: none; }
 .wv-hint { position: absolute; z-index: 3; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0;
   padding: 8px 16px 9px; border-radius: 999px; background: rgba(251,246,234,.92); font: 500 14px/1.25 "Inter Tight", system-ui, sans-serif;
-  text-align: center; width: max-content; max-width: calc(100vw - 32px); box-shadow: 0 6px 18px -10px rgba(20,20,40,.5);
+  text-align: center; width: max-content; max-width: calc(100vw - 160px); box-shadow: 0 6px 18px -10px rgba(20,20,40,.5);
   transition: opacity .6s ease, transform .6s ease; pointer-events: none; }
 .wv-hint.gone { opacity: 0; transform: translate(-50%, 8px); }
 /* a snowball one of the kids threw back, splatted on the screen (components/winter/scene/play.ts) */
@@ -725,7 +725,10 @@ h1 .pop { color: #ffd23f; }
   .wv-photo { max-width: 480px; }
 }
 @media (max-width: 560px) {
-  .wv-hint { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 58px); }
+  .wv-hint { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 58px); max-width: calc(100vw - 32px); }
+}
+/* phones, upright or on their side: a smaller title tag, so it covers less of the village */
+@media (max-width: 560px), (max-height: 500px) {
   .wv-title { padding: 10px 14px 12px; }
   .wv-title p:last-child { display: none; }
 }
