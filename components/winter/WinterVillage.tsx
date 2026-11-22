@@ -51,6 +51,8 @@ export default function WinterVillage() {
   const [touched, setTouched] = useState(false);
   const music = useRef<WinterMusic | null>(null);
   const [playing, setPlaying] = useState(false);
+  // With reduced motion the village holds still and clicking the snow does nothing, so the hint doesn't offer snowballs.
+  const [still, setStill] = useState(false);
 
   const openSpot = useCallback((id: string) => {
     const hash = hashFor(id);
@@ -99,6 +101,7 @@ export default function WinterVillage() {
         const [{ VillageScene }] = await Promise.all([import("./scene/village"), fontsReady()]);
         if (!alive || !host.current || !tag.current) return;
         const reduced = !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+        setStill(reduced);
         made = new VillageScene(host.current, tag.current, {
           onHover: (id) => events.current.onHover(id),
           onOpen: (id) => events.current.onOpen(id),
@@ -170,8 +173,8 @@ export default function WinterVillage() {
       {status === "loading" && <div className="wv-loading">Folding the village&hellip;</div>}
 
       <p className={"wv-hint" + (touched || open || status !== "ready" ? " gone" : "")} aria-hidden="true">
-        <span className="pointer-fine">Move your mouse to look around. Click a building to step inside.</span>
-        <span className="pointer-coarse">Drag to look around. Tap a building to step inside.</span>
+        <span className="pointer-fine">Move your mouse to look around. Click a building to step inside{still ? "" : ", or anywhere else to throw a snowball"}.</span>
+        <span className="pointer-coarse">Drag to look around. Tap a building to step inside{still ? "" : ", or anywhere else to throw a snowball"}.</span>
       </p>
 
       <div
