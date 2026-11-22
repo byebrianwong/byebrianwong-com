@@ -46,7 +46,7 @@ export const Game: Story = {
   },
 };
 
-/** Any other app's card, without footage: the button says LAUNCH, and its numbers show as chips. */
+/** Any other app's card, without footage: the button says LAUNCH, and its numbers (if it has any) show as chips. */
 export const App: Story = {
   args: { target: plain(notGame) },
   play: async ({ canvas }) => {
