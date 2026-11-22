@@ -47,6 +47,25 @@ arcade uses. Keyboard and screen reader visitors get a list of every building
 that appears when it gets focus; browsers without WebGL see that list instead
 of the village.
 
+Clicking anywhere that isn't an app's building throws a snowball, and what it
+lands on reacts:
+
+- Snow: the ball bursts and leaves a little heap that sinks back in after a few seconds.
+- Ice: the ball skids across the rink, bounces off the edge, and knocks over any skater it runs into.
+- Villagers (skaters, walkers, kids going back up the sledding hill, the kid
+  rolling a snowball): they fall over, see stars, and get back up where they left off.
+- The two kids in the snowball fight: they throw one back, and it splats on the screen.
+- Carolers: they hop and send up a burst of notes.
+- The dog: it barks and runs fast laps around its owner.
+- The snowman: its hat pops off, spins, and lands back on its head.
+- Pine trees: they shake their snow off, and sometimes a bird flies out.
+- The big tree: it sways and throws off a shower of paper stars.
+- Lamp posts: the light sputters out and comes back on a few seconds later.
+- Ordinary cottages: they squash and stretch, snow slides off the roof, and the chimney puffs.
+
+With reduced motion turned on, the village holds still and clicking the snow
+does nothing.
+
 ## Built with
 
 **Next.js (App Router) + React + TypeScript**, plus **three.js** for the
@@ -97,7 +116,8 @@ npm run start
     cards, keyboard directory) and the card URLs
   - `WinterCard.tsx`: the paper card for an app or the cabin
   - `spots.ts`: every place you can step into (each app, plus the cabin)
-  - `scene/village.ts`: the 3D village: layout, camera, villagers, hover and click
+  - `scene/village.ts`: the 3D village: layout, camera, villagers, hover and click, and how each thing reacts to a snowball
+  - `scene/play.ts`: snowballs: throwing, flying, splatting, and the effects things react with
   - `scene/builders.ts`: houses, paper people, props, and one building per app
   - `scene/mache.ts`: lumpy papier-mâché shapes, and merging each building into a few meshes
   - `scene/paper.ts`: paper textures and every cut-paper drawing (people, trees, signs)
