@@ -316,23 +316,6 @@ export const BUILDERS: Record<string, Builder> = {
     c.movers.push((t) => { disc.rotation.z = -t * 1.6; });
     return { g: built.g, top: 6.5, sign: [-2.2, 1.9] };
   },
-  /** A lighthouse whose lamp is a turning magnifying glass. */
-  tapsearch(c, a) {
-    const { S, k } = c, b = new Bake(k);
-    for (let i = 0; i < 5; i++) { const r0 = 1 - i * 0.07, r1 = 1 - (i + 1) * 0.07; b.add(S.cyl(r1, r0, 0.9, 24, 0.02, i), i % 2 ? a.accent : C.paper, { y: 0.45 + i * 0.9 }); }
-    b.add(S.cyl(0.98, 0.98, 0.18, 24, 0.01), C.ink, { y: 4.6 }); b.add(S.tor(0.9, 0.04, 0), C.ink, { y: 4.95, rx: Math.PI / 2 });
-    b.add(S.cyl(0.55, 0.55, 0.8, 20, 0), "#fff1c2", { y: 5.05, glow: true }); b.add(S.cone(0.75, 0.75, 20, 0.02), C.ink, { y: 5.8 }); b.add(S.cone(0.45, 0.45, 16, 0.03, 2), C.snow, { y: 6.0 });
-    b.add(S.rb(0.6, 1, 0.12, 0.08, 0.01), C.woodD, { y: 0.5, z: 0.98 }); b.add(S.rb(0.3, 0.4, 0.1, 0.04, 0), C.glow, { y: 2.3, z: 0.87, glow: true });
-    ([[-1.2, 0.3, 0.5], [1.1, 0.2, 0.8], [-0.5, 0.2, 1.3]] as const).forEach(([x, y, z], i) => b.add(S.sph(0.4, 0.08, i + 3), "#e8eaf0", { x, y, z, sy: 0.6 }));
-    const g = b.group({ ei: 1.8 });
-    const mag = new THREE.Group(); mag.position.y = 5.05; g.add(mag);
-    const mb = new Bake(k); mb.add(S.tor(0.42, 0.08, 0), C.ink, { x: 1.25 }); mb.add(S.cyl(0.07, 0.07, 0.8, 8, 0), C.ink, { x: 0.55, rz: Math.PI / 2 });
-    mag.add(mb.group());
-    const glass = new THREE.Mesh(S.cyl(0.38, 0.38, 0.04, 24, 0), k.memo("magGlass", () => new THREE.MeshStandardMaterial({ color: "#bfe0ff", emissive: "#bfe0ff", emissiveIntensity: 0.6, transparent: true, opacity: 0.65 })));
-    glass.position.x = 1.25; glass.rotation.z = Math.PI / 2; mag.add(glass);
-    c.movers.push((t) => { mag.rotation.y = t * 0.9; });
-    return { g, top: 6.5, sign: [0, 2] };
-  },
   /** A nursery with a growth-chart ruler, a marker that keeps growing, and baby blocks. */
   "little-one-percentile"(c, a) {
     const built = house(c, { w: 3, d: 2.6, h: 2.2, wall: "#f6d7c3", roof: a.accent, seed: 31 });

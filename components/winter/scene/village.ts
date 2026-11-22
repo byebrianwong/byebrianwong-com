@@ -9,8 +9,7 @@
 // everything that is text (tags, cards); this class only draws.
 
 import * as THREE from "three";
-import { APPS } from "@/lib/apps";
-import { ABOUT_ID } from "../spots";
+import { ABOUT_ID, VILLAGE_APPS } from "../spots";
 import { Bake, Kit, lumpy, shapeLib } from "./mache";
 import { Play } from "./play";
 import {
@@ -37,11 +36,11 @@ const HILL = { x: 21, z: -13, r: 4.5, h: 4 };
 
 /** [x, z, turn] for each app's building. */
 const APP_SPOTS: Record<string, [number, number, number]> = {
-  "wonder-lens": [-12.5, -7, 0.2], "saturday-boring-cereal": [-6.6, -8.6, 0.1], regibee: [-1, -9, 0],
-  "edm-atlas": [4.6, -8.7, -0.05], "little-lexicon": [10.5, -7.4, -0.2],
-  "second-guess": [-15.2, 1.2, 0.5], triveal: [-15.2, 7.8, 0.6], dodone: [14.6, 0.2, -0.55], "mainstream-hipster": [14.8, 7.8, -0.6],
+  regibee: [-12.5, -7, 0.2], "saturday-boring-cereal": [-6.6, -8.6, 0.1], "wonder-lens": [-1, -9, 0],
+  "edm-atlas": [4.6, -8.7, -0.05], "mainstream-hipster": [10.5, -7.4, -0.2],
+  "second-guess": [-15.2, 1.2, 0.5], "little-one-percentile": [-15.2, 7.8, 0.6], dodone: [14.6, 0.2, -0.55], "little-lexicon": [14.8, 7.8, -0.6],
   // The back row sits in the gaps of the front row: the camera only slides, so whatever hides a building keeps hiding it.
-  tapsearch: [-3.8, -16, 0.05], "little-one-percentile": [7.6, -16, -0.05],
+  triveal: [-3.8, -16, 0.05],
 };
 /** Where an app added later (with no spot above) goes, in order. */
 const SPARE_SPOTS: [number, number, number][] = [[0, -23, 0], [-21, -6, 0.5], [21, -4, -0.5], [-22, 5, 0.6], [22, 4, -0.6], [-16, -22, 0.1], [16, -22, -0.1]];
@@ -429,7 +428,7 @@ export class VillageScene {
 
     // One building per app, with its name on a sign out front.
     let spare = 0;
-    for (const app of APPS) {
+    for (const app of VILLAGE_APPS) {
       const spot = APP_SPOTS[app.id] ?? SPARE_SPOTS[spare++ % SPARE_SPOTS.length];
       const built = (BUILDERS[app.id] ?? fallbackBuilding)(c, app);
       this.place(built, app.id, spot, app.name, app.accent);
