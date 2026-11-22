@@ -1,7 +1,8 @@
 // The winter village: a papier-mâché diorama seen from far above, with paper
 // villagers skating, sledding and carolling, and one themed building per app.
 //
-// Moving the mouse pans the camera across the village (dragging on touch).
+// Moving the mouse pans the camera across the village (dragging on touch), and
+// the scroll wheel zooms in and out a little (pinching on touch, + and - keys).
 // Hovering a building highlights it and reports it through `onHover`, so the
 // page can show its tag; clicking reports `onOpen`. The page owns everything
 // that is text (tags, cards); this class only draws.
@@ -55,6 +56,9 @@ const HOUSES: HouseSpot[] = [
 
 /** The camera hangs back and above; panning moves it this far from its start. */
 const CAM = { target: new THREE.Vector3(0, 0, -3.5), off: new THREE.Vector3(0, 21, 24), rx: 15, up: 9, down: 11 };
+/** How far the visitor can zoom, as a multiple of the camera's distance: under 1 is closer, over 1 is farther back. */
+const ZOOM = { min: 0.7, max: 1.3, key: 1.12 };
+const FOG = { near: 60, far: 125 };
 
 /* ---------------- the scene ---------------- */
 
@@ -74,11 +78,17 @@ export class VillageScene {
   private ndc = new THREE.Vector2(9, 9);
   private pan = { x: 0, y: 0, tx: 0, ty: 0 };
   private focusPoint = { x: 0, z: 0 };
-  private zoom = 1;
+  /** Pulls the camera back on tall, narrow screens (set on resize). */
+  private fit = 1;
+  /** The visitor's zoom, eased toward its target like the pan. */
+  private zoom = { v: 1, t: 1 };
   private w = 1;
   private h = 1;
   private pointerIn = false;
   private drag: { x: number; y: number; moved: number } | null = null;
+  /** Fingers on the screen, so two of them can pinch. */
+  private touches = new Map<number, { x: number; y: number }>();
+  private pinch = 0;
   private dragMoved = 0;
   private hovered: Hoverable | null = null;
   private focused: Hoverable | null = null;
@@ -164,6 +174,12 @@ export class VillageScene {
     return { nx: ((e.clientX - r.left) / r.width) * 2 - 1, ny: ((e.clientY - r.top) / r.height) * 2 - 1, r };
   }
   private interacted() { if (!this.touched) { this.touched = true; this.ev.onInteract(); } }
+  /** Zoom by a factor: under 1 moves closer. */
+  private zoomBy(f: number) { this.zoom.t = clamp(this.zoom.t * f, ZOOM.min, ZOOM.max); }
+  private spread() {
+    const [a, b] = [...this.touches.values()];
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }
 
   private onMove = (e: PointerEvent) => {
     const { nx, ny, r } = this.toNdc(e);
@@ -172,6 +188,16 @@ export class VillageScene {
     if (e.pointerType === "mouse") {
       // The mouse's spot on screen is where the camera heads: move right to see more to the right.
       this.pan.tx = clamp(nx * 1.15, -1, 1); this.pan.ty = clamp(ny * 1.15, -1, 1);
+      this.interacted();
+      return;
+    }
+    if (!this.touches.has(e.pointerId)) return;
+    this.touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (this.touches.size >= 2) {
+      // Fingers spreading apart zoom in.
+      const d = this.spread();
+      if (this.pinch && d) this.zoomBy(this.pinch / d);
+      this.pinch = d;
       this.interacted();
     } else if (this.drag) {
       const dx = e.clientX - this.drag.x, dy = e.clientY - this.drag.y;
@@ -182,9 +208,35 @@ export class VillageScene {
     }
   };
   private onDown = (e: PointerEvent) => {
-    if (e.pointerType !== "mouse") { this.drag = { x: e.clientX, y: e.clientY, moved: 0 }; this.renderer.domElement.setPointerCapture?.(e.pointerId); }
+    if (e.pointerType === "mouse") return;
+    this.touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    this.renderer.domElement.setPointerCapture?.(e.pointerId);
+    if (this.touches.size === 1) this.drag = { x: e.clientX, y: e.clientY, moved: 0 };
+    else if (this.touches.size === 2) {
+      this.pinch = this.spread();
+      if (this.drag) this.drag.moved = Infinity; // a pinch is never a tap
+    }
   };
-  private onUp = () => { this.dragMoved = this.drag?.moved ?? 0; this.drag = null; };
+  private onUp = (e: PointerEvent) => {
+    this.touches.delete(e.pointerId);
+    if (this.touches.size === 1 && this.drag) {
+      // Back to one finger after a pinch: keep panning from where that finger is now.
+      const [t] = this.touches.values();
+      this.drag.x = t.x; this.drag.y = t.y;
+    }
+    if (this.touches.size > 0) return;
+    this.pinch = 0;
+    this.dragMoved = this.drag?.moved ?? 0; this.drag = null;
+  };
+  private onWheel = (e: WheelEvent) => {
+    // Ctrl + wheel (and a trackpad pinch, which arrives the same way) is left to the browser's own page zoom.
+    if (!this.interactive || e.ctrlKey) return;
+    e.preventDefault();
+    // Some mice scroll in lines or pages rather than pixels.
+    const px = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? this.h : 1);
+    this.zoomBy(Math.exp(clamp(px, -200, 200) * 0.0012));
+    this.interacted();
+  };
   private onLeave = (e: PointerEvent) => { if (e.pointerType === "mouse") { this.pointerIn = false; this.ndc.set(9, 9); } };
   private onClick = (e: MouseEvent) => {
     if (!this.interactive || this.dragMoved > 12) { this.dragMoved = 0; return; }
@@ -203,6 +255,8 @@ export class VillageScene {
     else if (e.key === "ArrowRight") this.pan.tx = clamp(this.pan.tx + step, -1, 1);
     else if (e.key === "ArrowUp") this.pan.ty = clamp(this.pan.ty - step, -1, 1);
     else if (e.key === "ArrowDown") this.pan.ty = clamp(this.pan.ty + step, -1, 1);
+    else if (e.key === "+" || e.key === "=") this.zoomBy(1 / ZOOM.key);
+    else if (e.key === "-" || e.key === "_") this.zoomBy(ZOOM.key);
     else return;
     e.preventDefault(); this.interacted();
   };
@@ -215,6 +269,7 @@ export class VillageScene {
     el.addEventListener("pointercancel", this.onUp);
     el.addEventListener("pointerleave", this.onLeave);
     el.addEventListener("click", this.onClick);
+    el.addEventListener("wheel", this.onWheel, { passive: false });
     window.addEventListener("keydown", this.onKey);
   }
   private unbindInput() {
@@ -225,6 +280,7 @@ export class VillageScene {
     el.removeEventListener("pointercancel", this.onUp);
     el.removeEventListener("pointerleave", this.onLeave);
     el.removeEventListener("click", this.onClick);
+    el.removeEventListener("wheel", this.onWheel);
     window.removeEventListener("keydown", this.onKey);
   }
 
@@ -237,16 +293,22 @@ export class VillageScene {
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     // A tall, narrow screen sees a thin slice; pull back so it still sees a good piece of the village.
-    this.zoom = clamp(1.3 / this.camera.aspect, 1, 2.2);
+    this.fit = clamp(1.3 / this.camera.aspect, 1, 2.2);
     this.camera.updateProjectionMatrix();
   }
 
   private updateCamera(dt: number) {
     const P = this.pan, e = Math.min(1, dt * 3.2);
     P.x += (P.tx - P.x) * e; P.y += (P.ty - P.y) * e;
+    const Z = this.zoom;
+    Z.v += (Z.t - Z.v) * Math.min(1, dt * 8);
     const tx = CAM.target.x + P.x * CAM.rx, tz = CAM.target.z + (P.y < 0 ? P.y * CAM.up : P.y * CAM.down);
-    this.camera.position.set(tx + CAM.off.x * this.zoom, CAM.off.y * this.zoom, tz + CAM.off.z * this.zoom);
+    const d = this.fit * Z.v;
+    this.camera.position.set(tx + CAM.off.x * d, CAM.off.y * d, tz + CAM.off.z * d);
     this.camera.lookAt(tx, 0, tz);
+    // The fog moves with the zoom, so stepping back doesn't wash the village out.
+    const fog = this.scene.fog as THREE.Fog;
+    fog.near = FOG.near * Z.v; fog.far = FOG.far * Z.v;
     this.focusPoint = { x: tx, z: tz };
   }
 
@@ -303,7 +365,7 @@ export class VillageScene {
   private build() {
     const { scene, c } = this;
     scene.background = new THREE.Color("#c7cde6");
-    scene.fog = new THREE.Fog("#c7cde6", 60, 125);
+    scene.fog = new THREE.Fog("#c7cde6", FOG.near, FOG.far);
     scene.add(new THREE.HemisphereLight("#e2e6ff", "#efe4da", 1.85));
     const sun = new THREE.DirectionalLight("#ffe1c4", 2.1);
     sun.position.set(-18, 30, 18); sun.castShadow = true;
