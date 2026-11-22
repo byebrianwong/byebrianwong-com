@@ -117,8 +117,9 @@ export const OpenReel: Story = {
       canvasElement.querySelector<HTMLElement>(`.cards .card[data-app="${reelApp.id}"]`)!,
     );
     await waitFor(() => expect(canvas.getByRole('dialog')).toBeVisible(), { timeout: 4000 });
-    // The side panel slides in.
-    await waitFor(() => expect(canvas.getByRole('list', { name: 'Walkthrough' })).toBeVisible());
+    // The side panel fades in (0.5s after a 0.15s delay). Allow three seconds: on a
+    // busy CI runner, with other story files running alongside, one isn't always enough.
+    await waitFor(() => expect(canvas.getByRole('list', { name: 'Walkthrough' })).toBeVisible(), { timeout: 3000 });
     await expect(window.location.hash).toBe(`#/card/${reelApp.id}`);
   },
 };
