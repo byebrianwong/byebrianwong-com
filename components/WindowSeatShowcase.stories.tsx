@@ -52,8 +52,9 @@ export const Opened: Story = {
     );
 
     const play = canvas.getByRole('link', { name: new RegExp(`^play ${args.app.name}`, 'i') });
-    // The side panel fades in.
-    await waitFor(() => expect(play).toBeVisible());
+    // The side panel fades in (0.5s after a 0.15s delay). Allow three seconds: on a
+    // busy CI runner, with other story files running alongside, one isn't always enough.
+    await waitFor(() => expect(play).toBeVisible(), { timeout: 3000 });
     await expect(play).toHaveAttribute('href', args.app.link);
   },
 };

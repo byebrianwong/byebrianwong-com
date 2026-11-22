@@ -663,6 +663,18 @@ h1 .pop { color: #ffd23f; }
 .wv-dir button span { font-weight: 400; font-size: 13px; color: #6b6170; }
 .wv-dir button:hover, .wv-dir button:focus-visible { background: #efe3cf; outline: 2px solid #2a2230; outline-offset: -2px; }
 
+/* the music switch, bottom right; the notes bob gently while the carols play */
+.wv-music { position: absolute; z-index: 6; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom));
+  width: 46px; height: 46px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  background: #fbf6ea; color: #2a2230; box-shadow: 0 2px 0 rgba(0,0,0,.08), 0 8px 18px -8px rgba(20,20,40,.55); transition: transform .12s ease, background .15s ease; }
+.wv-music:hover { background: #fff; transform: translateY(-1px); }
+.wv-music:active { transform: translateY(1px); }
+.wv-music:focus-visible { outline: 3px solid #2a2230; outline-offset: 2px; }
+.wv-music svg { width: 22px; height: 22px; display: block; }
+.wv-music[aria-pressed="true"] svg { animation: wvBob 2.4s ease-in-out infinite; }
+.wv-music[aria-pressed="false"] { color: #7a7180; }
+@keyframes wvBob { 50% { transform: translateY(-2px) rotate(-6deg); } }
+
 /* the paper card for an app (or the cabin's About) */
 .wv-panel { position: absolute; inset: 0; z-index: 90; display: grid; place-items: center; overflow: auto;
   padding: max(64px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
@@ -713,12 +725,13 @@ h1 .pop { color: #ffd23f; }
   .wv-photo { max-width: 480px; }
 }
 @media (max-width: 560px) {
+  .wv-hint { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 58px); }
   .wv-title { padding: 10px 14px 12px; }
   .wv-title p:last-child { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wv-panel, .wv-card { animation: none !important; }
+  .wv-panel, .wv-card, .wv-music svg { animation: none !important; }
   .float, .about-avatar,
   .bp-float, .bp-shadow, .bs-rays, .bs-glow, .bs-hint, .bp-ring, .bp-orb i, .bp-gloss, .bp-sticker, .bp-fan .m3,
   .sc-reticle, .sc-shutter, .rs-caption, .launch, .launch::after { animation: none !important; }

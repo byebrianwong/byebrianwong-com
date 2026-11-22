@@ -2,8 +2,11 @@
 // that shows the same things (a bit about Brian, and every app and game) in a
 // different world. Add a style here and it shows up in the nav's style menu.
 //
-// The home page ("/") opens whichever style the visitor last used. That choice
-// lives in localStorage, so it is per browser and never leaves the device.
+// The Winter Village is the default and owns "/". A visitor who picks another
+// style in the menu is remembered (in localStorage, so per browser, and it
+// never leaves the device), and "/" sends them to that style on later visits.
+// Only picking from the menu counts; landing on a style's page from a link
+// doesn't change what "/" opens.
 
 export type SiteStyleId = "arcade" | "winter";
 
@@ -13,20 +16,25 @@ export interface SiteStyle {
   name: string;
   /** One line under the name in the style menu. */
   blurb: string;
-  /** Where the style lives. The arcade is the original, so it owns "/". */
+  /** Where the style lives. */
   path: string;
   /** The About page's button back into this style. */
   enter: string;
 }
 
 export const SITE_STYLES: SiteStyle[] = [
-  { id: "arcade", name: "The App Arcade", blurb: "Rip open a booster pack of app cards", path: "/", enter: "ENTER THE ARCADE" },
-  { id: "winter", name: "Winter Village", blurb: "Wander a papier-mâché winter town", path: "/winter", enter: "BACK TO THE VILLAGE" },
+  { id: "winter", name: "Winter Village", blurb: "Wander a papier-mâché winter town", path: "/", enter: "BACK TO THE VILLAGE" },
+  { id: "arcade", name: "The App Arcade", blurb: "Rip open a booster pack of app cards", path: "/arcade", enter: "ENTER THE ARCADE" },
 ];
 
+/** What a new visitor sees. */
 export const DEFAULT_STYLE = SITE_STYLES[0];
 
-const KEY = "byebrianwong:style";
+/**
+ * Where the visitor's pick is kept. (An earlier key, "byebrianwong:style",
+ * was also written just by visiting a page, so it isn't read any more.)
+ */
+export const STYLE_KEY = "byebrianwong:style-choice";
 
 /** The style a page belongs to, or undefined for pages that aren't a style (like /about). */
 export function styleForPath(pathname: string | null | undefined): SiteStyle | undefined {
@@ -35,37 +43,37 @@ export function styleForPath(pathname: string | null | undefined): SiteStyle | u
   return SITE_STYLES.find((s) => s.path === clean);
 }
 
-/** The style this visitor last used, or null if they haven't picked one (or storage is blocked). */
+/** The style this visitor picked, or null if they never picked one (or storage is blocked). */
 export function readStyle(): SiteStyle | null {
   try {
-    const id = window.localStorage.getItem(KEY);
+    const id = window.localStorage.getItem(STYLE_KEY);
     return SITE_STYLES.find((s) => s.id === id) ?? null;
   } catch {
     return null;
   }
 }
 
-/**
- * Remember `id` as this visitor's style. Skipped while the boot script is
- * already sending the tab elsewhere, so a page that renders for a moment on
- * its way out can't overwrite the choice that sent it.
- */
+/** Remember the style the visitor picked from the style menu. */
 export function saveStyle(id: SiteStyleId) {
   try {
-    if ((window as unknown as { __styleRedirect?: boolean }).__styleRedirect) return;
-    window.localStorage.setItem(KEY, id);
+    window.localStorage.setItem(STYLE_KEY, id);
   } catch {
     /* storage blocked: the site still works, it just won't remember */
   }
 }
 
 /**
- * Runs in <head> before the home page paints. A visitor who last used
- * another style is sent there straight away, so they never see the arcade
- * flash first. A link with a hash (a shared arcade card) is left alone.
+ * Runs in <head> before "/" paints:
+ * - A visitor who picked another style is sent there straight away, so the
+ *   village never flashes first.
+ * - Old arcade links to its card grid or packs (`/#/cards`, `/#/pack/...`,
+ *   from when the arcade owned "/") go to the arcade. Card links
+ *   (`/#/card/<app>`) stay: the village opens the same app's card.
  */
 export const STYLE_BOOT_SCRIPT = `(function(){try{
-if(location.pathname!=="/"||location.hash)return;
-var p=${JSON.stringify(Object.fromEntries(SITE_STYLES.map((s) => [s.id, s.path])))}[localStorage.getItem(${JSON.stringify(KEY)})];
-if(p&&p!=="/"){window.__styleRedirect=true;location.replace(p+location.search);}
+if(location.pathname!=="/")return;
+if(/^#\\/(cards|packs?)(\\/|$)/.test(location.hash)){location.replace(${JSON.stringify(SITE_STYLES.find((s) => s.id === "arcade")!.path)}+location.search+location.hash);return;}
+if(location.hash)return;
+var p=${JSON.stringify(Object.fromEntries(SITE_STYLES.map((s) => [s.id, s.path])))}[localStorage.getItem(${JSON.stringify(STYLE_KEY)})];
+if(p&&p!=="/")location.replace(p+location.search);
 }catch(e){}})();`;

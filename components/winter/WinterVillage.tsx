@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { APPS } from "@/lib/apps";
 import { parseHash, routeToHash } from "@/lib/arcadeRoute";
+import { WinterMusic, musicWanted, setMusicWanted } from "./music";
+import MusicButton from "./MusicButton";
 import type { VillageScene } from "./scene/village";
 import { ABOUT_ID, SPOTS, spotById } from "./spots";
 import WinterCard from "./WinterCard";
@@ -16,6 +18,10 @@ import WinterCard from "./WinterCard";
  * building (hidden until it gets focus; shown outright if the browser can't
  * draw WebGL). An open card gets its own URL, `#/card/<app>` or `#/about`, the
  * same card links the arcade uses, so back closes it and a link can be shared.
+ *
+ * Quiet carols play in the background (./music). Browsers keep a page silent
+ * until the visitor first clicks or presses a key, so the music fades in on
+ * that first gesture, unless the visitor turned it off on an earlier visit.
  */
 
 type Status = "loading" | "ready" | "failed";
@@ -43,6 +49,8 @@ export default function WinterVillage() {
   const [hover, setHover] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
+  const music = useRef<WinterMusic | null>(null);
+  const [playing, setPlaying] = useState(false);
   // With reduced motion the village holds still and clicking the snow does nothing, so the hint doesn't offer snowballs.
   const [still, setStill] = useState(false);
 
@@ -117,6 +125,39 @@ export default function WinterVillage() {
     scene.current?.setInteractive(!open);
   }, [open, status]);
 
+  // Start the music on the first click, tap or key press (pointerup, not pointerdown: on a
+  // touch screen only the lift counts as a gesture that may start sound).
+  useEffect(() => {
+    const m = new WinterMusic();
+    music.current = m;
+    const first = (e: Event) => {
+      if ((e.target as Element | null)?.closest?.(".wv-music")) return; // the button decides for itself
+      window.removeEventListener("pointerup", first, true);
+      window.removeEventListener("keydown", first, true);
+      if (musicWanted()) {
+        m.start();
+        setPlaying(m.isPlaying);
+      }
+    };
+    window.addEventListener("pointerup", first, true);
+    window.addEventListener("keydown", first, true);
+    return () => {
+      window.removeEventListener("pointerup", first, true);
+      window.removeEventListener("keydown", first, true);
+      m.dispose();
+      music.current = null;
+    };
+  }, []);
+
+  const toggleMusic = () => {
+    const m = music.current;
+    if (!m) return;
+    if (m.isPlaying) m.stop();
+    else m.start();
+    setMusicWanted(m.isPlaying);
+    setPlaying(m.isPlaying);
+  };
+
   const lit = spotById(hover);
 
   return (
@@ -173,6 +214,8 @@ export default function WinterVillage() {
           ))}
         </ul>
       </nav>
+
+      <MusicButton playing={playing} onToggle={toggleMusic} />
 
       {open && <WinterCard key={open} target={open === ABOUT_ID ? "about" : APPS.find((a) => a.id === open)!} onClose={close} />}
     </main>

@@ -28,8 +28,22 @@ const withoutWebGL = () => {
 /** Clear the URL hash, which is where an open card lives. Stories share one document. */
 const clearHash = () => window.history.replaceState(null, '', window.location.pathname + window.location.search);
 
+const MUSIC = 'byebrianwong:music';
+
 /**
- * The winter village style of the site, at /winter: a papier-mâché village
+ * Every story starts with a clean URL and the music switched off, so a click
+ * in one story doesn't set the carols playing. Synthesizing them keeps the
+ * test browser busy, which slows the animated stories running beside these.
+ * The `Music` story switches it back on.
+ */
+const quietVillage = () => {
+  clearHash();
+  window.localStorage.setItem(MUSIC, 'off');
+  return () => window.localStorage.removeItem(MUSIC);
+};
+
+/**
+ * The winter village, the site's home page ("/"): a papier-mâché village
  * seen from far above where every app is a building and the log cabin is
  * About. Moving the mouse pans across it and the wheel zooms a little;
  * hovering a building tags it and clicking opens its card. Keyboard and screen
@@ -44,7 +58,7 @@ const meta = {
   component: WinterVillage,
   tags: ['ai-generated'],
   parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true } },
-  beforeEach: clearHash,
+  beforeEach: quietVillage,
 } satisfies Meta<typeof WinterVillage>;
 
 export default meta;
@@ -87,7 +101,7 @@ export const OpenFromDirectory: Story = {
   },
 };
 
-/** A shared link to the cabin (`/winter#/about`) opens Brian's bio straight away. */
+/** A shared link to the cabin (`/#/about`) opens Brian's bio straight away. */
 export const SharedAboutLink: Story = {
   beforeEach: () => {
     const restore = withoutWebGL();
@@ -101,5 +115,31 @@ export const SharedAboutLink: Story = {
     await started(canvasElement);
     const dialog = await canvas.findByRole('dialog', { name: /hi, i'm brian/i });
     await waitFor(() => expect(dialog).toBeVisible(), { timeout: 5000 });
+  },
+};
+
+/**
+ * The carols start on the visitor's first key press or click (browsers don't
+ * allow sound before that), and the music button turns them off and on again.
+ * Turning them off is remembered for the next visit.
+ */
+export const Music: Story = {
+  beforeEach: () => {
+    const restore = withoutWebGL();
+    window.localStorage.removeItem(MUSIC);
+    return () => {
+      restore();
+      window.localStorage.removeItem(MUSIC);
+    };
+  },
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    await started(canvasElement);
+    await expect(canvas.getByRole('button', { name: /play music/i })).toHaveAttribute('aria-pressed', 'false');
+    await userEvent.keyboard('{Shift}');
+    const off = await canvas.findByRole('button', { name: /turn the music off/i });
+    await expect(off).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(off);
+    await expect(canvas.getByRole('button', { name: /play music/i })).toHaveAttribute('aria-pressed', 'false');
+    await expect(window.localStorage.getItem(MUSIC)).toBe('off');
   },
 };
