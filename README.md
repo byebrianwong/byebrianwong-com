@@ -30,7 +30,10 @@ rink are lumpy papier-mâché shapes with real 3D light and shadow (three.js);
 the villagers and trees are flat paper cutouts standing in the scene. People
 skate on the rink, sled down a hill, throw snowballs and sing carols, and
 smoke rises from the chimneys. Moving the mouse pans the camera across the
-village (dragging on touch screens, arrow keys on a keyboard).
+village (dragging on touch screens, arrow keys on a keyboard). The scroll
+wheel zooms in and out a little (pinching on touch screens, + and - on a
+keyboard). Ctrl + scroll is left alone so the browser's own page zoom still
+works.
 
 Every app has a building that hints at what it does: a camera kiosk for Wonder
 Lens, a cereal-box shop, a beehive gift shop for Regibee, an observatory for
