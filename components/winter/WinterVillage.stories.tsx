@@ -28,6 +28,20 @@ const withoutWebGL = () => {
 /** Clear the URL hash, which is where an open card lives. Stories share one document. */
 const clearHash = () => window.history.replaceState(null, '', window.location.pathname + window.location.search);
 
+const MUSIC = 'byebrianwong:music';
+
+/**
+ * Every story starts with a clean URL and the music switched off, so a click
+ * in one story doesn't set the carols playing. Synthesizing them keeps the
+ * test browser busy, which slows the animated stories running beside these.
+ * The `Music` story switches it back on.
+ */
+const quietVillage = () => {
+  clearHash();
+  window.localStorage.setItem(MUSIC, 'off');
+  return () => window.localStorage.removeItem(MUSIC);
+};
+
 /**
  * The winter village, the site's home page ("/"): a papier-mâché village
  * seen from far above where every app is a building and the log cabin is
@@ -43,7 +57,7 @@ const meta = {
   component: WinterVillage,
   tags: ['ai-generated'],
   parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true } },
-  beforeEach: clearHash,
+  beforeEach: quietVillage,
 } satisfies Meta<typeof WinterVillage>;
 
 export default meta;
@@ -111,10 +125,10 @@ export const SharedAboutLink: Story = {
 export const Music: Story = {
   beforeEach: () => {
     const restore = withoutWebGL();
-    window.localStorage.removeItem('byebrianwong:music');
+    window.localStorage.removeItem(MUSIC);
     return () => {
       restore();
-      window.localStorage.removeItem('byebrianwong:music');
+      window.localStorage.removeItem(MUSIC);
     };
   },
   play: async ({ canvas, canvasElement, userEvent }) => {
@@ -125,6 +139,6 @@ export const Music: Story = {
     await expect(off).toHaveAttribute('aria-pressed', 'true');
     await userEvent.click(off);
     await expect(canvas.getByRole('button', { name: /play music/i })).toHaveAttribute('aria-pressed', 'false');
-    await expect(window.localStorage.getItem('byebrianwong:music')).toBe('off');
+    await expect(window.localStorage.getItem(MUSIC)).toBe('off');
   },
 };
