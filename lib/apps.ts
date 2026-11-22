@@ -13,7 +13,7 @@ import littleOnePercentileFootage from "./footage/little-one-percentile.json";
 
 const edmAtlas = fromRecording(edmAtlasFootage as WebFootage, "edmatlas.byebrianwong.com");
 const triveal = fromRecording(trivealFootage as WebFootage, "triveal.byebrianwong.com");
-const mainstreamHipster = fromRecording(mainstreamHipsterFootage as WebFootage, "mainstream-hipster.vercel.app");
+const mainstreamHipster = fromRecording(mainstreamHipsterFootage as WebFootage, "mainstreamhipster.byebrianwong.com");
 const boringCereal = fromRecording(boringCerealFootage as WebFootage, "saturdayboringcereal.byebrianwong.com");
 const littleLexicon = fromRecording(littleLexiconFootage as WebFootage, "littlelexicon.byebrianwong.com");
 const doDone = fromRecording(doDoneFootage as WebFootage, "dodone.byebrianwong.com");
@@ -139,7 +139,7 @@ export const APPS: AppCard[] = [
     accent: "#ec4899",
     hp: 130,
     rarity: "legendary",
-    link: "https://mainstream-hipster.vercel.app",
+    link: "https://mainstreamhipster.byebrianwong.com",
     stats: { users: "60K", rating: "4.8", platform: "Web" },
     blurb: "Rank everything from mainstream to hipster — scored on real Wikipedia, stream, and view-count data. How niche is your taste?",
     ...mainstreamHipster,
