@@ -29,7 +29,7 @@ const withoutWebGL = () => {
 const clearHash = () => window.history.replaceState(null, '', window.location.pathname + window.location.search);
 
 /**
- * The winter village style of the site, at /winter: a papier-mâché village
+ * The winter village, the site's home page ("/"): a papier-mâché village
  * seen from far above where every app is a building and the log cabin is
  * About. Moving the mouse pans across it; hovering a building tags it and
  * clicking opens its card. Keyboard and screen reader visitors get a list of
@@ -86,7 +86,7 @@ export const OpenFromDirectory: Story = {
   },
 };
 
-/** A shared link to the cabin (`/winter#/about`) opens Brian's bio straight away. */
+/** A shared link to the cabin (`/#/about`) opens Brian's bio straight away. */
 export const SharedAboutLink: Story = {
   beforeEach: () => {
     const restore = withoutWebGL();
@@ -100,5 +100,31 @@ export const SharedAboutLink: Story = {
     await started(canvasElement);
     const dialog = await canvas.findByRole('dialog', { name: /hi, i'm brian/i });
     await waitFor(() => expect(dialog).toBeVisible(), { timeout: 5000 });
+  },
+};
+
+/**
+ * The carols start on the visitor's first key press or click (browsers don't
+ * allow sound before that), and the music button turns them off and on again.
+ * Turning them off is remembered for the next visit.
+ */
+export const Music: Story = {
+  beforeEach: () => {
+    const restore = withoutWebGL();
+    window.localStorage.removeItem('byebrianwong:music');
+    return () => {
+      restore();
+      window.localStorage.removeItem('byebrianwong:music');
+    };
+  },
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    await started(canvasElement);
+    await expect(canvas.getByRole('button', { name: /play music/i })).toHaveAttribute('aria-pressed', 'false');
+    await userEvent.keyboard('{Shift}');
+    const off = await canvas.findByRole('button', { name: /turn the music off/i });
+    await expect(off).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(off);
+    await expect(canvas.getByRole('button', { name: /play music/i })).toHaveAttribute('aria-pressed', 'false');
+    await expect(window.localStorage.getItem('byebrianwong:music')).toBe('off');
   },
 };

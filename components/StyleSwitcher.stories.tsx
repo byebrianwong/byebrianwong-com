@@ -1,20 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, waitFor, within } from 'storybook/test';
-import { SITE_STYLES } from '@/lib/siteStyle';
+import { SITE_STYLES, STYLE_KEY } from '@/lib/siteStyle';
 import StyleSwitcher from './StyleSwitcher';
-
-const KEY = 'byebrianwong:style';
 
 /**
  * The nav button that switches the site between its styles (lib/siteStyle.ts).
  * It sits at the left of the nav cluster on every page and opens a menu with
- * one entry per style; the style you're in is ticked. In the winter village
- * the nav is drawn as paper (`data-skin="winter"`).
+ * one entry per style; the style you're in is ticked. The Winter Village is
+ * the home page ("/"), where the nav is drawn as paper (`data-skin="winter"`);
+ * the arcade lives at /arcade.
  */
 const meta = {
   component: StyleSwitcher,
   tags: ['ai-generated'],
-  parameters: { layout: 'fullscreen', nextjs: { appDirectory: true, navigation: { pathname: '/' } } },
+  parameters: { layout: 'fullscreen', nextjs: { appDirectory: true, navigation: { pathname: '/arcade' } } },
   // The menu is positioned against the fixed .site-nav cluster, so stories render inside one.
   decorators: [
     (Story, { parameters }) => (
@@ -26,7 +25,7 @@ const meta = {
     ),
   ],
   beforeEach: () => {
-    window.localStorage.removeItem(KEY);
+    window.localStorage.removeItem(STYLE_KEY);
   },
 } satisfies Meta<typeof StyleSwitcher>;
 
@@ -54,29 +53,34 @@ export const OpenOnArcade: Story = {
     const links = canvas.getAllByRole('link');
     await expect(links).toHaveLength(SITE_STYLES.length);
     await expect(canvas.getByRole('link', { name: /the app arcade/i })).toHaveAttribute('aria-current', 'page');
-    await expect(canvas.getByRole('link', { name: /winter village/i })).toHaveAttribute('href', '/winter');
+    await expect(canvas.getByRole('link', { name: /winter village/i })).toHaveAttribute('href', '/');
+    await expect(canvas.getByRole('link', { name: /the app arcade/i })).toHaveAttribute('href', '/arcade');
   },
 };
 
 /** Open in the winter village: the same menu, cut from paper, with Winter Village ticked. */
 export const OpenInVillage: Story = {
-  parameters: { skin: 'winter', nextjs: { appDirectory: true, navigation: { pathname: '/winter' } } },
+  parameters: { skin: 'winter', nextjs: { appDirectory: true, navigation: { pathname: '/' } } },
   play: async ({ canvas, canvasElement, userEvent }) => {
     await openMenu(canvasElement, userEvent);
     await expect(canvas.getByRole('link', { name: /winter village/i })).toHaveAttribute('aria-current', 'page');
   },
 };
 
-/** Picking a style remembers it, so "/" opens that style next time. Escape closes the menu. */
+/**
+ * Picking the arcade from the village remembers it, so "/" opens the arcade
+ * next time. Escape closes the menu.
+ */
 export const PickingRemembers: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
+  parameters: { skin: 'winter', chromatic: { disableSnapshot: true }, nextjs: { appDirectory: true, navigation: { pathname: '/' } } },
   play: async ({ canvas, canvasElement, userEvent }) => {
+    await expect(window.localStorage.getItem(STYLE_KEY)).toBeNull();
     await openMenu(canvasElement, userEvent);
-    await userEvent.click(canvas.getByRole('link', { name: /winter village/i }));
-    await waitFor(() => expect(window.localStorage.getItem(KEY)).toBe('winter'));
+    await userEvent.click(canvas.getByRole('link', { name: /the app arcade/i }));
+    await waitFor(() => expect(window.localStorage.getItem(STYLE_KEY)).toBe('arcade'));
     await openMenu(canvasElement, userEvent);
     await userEvent.keyboard('{Escape}');
-    await expect(canvas.queryByRole('link', { name: /winter village/i })).toBeNull();
+    await expect(canvas.queryByRole('link', { name: /the app arcade/i })).toBeNull();
     await expect(canvas.getByRole('button', { name: /change the site's style/i })).toHaveFocus();
   },
 };

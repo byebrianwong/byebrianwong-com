@@ -3,13 +3,13 @@ import "./globals.css";
 import SiteNav from "@/components/SiteNav";
 import { STYLE_BOOT_SCRIPT } from "@/lib/siteStyle";
 
+// Defaults for every page; the village (/) and the arcade (/arcade) set their own.
 export const metadata: Metadata = {
-  title: "Brian Wong — The App Arcade",
-  description:
-    "A booster-pack arcade of apps built by Brian Wong. Rip open a pack and collect the cards.",
+  title: "Brian Wong",
+  description: "Fun tools, apps, and games built by Brian Wong.",
   openGraph: {
-    title: "Brian Wong — The App Arcade",
-    description: "Rip open a booster pack and collect the apps.",
+    title: "Brian Wong",
+    description: "Fun tools, apps, and games built by Brian Wong.",
     type: "website",
   },
 };

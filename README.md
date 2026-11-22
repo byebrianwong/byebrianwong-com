@@ -2,28 +2,13 @@
 
 Brian's portfolio: a bit about him, and every app and game he's built. The site
 comes in more than one style. Each style is its own page that shows the same
-things in a different world. The palette button in the nav switches between
-them, and the home page (`/`) opens whichever style the visitor used last
-(remembered in their browser's localStorage).
+things in a different world. The Winter Village is the home page (`/`). The
+palette button in the nav switches styles; a visitor who picks the arcade
+there is remembered (in their browser's localStorage), and `/` sends them to
+it on later visits. Only picking from the menu counts, not landing on a
+style's page from a link.
 
-## The App Arcade (`/`)
-
-A booster-pack arcade portfolio. The site opens on one sealed 3D booster pack.
-Click it and it tears open, and every app card flies out into a grid, flipping
-face-up as it lands. The cards are styled like a modern board game: cream
-card stock, an arched art window, icon tokens and chips, and a foil border on
-rare, holo and legendary cards. They tilt under the pointer, show a "watch
-demo" label on hover, and open a full-screen view on click. There's arcade
-sound too.
-
-Every card shows real footage of its app instead of an icon. So that very
-different apps still look like one set, every card's footage is tinted in its
-app's color, with whites pulled down and blacks lifted; hovering a card shows
-the real colors. Wonder Lens's full-screen view is the game's viewfinder: you
-can switch worlds and take photos that are scored the way the game scores
-them. The other cards open a longer walkthrough of the app in chapters.
-
-## Winter Village (`/winter`)
+## Winter Village (`/`)
 
 A papier-mâché winter village seen from far above. Buildings, hills and the ice
 rink are lumpy papier-mâché shapes with real 3D light and shadow (three.js);
@@ -39,10 +24,35 @@ spot, a clock tower, a record shop, a lighthouse with a magnifying-glass lamp,
 and a nursery with a growth chart. The log cabin by the rink is About.
 Hovering a building tags it with its name; clicking opens a paper card with
 the app's footage, what it is, and a PLAY or LAUNCH button. An open card has
-its own URL (`/winter#/card/<app>`, `/winter#/about`), the same card links the
-arcade uses. Keyboard and screen reader visitors get a list of every building
-that appears when it gets focus; browsers without WebGL see that list instead
-of the village.
+its own URL (`/#/card/<app>`, `/#/about`), the same card links the arcade
+uses. Keyboard and screen reader visitors get a list of every building that
+appears when it gets focus; browsers without WebGL see that list instead of
+the village.
+
+Quiet carols play in the background: a music box playing Silent Night, Jingle
+Bells, Deck the Halls and We Wish You a Merry Christmas over a soft pad, with
+drifting bell notes in between. It's synthesized in the browser (Web Audio, no
+audio files) from public-domain melodies. Browsers keep a page silent until
+the visitor clicks or presses a key, so the music fades in on that first
+gesture. The button in the bottom-right corner turns it off, and that's
+remembered.
+
+## The App Arcade (`/arcade`)
+
+A booster-pack arcade portfolio. The site opens on one sealed 3D booster pack.
+Click it and it tears open, and every app card flies out into a grid, flipping
+face-up as it lands. The cards are styled like a modern board game: cream
+card stock, an arched art window, icon tokens and chips, and a foil border on
+rare, holo and legendary cards. They tilt under the pointer, show a "watch
+demo" label on hover, and open a full-screen view on click. There's arcade
+sound too.
+
+Every card shows real footage of its app instead of an icon. So that very
+different apps still look like one set, every card's footage is tinted in its
+app's color, with whites pulled down and blacks lifted; hovering a card shows
+the real colors. Wonder Lens's full-screen view is the game's viewfinder: you
+can switch worlds and take photos that are scored the way the game scores
+them. The other cards open a longer walkthrough of the app in chapters.
 
 ## Built with
 
@@ -86,10 +96,12 @@ npm run start
   from the old two-pack layout (`#/pack/...`) still resolve.
 - `lib/sound.ts` — synthesized arcade SFX (Web Audio, no asset files)
 - `lib/siteStyle.ts`: the list of styles, the visitor's remembered choice, and the
-  script in `<head>` that sends "/" to it before the page paints
+  script in `<head>` that sends "/" to it before the page paints (and sends old
+  arcade links like `/#/cards` to `/arcade`)
+- `next.config.mjs`: redirects `/winter`, where the village first lived, to `/`
 - `components/StyleSwitcher.tsx`: the palette button and style menu in the nav
 - `components/AboutBio.tsx`: Brian's bio, shared by the About page and the village's cabin
-- `app/winter/page.tsx` and `components/winter/`: the winter village
+- `app/page.tsx` and `components/winter/`: the winter village (`app/arcade/page.tsx` is the arcade)
   - `WinterVillage.tsx`: the page; owns everything you read (title, hover tag,
     cards, keyboard directory) and the card URLs
   - `WinterCard.tsx`: the paper card for an app or the cabin
@@ -98,6 +110,8 @@ npm run start
   - `scene/builders.ts`: houses, paper people, props, and one building per app
   - `scene/mache.ts`: lumpy papier-mâché shapes, and merging each building into a few meshes
   - `scene/paper.ts`: paper textures and every cut-paper drawing (people, trees, signs)
+  - `music.ts`: the background carols (the notes, the music box, and the player);
+    `MusicButton.tsx` is the switch
 - `prototypes/` — the original standalone HTML explorations (reference only; not part of the build).
   `winter-village-studies.html` compares the three looks and three app placements
   that were considered for the winter village.
@@ -114,9 +128,9 @@ the camera only slides, so a building hidden behind another stays hidden.
 
 ## Adding a style
 
-Add an entry to `SITE_STYLES` in `lib/siteStyle.ts`, make its page, and render
-`<StyleMemory id="..." />` on it so "/" remembers it. It appears in the style
-menu automatically. To give the nav buttons its look, style
+Add an entry to `SITE_STYLES` in `lib/siteStyle.ts` and make its page at the
+entry's `path`. It appears in the style menu automatically, and "/" remembers
+it when a visitor picks it there. To give the nav buttons its look, style
 `.site-nav[data-skin="<id>"]` in `app/globals.css`.
 
 ## Deploy (Vercel)
