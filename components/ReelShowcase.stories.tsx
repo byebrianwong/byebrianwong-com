@@ -67,8 +67,10 @@ export const PlayGame: Story = {
   play: async ({ canvas, canvasElement, args }) => {
     await holdFirstFrame(canvasElement);
     const play = canvas.getByRole('link', { name: new RegExp(`^play ${args.app.name}`, 'i') });
-    // The side panel fades in.
-    await waitFor(() => expect(play).toBeVisible());
+    // The side panel fades in (0.5s after a 0.15s delay). Allow it the same three
+    // seconds as JumpToChapter: on a busy CI runner, with other story files
+    // running alongside, the default one second isn't always enough.
+    await waitFor(() => expect(play).toBeVisible(), { timeout: 3000 });
     await expect(play).toHaveAttribute('href', args.app.link);
   },
 };
@@ -80,7 +82,7 @@ export const LaunchApp: Story = {
   play: async ({ canvas, canvasElement, args }) => {
     await holdFirstFrame(canvasElement);
     const launch = canvas.getByRole('link', { name: new RegExp(`^launch ${args.app.name}`, 'i') });
-    await waitFor(() => expect(launch).toBeVisible());
+    await waitFor(() => expect(launch).toBeVisible(), { timeout: 3000 });
     await expect(launch).toHaveAttribute('href', args.app.link);
   },
 };
