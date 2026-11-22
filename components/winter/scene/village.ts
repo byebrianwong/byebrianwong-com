@@ -3,13 +3,15 @@
 //
 // Moving the mouse pans the camera across the village (dragging on touch).
 // Hovering a building highlights it and reports it through `onHover`, so the
-// page can show its tag; clicking reports `onOpen`. The page owns everything
-// that is text (tags, cards); this class only draws.
+// page can show its tag; clicking reports `onOpen`. Clicking anywhere else
+// throws a snowball (./play), and whatever it lands on reacts. The page owns
+// everything that is text (tags, cards); this class only draws.
 
 import * as THREE from "three";
 import { APPS } from "@/lib/apps";
 import { ABOUT_ID } from "../spots";
 import { Bake, Kit, lumpy, shapeLib } from "./mache";
+import { Play } from "./play";
 import {
   BUILDERS, actor, cabin, dog, fallbackBuilding, house, sign, snowman, type Actor, type Built, type Ctx, type Mover,
 } from "./builders";
@@ -67,6 +69,9 @@ export class VillageScene {
   private camera = new THREE.PerspectiveCamera(30, 1, 0.5, 400);
   private k: Kit;
   private c: Ctx;
+  private play: Play;
+  /** The skaters, so a ball skidding across the ice can bowl them over. */
+  private skating: Actor[] = [];
   private movers: Mover[] = [];
   private hoverables: Hoverable[] = [];
   private hits: THREE.Object3D[] = [];
@@ -113,6 +118,7 @@ export class VillageScene {
       return h;
     };
     this.c = { k: this.k, S: shapeLib(this.k), scene: this.scene, movers: this.movers, gh: groundH };
+    this.play = new Play(this.c, this.camera, host);
     this.build();
 
     this.resizeObs = new ResizeObserver(() => this.resize());
@@ -147,6 +153,7 @@ export class VillageScene {
     cancelAnimationFrame(this.raf);
     this.resizeObs.disconnect();
     this.unbindInput();
+    this.play.dispose();
     this.scene.traverse((o) => {
       const m = o as THREE.Mesh;
       if (m.geometry) m.geometry.dispose();
@@ -190,10 +197,18 @@ export class VillageScene {
     if (!this.interactive || this.dragMoved > 12) { this.dragMoved = 0; return; }
     const { nx, ny } = this.toNdc(e);
     this.ray.setFromCamera(new THREE.Vector2(nx, -ny), this.camera);
-    const hit = this.ray.intersectObjects(this.hits, false)[0];
-    const h = (hit?.object.userData.hov as Hoverable | undefined) ?? this.hovered;
+    // A mouse's hover is where it is now. A finger's is wherever the last drag ended, so a tap ignores it.
+    const h = this.building() ?? ((e as PointerEvent).pointerType === "mouse" ? this.hovered : null);
     if (h) this.ev.onOpen(h.id);
+    else if (!this.reducedMotion) this.play.throw(this.ray);
   };
+
+  /** The building under `this.ray`, unless something (a tree, a cottage) stands in front of it. */
+  private building() {
+    const hit = this.ray.intersectObjects(this.hits, false)[0];
+    if (!hit || this.play.blocks(this.ray, hit.distance)) return null;
+    return hit.object.userData.hov as Hoverable;
+  }
   private onKey = (e: KeyboardEvent) => {
     if (!this.interactive || e.altKey || e.metaKey || e.ctrlKey) return;
     const t = e.target as HTMLElement | null;
@@ -253,8 +268,7 @@ export class VillageScene {
   private updateHover(dt: number) {
     if (this.interactive && this.pointerIn) {
       this.ray.setFromCamera(this.ndc, this.camera);
-      const hit = this.ray.intersectObjects(this.hits, false)[0];
-      this.hovered = (hit?.object.userData.hov as Hoverable | undefined) ?? null;
+      this.hovered = this.building();
     }
     const lit = this.hovered ?? this.focused;
     const id = lit?.id ?? null;
@@ -283,6 +297,7 @@ export class VillageScene {
     if (!this.interactive && ++this.held > 2) return;
     this.updateCamera(dt);
     if (!this.reducedMotion) { const t = (now - this.start) / 1000; for (const m of this.movers) m(t, dt); }
+    this.play.update(dt);
     this.updateHover(dt);
     this.adapt(ms);
     this.renderer.render(this.scene, this.camera);
@@ -319,6 +334,7 @@ export class VillageScene {
     geo.computeVertexNormals();
     const ground = new THREE.Mesh(geo, this.k.paint(C.snow, { mache: false, repeat: 28, bump: 1 }));
     ground.receiveShadow = true; scene.add(ground);
+    this.play.on(ground, { floor: true, hit: (at) => { this.play.splat(at); this.play.lump(at); } });
 
     this.pond();
     const keep: Keep[] = [
@@ -342,10 +358,28 @@ export class VillageScene {
       const built = house(c, { w, d, h, wall, roof, seed: i * 3 + 40 });
       this.place(built, null, [x, z, ry]);
       keep.push({ x, z, r: 3.3 });
+      // Hit a cottage and it gives like papier-mâché, snow slides off the front of its roof, and the chimney coughs.
+      const g = built.g, parts: THREE.Object3D[] = [], chimney = built.smoke?.[0]?.clone().applyMatrix4(g.matrixWorld);
+      g.traverse((o) => { if ((o as THREE.Mesh).isMesh) parts.push(o); });
+      this.play.on(parts, {
+        hit: (at) => {
+          this.play.splat(at); this.play.squash(g);
+          for (let j = 0; j < 5; j++) this.play.burst(g.localToWorld(new THREE.Vector3(lerp(-w / 2, w / 2, 0.1 + j * 0.2), h - 0.1, d / 2 + 0.45)), "puff", 1, { speed: 0.3, up: 0.6, grav: 7, size: [0.26, 0.4], life: 0.9 });
+          if (chimney) this.play.burst(chimney, "puff", 3, { speed: 0.35, up: 1.6, grav: -1.2, size: [0.4, 0.6], life: 1.6, grow: 1.4 });
+        },
+      });
     });
 
+    // The big tree shakes and throws off a shower of paper stars.
     const tree = c.k.cutout(bigTreeCanvas(), 7.2, { foot: 0.02 });
     tree.position.set(BIG_TREE.x, c.gh(BIG_TREE.x, BIG_TREE.z), BIG_TREE.z); scene.add(tree);
+    this.play.on(tree, {
+      cut: true,
+      hit: (at) => {
+        this.play.splat(at); this.play.wobble(tree, 0.06, 9, 3);
+        this.play.burst(tree.position.clone().setY(tree.position.y + 6.7), "star", 12, { speed: 3, up: 4.5, grav: 5, size: [0.3, 0.5], life: 1.7, spin: 4 });
+      },
+    });
 
     const paths: [number, number, number, number][] = [[-11, -4, 6.4, -4.2], [-3.2, 9.6, 4.2, 9.8], [-19, -2, -18.2, 9.5], [18.6, -4, 18.8, 7]];
     for (const [ax, az, bx, bz] of paths) for (let i = 0; i <= 6; i++) keep.push({ x: lerp(ax, bx, i / 6), z: lerp(az, bz, i / 6), r: 1.4 });
@@ -396,10 +430,18 @@ export class VillageScene {
       this.k.memo("ice", () => new THREE.MeshStandardMaterial({ map: this.k.tex(iceCanvas(), { edge: true }), roughness: 0.3, metalness: 0 })),
     );
     ice.scale.set(POND.rx, 1, POND.rz); ice.position.set(POND.x, 0.05, POND.z); ice.receiveShadow = true; this.scene.add(ice);
+    // A snowball on the ice skids, and bowls over any skater in its way.
+    this.play.on(ice, {
+      floor: true,
+      hit: (at, dir) => this.play.slide(at, dir, POND, (p, v) => {
+        for (const a of this.skating) if (!a.down && Math.hypot(a.root.position.x - p.x, a.root.position.z - p.z) < 0.45) this.play.knock(a, v);
+      }),
+    });
     const pts: THREE.Vector3[] = [];
     for (let i = 0; i < 64; i++) { const a = (i / 64) * TAU; pts.push(new THREE.Vector3(POND.x + Math.cos(a) * (POND.rx + 0.15), 0.06, POND.z + Math.sin(a) * (POND.rz + 0.15))); }
     const rim = new THREE.Mesh(lumpy(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 160, 0.3, 8, true), 0.1, 1.6, 3), this.k.paint(C.snow));
     rim.castShadow = true; rim.receiveShadow = true; this.scene.add(rim);
+    this.play.on(rim, { floor: true, hit: (at) => this.play.splat(at) });
   }
 
   /** Cutout pines everywhere there's room, thicker towards the edges of the village. */
@@ -412,8 +454,17 @@ export class VillageScene {
       const chance = 0.08 + 0.92 * smooth(10, 21, Math.hypot(x, z * 1.15));
       if (R() > chance || !clear(x, z)) continue;
       const s = 0.75 + R() * 0.7, v = Math.floor(R() * TREE_VARIANTS);
-      const m = this.k.cutout(treeCanvas(v), 2.9 * s, { foot: 0.04 });
+      const m = this.k.cutout(treeCanvas(v), 2.9 * s, { foot: 0.04 }), h = 2.9 * s;
       m.position.set(x, this.c.gh(x, z) - 0.05, z); this.scene.add(m);
+      // Hit a tree and it shakes the snow off its branches. Now and then a bird flies out.
+      this.play.on(m, {
+        cut: true,
+        hit: (at) => {
+          this.play.splat(at, 0.8); this.play.wobble(m, 0.2);
+          this.play.burst(new THREE.Vector3(x, m.position.y + h * 0.55, z + 0.1), "puff", 7, { spread: [h * 0.22, h * 0.25, 0.1], speed: 0.3, up: 0.3, grav: 6, size: [0.22, 0.38], life: 1 });
+          if (Math.random() < 0.35) this.play.bird(new THREE.Vector3(x, m.position.y + h * 0.8, z + 0.15));
+        },
+      });
       placed++;
     }
   }
@@ -425,6 +476,11 @@ export class VillageScene {
     b.add(S.rb(0.3, 0.08, 0.3, 0.04, 0.02), C.snow, { y: 2.88 });
     const g = b.group({ ei: 2 }); g.position.set(x, y, z); this.scene.add(g);
     const s = k.sprite(glowCanvas(), 0.9, true); s.scale.setScalar(2.4); s.position.set(x, y + 2.45, z); this.scene.add(s);
+    // A snowball puts the lamp out for a moment.
+    const lit = k.glow("#ffd27a", 2), bulb = g.children.find((o) => (o as THREE.Mesh).material === lit) as THREE.Mesh | undefined;
+    const dark = k.memo("lampOut", () => { const m = lit.clone(); m.emissiveIntensity = 0.05; m.color.set("#8f8778"); return m; });
+    const set = (on: boolean) => { if (bulb) bulb.material = on ? lit : dark; s.visible = on; };
+    this.play.on(this.play.box(g, 0.8, 3.1), { hit: (at) => { this.play.splat(at, 0.8); this.play.sputter(set); } });
   }
 
   private smoke(pos: THREE.Vector3) {
@@ -462,42 +518,69 @@ export class VillageScene {
 
   private add(a: Actor) { this.scene.add(a.root); return a; }
 
+  /**
+   * Move someone with `at(t)` on a clock of their own, which stops while any of `who` is knocked
+   * over, so they carry on from where they fell instead of jumping ahead.
+   */
+  private live(who: Actor[], at: (t: number) => void) {
+    let t = 0;
+    at(0);
+    this.movers.push((_, dt) => { if (who.some((a) => a.down)) return; t += dt; at(t); });
+  }
+
+  /** Let a snowball knock this person over. */
+  private knockable(a: Actor) {
+    this.play.on(this.play.box(a.root, a.h * 0.55, a.h), {
+      follow: a.root,
+      hit: (at, dir) => { this.play.splat(at, 0.7); this.play.knock(a, dir); },
+    });
+  }
+
   private skaters() {
     const R = rng(31);
     for (let i = 0; i < 6; i++) {
       const a = this.add(actor(this.c, { outfit: i, pose: "skate", skates: true, kid: i === 4 }));
       const k = 0.32 + R() * 0.52, sp = (0.24 + R() * 0.18) * (i % 2 ? -1 : 1), ph0 = R() * TAU;
-      const at = (t: number) => {
+      this.live([a], (t) => {
         const th = ph0 + sp * t;
         a.root.position.set(POND.x + POND.rx * k * Math.cos(th), 0.06, POND.z + POND.rz * k * Math.sin(th));
         a.face(-Math.sin(th) * sp); a.pose("skate", t * 3 + i);
-      };
-      at(0); this.movers.push(at);
+      });
+      this.knockable(a); this.skating.push(a);
     }
     const spin = this.add(actor(this.c, { outfit: 4, pose: "spin", skates: true }));
     spin.root.position.set(POND.x - POND.rx * 0.1, 0.06, POND.z + POND.rz * 0.05);
-    this.movers.push((t) => { spin.root.rotation.y = t * 3.4; });
+    this.live([spin], (t) => { spin.root.rotation.y = t * 3.4; });
+    this.knockable(spin); this.skating.push(spin);
   }
 
   private walker([ax, az, bx, bz]: [number, number, number, number], outfit: number, speed: number, ph: number, kid = false) {
     const a = this.add(actor(this.c, { outfit, pose: "walk", kid }));
     const len = Math.hypot(bx - ax, bz - az);
-    const at = (t: number) => {
+    this.live([a], (t) => {
       const u = (t * speed / len + ph) % 2, s = u < 1 ? u : 2 - u, dir = u < 1 ? 1 : -1;
       const x = lerp(ax, bx, s), z = lerp(az, bz, s);
       a.root.position.set(x, this.c.gh(x, z), z); a.face((bx - ax) * dir); a.pose("walk", t * 7 + ph * 3);
-    };
-    at(0); this.movers.push(at);
+    });
+    this.knockable(a);
     return a;
   }
 
+  /** A dog trotting circles around its owner. A snowball sets it barking and doing laps. */
   private dogFollow(owner: Actor) {
     const d = dog(this.c); this.scene.add(d.root);
-    const at = (t: number) => {
-      const o = owner.root.position, a = t * 2.6, x = o.x + Math.cos(a) * 1.1, z = o.z + Math.sin(a) * 0.7;
-      d.root.position.set(x, this.c.gh(x, z), z); d.face(-Math.sin(a)); d.bob(t * 14);
+    let ang = 0, wide = 1, zoom = 0;
+    const at = (t: number, dt: number) => {
+      zoom = Math.max(0, zoom - dt);
+      ang += dt * (zoom > 0 ? 8 : 2.6); wide += ((zoom > 0 ? 2 : 1) - wide) * Math.min(1, dt * 4);
+      const o = owner.root.position, x = o.x + Math.cos(ang) * 1.1 * wide, z = o.z + Math.sin(ang) * 0.7 * wide;
+      d.root.position.set(x, this.c.gh(x, z), z); d.face(-Math.sin(ang)); d.bob(t * (zoom > 0 ? 24 : 14));
     };
-    at(0); this.movers.push(at);
+    at(0, 0); this.movers.push(at);
+    this.play.on(this.play.box(d.root, 0.75, 0.6), {
+      follow: d.root,
+      hit: (p) => { this.play.splat(p, 0.6); zoom = 2.6; this.play.woof(d.root); },
+    });
   }
 
   /** Kids sledding down the hill, then trudging back up. */
@@ -509,7 +592,7 @@ export class VillageScene {
       const back = this.add(actor(this.c, { outfit, pose: "walk", kid: true }));
       this.scene.add(ride);
       const T = 8;
-      const at = (t: number) => {
+      this.live([back], (t) => {
         const s = (t + ph) % T;
         if (s < 2.6) {
           const u = (s / 2.6) ** 2, x = lerp(top[0], bot[0], u), z = lerp(top[1], bot[1], u);
@@ -519,11 +602,12 @@ export class VillageScene {
           ride.visible = false; back.root.visible = true; back.root.position.set(x, this.c.gh(x, z), z);
           back.face(top[0] - bot[0]); back.pose("walk", t * 6);
         }
-      };
-      at(0); this.movers.push(at);
+      });
+      this.knockable(back);
     });
   }
 
+  /** Two kids in a snowball fight. Hit one and they throw one back, at you. */
   private snowballFight(A: [number, number], B: [number, number]) {
     const a = this.add(actor(this.c, { outfit: 2, pose: "throw", kid: true })), b = this.add(actor(this.c, { outfit: 5, pose: "throw", kid: true }));
     a.root.position.set(A[0], this.c.gh(...A), A[1]); b.root.position.set(B[0], this.c.gh(...B), B[1]);
@@ -535,38 +619,60 @@ export class VillageScene {
       a.pose("hop", t * 5); b.pose("hop", t * 5 + 1.5);
     };
     at(0.4); this.movers.push(at);
+    for (const k of [a, b]) {
+      this.play.on(this.play.box(k.root, k.h * 0.55, k.h), {
+        hit: (p) => {
+          this.play.splat(p, 0.7); this.play.wobble(k.root, 0.35, 16, 5);
+          this.play.later(0.45, () => this.play.throwBack(k.root.position.clone().setY(k.root.position.y + k.h * 0.8)));
+        },
+      });
+    }
   }
 
+  /** Carolers. A snowball makes them hop and hit a high note. */
   private carolers(x: number, z: number) {
+    const y = this.c.gh(x, z);
     const list = [0, 3, 1].map((o, i) => {
       const a = this.add(actor(this.c, { outfit: o, pose: "carol", kid: i === 1 }));
-      a.root.position.set(x + i * 0.85, this.c.gh(x, z), z + (i % 2) * 0.25); a.face(1);
+      a.root.position.set(x + i * 0.85, y, z + (i % 2) * 0.25); a.face(1);
       return a;
     });
     const notes = [0, 1, 2, 3].map(() => { const s = this.k.sprite(noteCanvas(), 1); s.scale.set(0.3, 0.4, 1); this.scene.add(s); return s; });
-    const at = (t: number) => {
-      list.forEach((a, i) => a.pose("sway", t * 2.4 + i));
+    let cheer = 0;
+    const at = (t: number, dt = 0) => {
+      cheer = Math.max(0, cheer - dt);
+      list.forEach((a, i) => (cheer > 0 ? a.pose("hop", t * 10 + i * 1.3) : a.pose("sway", t * 2.4 + i)));
       notes.forEach((s, i) => {
         const a = (t * 0.35 + i / 4) % 1;
-        s.position.set(x + 1.6 + Math.sin(a * 6 + i) * 0.4, this.c.gh(x, z) + 1.8 + a * 2.2, z + 0.2); s.material.opacity = Math.sin(a * Math.PI);
+        s.position.set(x + 1.6 + Math.sin(a * 6 + i) * 0.4, y + 1.8 + a * 2.2, z + 0.2); s.material.opacity = Math.sin(a * Math.PI);
       });
     };
     at(0.6); this.movers.push(at);
+    const spot = new THREE.Group(); spot.position.set(x + 0.85, y, z + 0.12); this.scene.add(spot);
+    this.play.on(this.play.box(spot, 2.7, 1.7, 1), {
+      hit: (p) => {
+        this.play.splat(p, 0.7); cheer = 1.3;
+        this.play.burst(new THREE.Vector3(x + 0.85, y + 1.7, z + 0.2), "note", 8, { speed: 1.4, up: 3.2, grav: 2.5, size: [0.3, 0.42], life: 1.5, spin: 1.5 });
+      },
+    });
   }
 
-  /** A finished snowman, and a kid rolling the next one's bottom ball. */
+  /** A finished snowman, and a kid rolling the next one's bottom ball. A snowball knocks the snowman's hat off. */
   private snowmanScene(x: number, z: number) {
-    const sm = snowman(this.c); sm.position.set(x, this.c.gh(x, z), z); this.scene.add(sm);
+    const sm = snowman(this.c); sm.g.position.set(x, this.c.gh(x, z), z); this.scene.add(sm.g);
+    this.play.on(this.play.box(sm.g, 1, 1.75), {
+      hit: (p) => { this.play.splat(p); this.play.wobble(sm.body, 0.1, 14, 5); this.play.toss(sm.hat); },
+    });
     const a = this.add(actor(this.c, { outfit: 3, pose: "push", kid: true }));
     const ball = new THREE.Mesh(this.c.S.sph(0.42, 0.04, 8), this.k.paint(C.snow)); ball.castShadow = true; ball.receiveShadow = true; this.scene.add(ball);
     const A = [x + 1.6, z + 1.2], B = [x + 5, z + 2.2], len = Math.hypot(B[0] - A[0], B[1] - A[1]);
-    const at = (t: number) => {
+    this.live([a], (t) => {
       const u = ((t * 0.45) / len) % 2, s = u < 1 ? u : 2 - u, dir = u < 1 ? 1 : -1;
       const bx = lerp(A[0], B[0], s), bz = lerp(A[1], B[1], s), dx = ((B[0] - A[0]) / len) * dir, dz = ((B[1] - A[1]) / len) * dir;
       ball.position.set(bx, this.c.gh(bx, bz) + 0.4, bz); ball.rotation.z = -(s * len) / 0.42;
       const px = bx - dx * 0.75, pz = bz - dz * 0.75;
       a.root.position.set(px, this.c.gh(px, pz), pz); a.face(dx);
-    };
-    at(0); this.movers.push(at);
+    });
+    this.knockable(a);
   }
 }

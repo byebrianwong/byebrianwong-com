@@ -6,7 +6,7 @@ import * as THREE from "three";
 import type { AppCard } from "@/lib/apps";
 import { Bake, type Kit, type Shapes } from "./mache";
 import {
-  C, OUTFITS, TAU, clockCanvas, cerealLabelCanvas, dogCanvas, mix, numberCanvas, personCanvas,
+  C, OUTFITS, TAU, clockCanvas, cerealLabelCanvas, dogCanvas, hatCanvas, mix, numberCanvas, personCanvas,
   rulerCanvas, signCanvas, snowmanCanvas, starCanvas, todoCanvas, vinylCanvas, type Pose,
 } from "./paper";
 
@@ -111,6 +111,10 @@ export function house(c: Ctx, o: HouseOpts): Built {
 
 export interface Actor {
   root: THREE.Group;
+  /** How tall they stand. */
+  h: number;
+  /** Knocked over by a snowball: whatever moves them waits until they're back up. */
+  down: boolean;
   /** Face left or right by flipping the cutout, like a paper puppet. */
   face(dx: number): void;
   pose(kind: "walk" | "skate" | "sway" | "hop", ph: number): void;
@@ -123,7 +127,7 @@ export function actor(c: Ctx, o: { outfit: number; pose: Pose; kid?: boolean; sk
   const root = new THREE.Group();
   root.add(m);
   return {
-    root,
+    root, h, down: false,
     face(dx) { if (Math.abs(dx) > 1e-3) m.scale.x = dx > 0 ? 1 : -1; },
     pose(kind, ph) {
       if (kind === "walk") { m.position.y = Math.abs(Math.sin(ph)) * 0.07; m.rotation.z = Math.sin(ph) * 0.05; }
@@ -134,7 +138,17 @@ export function actor(c: Ctx, o: { outfit: number; pose: Pose; kid?: boolean; sk
   };
 }
 
-export const snowman = (c: Ctx) => c.k.cutout(snowmanCanvas(), 1.7, { foot: 0.03 });
+/** A snowman, with its hat as a cutout of its own so it can be knocked off. */
+export function snowman(c: Ctx) {
+  // The hat's canvas is drawn at the snowman's scale (1.7 tall over 210px); its centre is 31px from the top of its canvas.
+  const H = 1.7, foot = 0.03, px = H / 210;
+  const body = c.k.cutout(snowmanCanvas(), H, { foot });
+  const hat = c.k.cutout(hatCanvas(), 46 * px, { center: true });
+  hat.position.set(0, H - H * foot - 31 * px, 0.02);
+  const g = new THREE.Group();
+  g.add(body, hat);
+  return { g, body, hat };
+}
 
 export function dog(c: Ctx) {
   const m = c.k.cutout(dogCanvas(), 0.55, { foot: 0.05 });

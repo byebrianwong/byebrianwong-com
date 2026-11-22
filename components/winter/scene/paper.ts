@@ -248,10 +248,34 @@ function drawSnowman(g: G) {
   g.fillStyle = "#2a2230"; [[58, 56], [72, 56], [65, 96], [65, 110]].forEach(([x, y]) => { circ(g, x, y, 2.8); g.fill(); });
   g.fillStyle = "#ef8a2c"; g.beginPath(); g.moveTo(66, 61); g.lineTo(92, 65); g.lineTo(66, 67); g.closePath(); g.fill();
   SH(g, 0.2, 2, 1); g.fillStyle = "#c8463d"; rr(g, 42, 76, 46, 10, 5); g.fill(); rr(g, 72, 78, 10, 26, 4); g.fill();
+  NOSH(g);
+}
+/** The snowman without its hat, which is its own cutout (`hatCanvas`) so a snowball can knock it off. */
+export const snowmanCanvas = () => cached("snowman", () => cut(130, 210, drawSnowman, { border: 5 }));
+/**
+ * The snowman's top hat. Its centre sits at (65, 31) on the snowman's canvas, and it's drawn at the
+ * same scale, so it goes back on at that spot.
+ */
+export const hatCanvas = () => cached("hat", () => cut(70, 46, (g) => {
+  g.translate(-30, -8); SH(g, 0.2, 2, 1);
   g.fillStyle = "#2a2230"; rr(g, 49, 18, 32, 24, 2); g.fill(); rr(g, 40, 38, 50, 6, 3); g.fill();
   g.fillStyle = "#2f6b55"; g.fillRect(49, 32, 32, 5); NOSH(g);
-}
-export const snowmanCanvas = () => cached("snowman", () => cut(130, 210, drawSnowman, { border: 5 }));
+}, { border: 5 }));
+
+/** A little red bird, facing right, with its wing up or down (two frames of flapping). */
+export const birdCanvas = (up: boolean) => cached("bird" + up, () => cut(84, 70, (g) => {
+  g.lineJoin = "round"; SH(g, 0.22, 2, 1);
+  g.fillStyle = "#9b2f36"; g.beginPath(); g.moveTo(24, 40); g.lineTo(6, 30); g.lineTo(9, 48); g.closePath(); g.fill();
+  g.fillStyle = "#c8463d"; g.beginPath(); g.ellipse(40, 42, 20, 13, -0.15, 0, TAU); g.fill();
+  circ(g, 58, 31, 11); g.fill();
+  g.beginPath(); g.moveTo(51, 24); g.lineTo(58, 10); g.lineTo(63, 23); g.closePath(); g.fill();
+  NOSH(g); g.fillStyle = "#2a2230"; circ(g, 65, 33, 5); g.fill();
+  g.fillStyle = "#ef8a2c"; g.beginPath(); g.moveTo(66, 29); g.lineTo(77, 33); g.lineTo(66, 37); g.closePath(); g.fill();
+  g.fillStyle = "#fbf6ea"; circ(g, 61, 29, 1.6); g.fill();
+  SH(g, 0.22, 2, 1); g.fillStyle = "#9b2f36"; g.beginPath();
+  if (up) { g.moveTo(30, 38); g.lineTo(36, 6); g.lineTo(50, 36); } else { g.moveTo(30, 42); g.lineTo(34, 66); g.lineTo(50, 44); }
+  g.closePath(); g.fill(); NOSH(g);
+}, { border: 4 }));
 
 function drawDog(g: G) {
   g.lineCap = "round"; SH(g);
@@ -362,6 +386,13 @@ export const iceCanvas = () => cached("ice", () => {
 
 const HAND = '"Caveat Brush", "Marker Felt", "Comic Sans MS", cursive';
 const DISPLAY = '"Bricolage Grotesque", system-ui, sans-serif';
+
+/** A speech bubble for the dog. */
+export const woofCanvas = () => cached("woof", () => cut(160, 96, (g) => {
+  SH(g, 0.25, 4, 2); g.fillStyle = "#fbf6ea"; rr(g, 8, 6, 144, 62, 24); g.fill();
+  g.beginPath(); g.moveTo(40, 60); g.lineTo(30, 90); g.lineTo(64, 62); g.closePath(); g.fill(); NOSH(g);
+  g.fillStyle = "#2a2230"; g.font = `46px ${HAND}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("woof!", 80, 40);
+}, { border: 4 }));
 
 /** A hand-lettered wooden-post sign. Long names wrap onto two lines. */
 export const signCanvas = (text: string, accent: string) => cached("sign" + text + accent, () => cut(420, 150, (g, w, h) => {
