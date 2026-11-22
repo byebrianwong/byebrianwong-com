@@ -14,7 +14,7 @@ import { ABOUT_ID } from "../spots";
 import { Bake, Kit, lumpy, shapeLib } from "./mache";
 import { Play } from "./play";
 import {
-  BUILDERS, actor, cabin, dog, fallbackBuilding, house, sign, snowman, type Actor, type Built, type Ctx, type Mover,
+  BUILDERS, SIGN_W, actor, cabin, dog, fallbackBuilding, house, sign, snowman, type Actor, type Built, type Ctx, type Mover,
 } from "./builders";
 import {
   C, OUTFITS, TAU, TREE_VARIANTS, bigTreeCanvas, clamp, fbm, flakeCanvas, glowCanvas, iceCanvas, lerp, noteCanvas,
@@ -58,6 +58,13 @@ const HOUSES: HouseSpot[] = [
 
 /** The camera hangs back and above; panning moves it this far from its start. */
 const CAM = { target: new THREE.Vector3(0, 0, -3.5), off: new THREE.Vector3(0, 21, 24), rx: 15, up: 9, down: 11 };
+/**
+ * On a small screen the camera comes no farther back than keeps one village unit this many pixels tall,
+ * so a phone sees a smaller piece of the village rather than a tiny one.
+ */
+const MIN_PX = 27;
+/** Name signs grow on small screens until they're about this many pixels wide, close to their size on a laptop. */
+const SIGN_PX = 110;
 /** How far the visitor can zoom, as a multiple of the camera's distance: under 1 is closer, over 1 is farther back. */
 const ZOOM = { min: 0.7, max: 1.3, key: 1.12 };
 const FOG = { near: 60, far: 125 };
@@ -83,8 +90,12 @@ export class VillageScene {
   private ndc = new THREE.Vector2(9, 9);
   private pan = { x: 0, y: 0, tx: 0, ty: 0 };
   private focusPoint = { x: 0, z: 0 };
-  /** Pulls the camera back on tall, narrow screens (set on resize). */
+  /** Moves the camera back on tall, narrow screens and closer on small ones (set on resize). */
   private fit = 1;
+  /** How many village units tall the screen shows at the middle of the view, at the default distance. */
+  private span = 1;
+  /** Every name sign, so they can grow on small screens. */
+  private signs: THREE.Object3D[] = [];
   /** The visitor's zoom, eased toward its target like the pan. */
   private zoom = { v: 1, t: 1 };
   private w = 1;
@@ -209,8 +220,12 @@ export class VillageScene {
     } else if (this.drag) {
       const dx = e.clientX - this.drag.x, dy = e.clientY - this.drag.y;
       this.drag.x = e.clientX; this.drag.y = e.clientY; this.drag.moved += Math.abs(dx) + Math.abs(dy);
-      this.pan.tx = clamp(this.pan.tx - (dx / r.width) * 2.2, -1, 1);
-      this.pan.ty = clamp(this.pan.ty - (dy / r.height) * 2.2, -1, 1);
+      // The snow follows the finger: turn the pixels dragged into village units, then into the pan's range.
+      // Going up the screen covers more ground than going across, since the camera looks down at a slant.
+      const unit = r.height / (this.span * this.fit * this.zoom.v);
+      const across = dx / unit, back = dy / (unit * Math.sin(Math.atan2(CAM.off.y, CAM.off.z)));
+      this.pan.tx = clamp(this.pan.tx - across / CAM.rx, -1, 1);
+      this.pan.ty = clamp(this.pan.ty - back / (this.pan.ty < 0 ? CAM.up : CAM.down), -1, 1);
       this.interacted();
     }
   };
@@ -307,8 +322,15 @@ export class VillageScene {
     this.w = w; this.h = h;
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
-    // A tall, narrow screen sees a thin slice; pull back so it still sees a good piece of the village.
-    this.fit = clamp(1.3 / this.camera.aspect, 1, 2.2);
+    this.span = 2 * CAM.off.length() * Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
+    // A tall, narrow screen sees a thin slice; pull back so it still sees a good piece of the village,
+    // but on a small screen not so far that everything turns to specks.
+    const wide = clamp(1.3 / this.camera.aspect, 1, 2.2), near = h / (this.span * MIN_PX);
+    this.fit = clamp(Math.min(wide, near), 0.75, 2.2);
+    // Where the signs would still come out small, they grow so their names can be read.
+    const px = h / (this.span * this.fit);
+    const s = clamp(SIGN_PX / (SIGN_W * px), 1, 1.6);
+    for (const sg of this.signs) sg.scale.setScalar(s);
     this.camera.updateProjectionMatrix();
   }
 
@@ -321,9 +343,9 @@ export class VillageScene {
     const d = this.fit * Z.v;
     this.camera.position.set(tx + CAM.off.x * d, CAM.off.y * d, tz + CAM.off.z * d);
     this.camera.lookAt(tx, 0, tz);
-    // The fog moves with the zoom, so stepping back doesn't wash the village out.
+    // The fog moves with the camera, so stepping back doesn't wash the village out.
     const fog = this.scene.fog as THREE.Fog;
-    fog.near = FOG.near * Z.v; fog.far = FOG.far * Z.v;
+    fog.near = FOG.near * d; fog.far = FOG.far * d;
     this.focusPoint = { x: tx, z: tz };
   }
 
@@ -469,6 +491,7 @@ export class VillageScene {
     if (label && accent && built.sign) {
       const s = sign(this.c, label, accent);
       s.position.set(built.sign[0], 0, built.sign[1]); s.rotation.y = -ry * 0.6; g.add(s);
+      this.signs.push(s);
     }
     g.updateMatrixWorld(true);
     (built.smoke ?? []).forEach((pt) => this.smoke(pt.clone().applyMatrix4(g.matrixWorld)));

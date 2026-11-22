@@ -163,8 +163,11 @@ export function dog(c: Ctx) {
 
 /* ---------------- signs ---------------- */
 
+/** How wide a name sign is, in village units. */
+export const SIGN_W = 2.3;
+
 /** A hand-lettered name sign on a wooden post. */
-export function sign(c: Ctx, name: string, accent: string, w = 2.3) {
+export function sign(c: Ctx, name: string, accent: string, w = SIGN_W) {
   const m = c.k.cutout(signCanvas(name, accent), (w * 150) / 420, { w, foot: 0 });
   const g = new THREE.Group();
   m.position.y = 0.55; g.add(m);
