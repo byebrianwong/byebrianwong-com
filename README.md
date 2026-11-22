@@ -26,8 +26,9 @@ Every app has a building that hints at what it does: a camera kiosk for Wonder
 Lens, a cereal-box shop, a beehive gift shop for Regibee, an observatory for
 EDM Atlas, a library of stacked books, a podium with someone proudly on the #2
 spot, a clock tower, a record shop, a lighthouse with a magnifying-glass lamp,
-and a nursery with a growth chart. The log cabin by the rink is About.
-Hovering a building tags it with its name; clicking opens a paper card with
+and a nursery with a growth chart. The log cabin by the rink is About, and
+the person button in the top-right nav opens the same About card (on other
+pages it goes to `/about`). Hovering a building tags it with its name; clicking opens a paper card with
 the app's footage, what it is, and a PLAY or LAUNCH button. An open card has
 its own URL (`/#/card/<app>`, `/#/about`), the same card links the arcade
 uses. Keyboard and screen reader visitors get a list of every building that
@@ -130,6 +131,7 @@ npm run start
     cards, keyboard directory) and the card URLs
   - `WinterCard.tsx`: the paper card for an app or the cabin
   - `spots.ts`: every place you can step into (each app, plus the cabin)
+  - `openCard.ts`: how the nav's About button asks the village to open the cabin's card
   - `scene/village.ts`: the 3D village: layout, camera, villagers, hover and click, and how each thing reacts to a snowball
   - `scene/play.ts`: snowballs: throwing, flying, splatting, and the effects things react with
   - `scene/builders.ts`: houses, paper people, props, and one building per app

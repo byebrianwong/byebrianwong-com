@@ -5,10 +5,13 @@ import { usePathname } from "next/navigation";
 import { styleForPath } from "@/lib/siteStyle";
 import { Sound } from "@/lib/sound";
 import StyleSwitcher from "./StyleSwitcher";
+import { ABOUT_CARD_HREF, ABOUT_ID, openVillageCard } from "./winter/openCard";
 
 /**
  * Persistent site chrome shown on every page (rendered from the root layout):
- * a style switcher, an "About Brian" link and a GitHub link. On the arcade
+ * a style switcher, an "About Brian" link and a GitHub link. The About link
+ * goes to /about, except in the winter village, where it opens the village's
+ * own About card (the cabin's) without leaving the page. On the arcade
  * (and pages that aren't a style, like /about) the buttons match the arcade's
  * other fixed corner controls; the arcade's sound button sits just to the left
  * of this cluster so they read as one group. In another style the buttons take
@@ -23,12 +26,19 @@ export default function SiteNav() {
     <nav className="site-nav" aria-label="Site" data-skin={skin}>
       <StyleSwitcher />
       <Link
-        href="/about"
+        href={skin === "winter" ? ABOUT_CARD_HREF : "/about"}
         className="snav"
         aria-label="About Brian"
         title="About Brian"
         onMouseEnter={() => Sound.blip()}
-        onClick={() => Sound.select()}
+        onClick={(e) => {
+          Sound.select();
+          // In the village, open the cabin's card in place. A modified click (new tab or
+          // window) follows the link instead, which opens the village with the card up.
+          if (skin !== "winter" || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          e.preventDefault();
+          openVillageCard(ABOUT_ID);
+        }}
       >
         {/* person / profile glyph */}
         <svg viewBox="0 0 24 24" aria-hidden="true">

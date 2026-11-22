@@ -5,6 +5,7 @@ import { APPS } from "@/lib/apps";
 import { parseHash, routeToHash } from "@/lib/arcadeRoute";
 import { WinterMusic, musicWanted, setMusicWanted } from "./music";
 import MusicButton from "./MusicButton";
+import { OPEN_CARD_EVENT } from "./openCard";
 import type { VillageScene } from "./scene/village";
 import { ABOUT_ID, SPOTS, spotById } from "./spots";
 import WinterCard from "./WinterCard";
@@ -56,12 +57,30 @@ export default function WinterVillage() {
 
   const openSpot = useCallback((id: string) => {
     const hash = hashFor(id);
-    if (window.location.hash !== hash) {
-      window.history.pushState(window.history.state, "", window.location.pathname + window.location.search + hash);
-      pushed.current = true;
+    const current = window.location.hash;
+    if (current !== hash) {
+      const url = window.location.pathname + window.location.search + hash;
+      // Swapping one open card for another (the nav's About button still works over a card)
+      // replaces the open card's entry, so Close goes back to the village, not to the old card.
+      if (idFromHash(current)) {
+        window.history.replaceState(window.history.state, "", url);
+      } else {
+        window.history.pushState(window.history.state, "", url);
+        pushed.current = true;
+      }
     }
     setOpen(id);
   }, []);
+
+  // The site nav's About button opens the cabin's card here instead of leaving for /about.
+  useEffect(() => {
+    const onRequest = (e: Event) => {
+      const id = (e as CustomEvent<string>).detail;
+      if (spotById(id)) openSpot(id);
+    };
+    window.addEventListener(OPEN_CARD_EVENT, onRequest);
+    return () => window.removeEventListener(OPEN_CARD_EVENT, onRequest);
+  }, [openSpot]);
 
   const close = useCallback(() => {
     // If we added the card's history entry, step back off it (popstate then closes the card),
