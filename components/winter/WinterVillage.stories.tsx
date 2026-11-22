@@ -45,9 +45,10 @@ const quietVillage = () => {
 /**
  * The winter village, the site's home page ("/"): a papier-mâché village
  * seen from far above where every app is a building and the log cabin is
- * About. Moving the mouse pans across it; hovering a building tags it and
- * clicking opens its card. Keyboard and screen reader visitors get a list of
- * every building, which appears when it gets focus.
+ * About. Moving the mouse pans across it and the wheel zooms a little;
+ * hovering a building tags it and clicking opens its card. Keyboard and screen
+ * reader visitors get a list of every building, which appears when it gets
+ * focus.
  *
  * The village is live 3D with snow falling and people skating, so these
  * stories run as tests but stay out of Chromatic. WinterCard's stories are

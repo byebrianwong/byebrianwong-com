@@ -173,8 +173,8 @@ export default function WinterVillage() {
       {status === "loading" && <div className="wv-loading">Folding the village&hellip;</div>}
 
       <p className={"wv-hint" + (touched || open || status !== "ready" ? " gone" : "")} aria-hidden="true">
-        <span className="pointer-fine">Move your mouse to look around. Click a building to step inside{still ? "" : ", or anywhere else to throw a snowball"}.</span>
-        <span className="pointer-coarse">Drag to look around. Tap a building to step inside{still ? "" : ", or anywhere else to throw a snowball"}.</span>
+        <span className="pointer-fine">Move your mouse to look around and scroll to zoom. Click a building to step inside{still ? "" : ", or anywhere else to throw a snowball"}.</span>
+        <span className="pointer-coarse">Drag to look around and pinch to zoom. Tap a building to step inside{still ? "" : ", or anywhere else to throw a snowball"}.</span>
       </p>
 
       <div
