@@ -4,8 +4,9 @@
 // the 3D scene.
 
 import { APPS } from "@/lib/apps";
+import { ABOUT_ID } from "./openCard";
 
-export const ABOUT_ID = "about";
+export { ABOUT_ID };
 
 export interface Spot {
   id: string;
