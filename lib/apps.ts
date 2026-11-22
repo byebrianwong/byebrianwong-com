@@ -143,11 +143,6 @@ export const APPS: AppCard[] = [
     stats: { users: "60K", rating: "4.8", platform: "Web" },
     blurb: "Rank everything from mainstream to hipster — scored on real Wikipedia, stream, and view-count data. How niche is your taste?",
     ...mainstreamHipster,
-    facts: [
-      { label: "DECKS", value: "12" },
-      { label: "THINGS", value: "1,976" },
-      { label: "SOURCES", value: "5" },
-    ],
     move: { name: "RANK IT", text: "Drag from mainstream to hipster, then see the real data." },
     traits: [
       { icon: "🎞️", text: "Music, movies, TV, food and more" },
@@ -170,11 +165,6 @@ export const APPS: AppCard[] = [
     stats: { users: "—", rating: "—", platform: "Web" },
     blurb: "Explore electronic dance music as a 3D star map. Every genre is a star, related genres link into constellations, and each one comes with what makes it sound that way, real tracks to hear, and a synthesized demo of its building blocks.",
     ...edmAtlas,
-    facts: [
-      { label: "GENRES", value: "31" },
-      { label: "FAMILIES", value: "8" },
-      { label: "SYNTHS", value: "31" },
-    ],
     move: { name: "FLY TO", text: "Pick a genre and the camera flies to its star." },
     traits: [
       { icon: "✨", text: "Every genre is a star on a 3D map" },
@@ -196,11 +186,6 @@ export const APPS: AppCard[] = [
     stats: { users: "—", rating: "—", platform: "Web" },
     blurb: "A daily trivia game of counting-down clues — guess early for glory, or hold out for the giveaway. The longer you wait, the less it's worth.",
     ...triveal,
-    facts: [
-      { label: "CLUES", value: "4" },
-      { label: "TOP SCORE", value: "10" },
-      { label: "MODES", value: "2" },
-    ],
     move: { name: "GUESS EARLY", text: "Fewer clues, more points. Wrong guesses cost one." },
     traits: [
       { icon: "🔍", text: "Each clue is easier, and worth less" },
@@ -223,11 +208,6 @@ export const APPS: AppCard[] = [
     stats: { users: "—", rating: "—", platform: "Web" },
     blurb: "One reviewer walks the healthy-cereal aisle so you don't have to — every box tasted, weighed, and priced in cold, hard macros. The only aisle where boring is a brag.",
     ...boringCereal,
-    facts: [
-      { label: "BOXES", value: "25" },
-      { label: "BRANDS", value: "16" },
-      { label: "TOP SCORE", value: "8.5" },
-    ],
     move: { name: "READ THE SIDE", text: "Every box re-weighed and scored out of ten." },
     traits: [
       { icon: "🥣", text: "Healthy cereals, tasted and ranked" },
@@ -249,11 +229,6 @@ export const APPS: AppCard[] = [
     stats: { users: "—", rating: "—", platform: "Web" },
     blurb: "Learn the big words — GRE and beyond. Spaced repetition brings each word back just before you forget it, seven game modes keep practice from going stale, and every word comes with example sentences and audio.",
     ...littleLexicon,
-    facts: [
-      { label: "WORDS", value: "317" },
-      { label: "MODES", value: "7" },
-      { label: "EXAMPLES", value: "2,451" },
-    ],
     move: { name: "RECALL", text: "Each word comes back just before you'd forget it." },
     traits: [
       { icon: "🎮", text: "Quizzes, speed rounds and more" },
@@ -275,10 +250,6 @@ export const APPS: AppCard[] = [
     stats: { users: "70K", rating: "4.8", platform: "Web" },
     blurb: "A tasks and to-do app built for speed — AI-native and designed to work right inside Claude and Codex.",
     ...doDone,
-    facts: [
-      { label: "VIEWS", value: "8" },
-      { label: "MCP TOOLS", value: "17" },
-    ],
     move: { name: "CHECK OFF", text: "Add a task, get it done, tick it off." },
     traits: [
       { icon: "🤖", text: "Works right inside Claude and Codex" },
@@ -300,11 +271,6 @@ export const APPS: AppCard[] = [
     stats: { users: "120K", rating: "4.9", platform: "Web" },
     blurb: "One registry for weddings, baby showers, housewarmings, and more — pull gifts from any store into a single list.",
     ...regibee,
-    facts: [
-      { label: "CHECKLIST", value: "100" },
-      { label: "CATEGORIES", value: "10" },
-      { label: "GUEST SIGN-UPS", value: "0" },
-    ],
     move: { name: "POLLINATE", text: "Pull gifts from any store into one list." },
     traits: [
       { icon: "💍", text: "Weddings, baby showers and more" },
@@ -326,10 +292,6 @@ export const APPS: AppCard[] = [
     stats: { users: "35K", rating: "4.7", platform: "Chrome" },
     blurb: "A Chrome extension to instantly learn about any word or subject — click anywhere on a page, learn inline, or save it for later.",
     ...tapSearch,
-    facts: [
-      { label: "SOURCES", value: "3" },
-      { label: "SEARCHES", value: "2" },
-    ],
     move: { name: "TAP", text: "Click any word on a page to learn about it." },
     traits: [
       { icon: "🧩", text: "A Chrome extension for any page" },
@@ -351,11 +313,6 @@ export const APPS: AppCard[] = [
     stats: { users: "85K", rating: "4.9", platform: "Web" },
     blurb: "A real-time party game where being popular loses. Match the crowd's second-favorite answer — take silver to win gold.",
     ...secondGuess,
-    facts: [
-      { label: "#1 SCORES", value: "0" },
-      { label: "#2 SCORES", value: "3" },
-      { label: "SOLO BOTS", value: "15" },
-    ],
     move: { name: "TAKE SILVER", text: "Match the crowd's second-favorite answer." },
     traits: [
       { icon: "🎉", text: "A real-time party game" },
@@ -378,11 +335,6 @@ export const APPS: AppCard[] = [
     stats: { users: "—", rating: "—", platform: "Web" },
     blurb: "See where a baby's weight, length or head size falls on the WHO growth charts, worked out for every day from birth to 2 years. Point anywhere on the chart to read it, look up any age and percentile without entering anything, or add your baby's measurements. They stay in your browser.",
     ...littleOnePercentile,
-    facts: [
-      { label: "MEASURES", value: "3" },
-      { label: "DAYS", value: "731" },
-      { label: "UPLOADS", value: "0" },
-    ],
     move: { name: "PIN IT", text: "Tap where your baby is, then drag to adjust." },
     traits: [
       { icon: "📏", text: "Weight, length and head size" },

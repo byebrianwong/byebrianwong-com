@@ -346,17 +346,6 @@ export default function WindowSeatShowcase({
           <p className="sc-tagline">{app.tagline}</p>
           <LaunchButton app={app} />
           <p>{app.blurb}</p>
-          <div className="sc-facts">
-            <span>
-              <b>3</b>WORLDS
-            </span>
-            <span>
-              <b>{SUBJECT_COUNT}</b>SUBJECTS
-            </span>
-            <span>
-              <b>{FILM}</b>SHOTS A ROLL
-            </span>
-          </div>
 
           <div className="sc-album">
             <div className="sc-album-head">
